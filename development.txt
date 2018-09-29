@@ -1,0 +1,16 @@
+[UNIVERSAL BUSINESS LANGUAGE]
+This application is python implementation of the UBL 2.0 specification for business documents and processes.
+The core ideas of the this project are geared towards building faster business application for web, mobile, and others.
+[DESIGN AND IMPLEMENTATION CONSIDERATIONS]
+The abstract base types of the UBL will be implemented using the abc.ABC class or derivative of the Abstract Base
+Classes.
+The concept of business service object will be used while still keeping in line with recommendation from the UBL tech
+ committee. The business service object will enable a mathematical/logical modelling of business operations using
+ formal symbols as described by set, logic, and algebraic expressions. This approach is aimed at making testing and
+ class implementation to be a lot more structured and clear.
+
+Python implementation constructs such as decorators, asyncio.Task, asyncio.Futures, asyncio.Coroutines, Generators
+and others will be used to implement mathematical models or building blocks. Example:
+Sequencial operation will be implemented using Generators (yield statement), Coroutines or asyncio.Task
+Set operations will be implemented using builtin set or collection classes
+Operations such as equals, greater than, etc can be achieved by overriding special methods __eq__, __gt__, __and__ etc.
