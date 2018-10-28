@@ -2365,7 +2365,7 @@ class DocumentAttributeMixin:
 
 def _dynamic_document(document_type, fields, module=None):
 
-    _class_definition = """\
+    class_definition = """\
 class {document_type}:
     __slots__ = {fields}.keys()
 
@@ -2392,12 +2392,12 @@ class {document_type}:
         return object.__getattribute__(self, name)
 
     """
-    _class_definition.format(document_type=document_type, fields=fields)
-    _tmp_namespace = 'ubl_%s' % document_type.lower()
-    namespace = dict(__name__=_tmp_namespace)
-    exec(_class_definition, namespace)
-    class_impl = namespace[_tmp_namespace]
-    class_impl._source = _class_definition
+    class_definition.format(document_type=document_type, fields=fields)
+    tmp_namespace = 'ubl_%s' % document_type.lower()
+    namespace = dict(__name__=tmp_namespace)
+    exec(class_definition, namespace)
+    class_impl = namespace[tmp_namespace]
+    class_impl._source = class_definition
     if module is None:
         module = 'ubl'
     class_impl.__module__ = str(module)
