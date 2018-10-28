@@ -1729,14 +1729,12 @@ class _BusinessDocumentFlag(IntEnum):
 
 
 class DocumentDescriptor:
-    _document = None
+    _fields = None
 
     def __get__(self, instance, owner):
         try:
-            if instance is not None:
-                instance.document = self._document
-            else:
-                owner.document = self._document
+            if hasattr(instance, '_fields') or hasattr(owner, '_fields'):
+                return self._fields
         except KeyError:
             raise KeyError(
                 'Document definition does not exit in '
@@ -1752,7 +1750,7 @@ class DocumentDescriptor:
 
 class ApplicationResponse(DocumentDescriptor):
     def __init__(self):
-        self._document = (
+        self._fields = (
             'application_response',
             'ubl_version_id',
             'customization_id',
@@ -1775,242 +1773,242 @@ class ApplicationResponse(DocumentDescriptor):
 
 class AttachedDocument(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class UnawardedNotification(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class BillOfLading(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class CallForTenders(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Catalogue(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class CatalogueDeletion(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class CatalogueItemSpecificationUpdate(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class CataloguePricingUpdate(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class CatalogueRequest(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class CertificateOfOrigin(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ContractAwardNotice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ContractNotice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class CreditNote(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class DebitNote(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class DespatchAdvice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class DocumentStatus(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class DocumentStatusRequest(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ExceptionCriteria(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ExceptionNotification(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Forecast(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ForecastRevision(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ForwardingInstructions(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class FreightInvoice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class FulfilmentCancellation(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class GoodsItemItinerary(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class GuaranteeCertificate(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class InstructionForReturns(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class InventoryReport(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Invoice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ItemInformationRequest(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Order(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class OrderCancellation(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class OrderChange(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class OrderResponse(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class OrderResponseSimple(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class PackingList(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class PriorInformationNotice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ProductActivity(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Quotation(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class ReceiptAdvice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Reminder(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class RemittanceAdvice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class RequestForQuotation(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class RetailEvent(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class SelfBilledCreditNote(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class SelfBilledInvoice(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Statement(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class StockAvailabilityReport(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Tender(DocumentDescriptor):
@@ -2021,77 +2019,77 @@ class Tender(DocumentDescriptor):
     work, according to the terms of a proposed contract.
     """
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TendererQualification(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TendererQualificationResponse(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TenderReceipt(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TradeItemLocationProfile(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportationStatus(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportationStatusRequest(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportExecutionPlan(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportExecutionPlanRequest(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportProgressStatus(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportProgressStatusRequest(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportServiceDescription(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class TransportServiceDescriptionRequest(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class UtilityStatement(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class Waybill(DocumentDescriptor):
     def __init__(self):
-        self._document = ()
+        self._fields = ()
 
 
 class BusinessDocumentTemplate(metaclass=Singleton):
@@ -2326,9 +2324,9 @@ class BusinessDocumentTemplate(metaclass=Singleton):
         return getattr(self._template, document, None)
 
     def document_definition(self, document):
-        fields = (x for x in getattr(self._template, document, None) if x is
-                  not None)
-        return OrderedDict.fromkeys(fields, None)
+        fields = ((x, None) for x in getattr(self._template, document,
+                                             None) if x is not None)
+        return OrderedDict.fromkeys(fields)
 
     def schema(self, document):
         return getattr(self._schemas, document, None)
@@ -2344,21 +2342,66 @@ class BusinessDocumentTemplate(metaclass=Singleton):
 
 class DocumentAttributeMixin:
 
+    # @todo: deprecated class as behaviour defined dynamically
+
     def __getitem__(self, item):
-        if item in self._definition:
-            return getattr(self, item, None)
-        raise IndexError('Index does not exist in Business Document')
+        if item not in self.__slots__ or item not in self.__dict__:
+            raise IndexError('Index does not exist in Business Document')
+        return getattr(self, item, None)
 
     def __setitem__(self, key, value):
-        if key in self._definition:
-            setattr(self, key, value)
-            return None
-        raise IndexError('Index does not exist in Business Document')
+        if key not in self.__slots__ or key not in self.__dict__:
+            raise IndexError('Index does not exist in Business Document')
+        setattr(self, key, value)
+
+    def __delattr__(self, item):
+        raise AttributeError('Attribute cannot be deleted in Business Document')
 
     def __getattribute__(self, name):
         if name in self._definition:
             return getattr(self, name, None)
         return object.__getattribute__(self, name)
+
+
+def _dynamic_document(document_type, fields, module=None):
+
+    _class_definition = """\
+class {document_type}:
+    __slots__ = {fields}.keys()
+
+    def __init__(self):
+        for field, value in {fields}.items():
+            setattr(self, field, value)
+
+    def __getitem__(self, item):
+        if item not in self.__slots__ or item not in self.__dict__:
+            raise IndexError('Index does not exist in Business Document')
+        return getattr(self, item, None)
+
+    def __setitem__(self, key, value):
+        if key not in self.__slots__ or key not in self.__dict__:
+            raise IndexError('Index does not exist in Business Document')
+        setattr(self, key, value)
+
+    def __delattr__(self, item):
+        raise AttributeError('Attribute cannot be deleted in Business Document')
+
+    def __getattribute__(self, name):
+        if name in self._definition:
+            return getattr(self, name, None)
+        return object.__getattribute__(self, name)
+
+    """
+    _class_definition.format(document_type=document_type, fields=fields)
+    _tmp_namespace = 'ubl_%s' % document_type.lower()
+    namespace = dict(__name__=_tmp_namespace)
+    exec(_class_definition, namespace)
+    class_impl = namespace[_tmp_namespace]
+    class_impl._source = _class_definition
+    if module is None:
+        module = 'ubl'
+    class_impl.__module__ = str(module)
+    return class_impl()
 
 
 class BusinessDocumentPrototype:
@@ -2371,6 +2414,7 @@ class BusinessDocumentPrototype:
     Upon creating a new type of document, the instance is replaced. This is
     resource saving where a given type of document is created in a loop
     """
+    __slots__ = ('instance', '_fields', '_definition', '_schema')
 
     def __init__(self):
         self.instance = None
@@ -2397,13 +2441,9 @@ class BusinessDocumentPrototype:
                 self._definition = bt.document_definition(document)
                 self._fields = bt.document_fields(document)
                 self._schema = bt.schema(document)
-                self.instance = type(self._name,
-                                     (DocumentAttributeMixin.__class__, object),
-                                     self._definition)
+                self.instance = _dynamic_document(self._name, self._fields)
             elif document != self.instance.__name__:
-                self.instance = type(document,
-                                     (DocumentAttributeMixin.__class__, object),
-                                     self._definition)
+                self.instance = _dynamic_document(self._name, self._fields)
 
         return copy.deepcopy(self.instance)
 

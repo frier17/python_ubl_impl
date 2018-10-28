@@ -28,7 +28,6 @@ adopted from http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html
 """
 
 from abc import ABC, abstractmethod
-from functools import partial
 
 
 class Service(ABC):
