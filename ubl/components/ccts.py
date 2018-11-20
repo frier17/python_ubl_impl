@@ -8,19 +8,27 @@ from collections import namedtuple
 
 
 class DocumentAnnotation:
-    # provide documentation for all components e.g uid
     # Defines the lookup for various document annotations as specified by UBL
     # Entries in annotation can be filled from a annotation config parser
     __slots__ = ('unique_id', 'category_code', 'dictionary_entry_name',
                  'version_id', 'definition', 'representation_term_name',
                  'primitive_type', )
 
+    def __init__(self, *args, **kwargs):
+        self.unique_id = kwargs.get('unique_id', None)
+        self.category_code = kwargs.get('category_code', None)
+        self.dictionary_entry_name = kwargs.get('dictionary_entry_name', None)
+        self.version_id = kwargs.get('version_id', None)
+        self.definition = kwargs.get('definition', None)
+        self.representation_term_name = kwargs.get('representation_term_name', None)
+        self.primitive_type = kwargs.get('primitive_type', None)
+
 
 class DocumentFieldAnnotation:
     # list the meta data describing a given field
     # the annotation can be used to provide more information about a field
     # data
-    # Defines the lookup for various fields' annotations as specified by UBL
+    # Defines the lookup for various fields' annotations as specified by UBL.
     # DocumentFieldAnnotation.get('Order','OrderDate', None_or_annotation)
     # This class serves as a wrapper to the config wrapper for field annotations
     pass
@@ -31,7 +39,7 @@ class CCTSCategoryCode(IntFlag):
 
 
 class DataType:
-    __annotations__ = None
+    __slots__ = '__desc__', '__meta__'
 
     def update(self, value):
         raise NotImplementedError
@@ -48,15 +56,16 @@ class AmountType(DataType, Real):
     # all numeric operations are carried on the magnitude and the description
     # may be used to explain results or convert results to other monetary values
 
-    __slots__ = '_amount', '__meta__',
+    __slots__ = ('_amount',)
 
     def __init__(self, amount, *, currency, currency_code, version_id):
+        self.__meta__ = {}
         try:
             self._amount = float(amount)
             _prepare_meta(self.__meta__, currency=currency,
                           currency_code=currency_code,
                           version_id=version_id)
-            self.__annotations__ = {
+            self.__desc__ = DocumentAnnotation({
                 'unique_id': 'UNDT000001',
                 'category_code': 'CCT',
                 'dictionary_entry_name': 'Amount. Type',
@@ -66,7 +75,7 @@ class AmountType(DataType, Real):
                               'explicit or implied.',
                 'representation_term_name': 'Amount',
                 'primitive_type': 'float',
-            }
+            })
         except TypeError:
             raise TypeError('Invalid amount provided')
 
@@ -87,7 +96,7 @@ class AmountType(DataType, Real):
             currency=self.__meta__['currency'],
             currency_code=self.__meta__['currency_code'],
             version_id=self.__meta__['version_id'],
-            annotations=self.__annotations__
+            annotations=self.__desc__
         )
 
     @property
@@ -338,7 +347,7 @@ class BinaryObjectType(DataType, bytearray):
 
 class TextType(DataType, str):
     # define the attributes common to all text type for components
-    __slots__ = ('_pattern', 'max_length')
+    __slots__ = '_pattern', 'max_length'
 
     def __init__(self, pattern=None, max_length=200):
         if compile(pattern):
@@ -358,11 +367,12 @@ class TextType(DataType, str):
 
 
 class CodeType(TextType):
-    __slots__ = ('code', '__meta__')
+    __slots__ = 'code'
 
     def __init__(self, code, *, list_id, list_agency_id, list_agency_name,
                  list_name, list_version_id, name, language_id, list_uri,
                  list_scheme_uri):
+        self.__meta__ = {}
         if code:
             self.code = str(code).upper()
             _prepare_meta(self.__meta__, list_id=list_id,
@@ -404,11 +414,12 @@ class DateTimeType(DataType, datetime):
 class IdentifierType(TextType):
     __slots__ = ('_identifier', 'scheme_id', 'scheme_name', 'scheme_agency_id',
                  'scheme_agency_name', 'scheme_version_id',
-                 'scheme_data_uri', 'scheme_uri', '__meta__', '__desc__')
+                 'scheme_data_uri', 'scheme_uri', )
 
     def __init__(self, *, scheme_id, scheme_name, scheme_agency_id,
                  scheme_agency_name, scheme_version_id, scheme_data_uri,
                  scheme_uri):
+        self.__meta__ = {}
         _prepare_meta(self.__meta__, scheme_id=scheme_id,
                       scheme_name=scheme_name,
                       scheme_agency_id=scheme_agency_id,
@@ -422,7 +433,7 @@ class IdentifierType(TextType):
 
 class IndicatorType(DataType):
 
-    __slots__ = ('_state', '__meta__', '__desc__')
+    __slots__ = ('_state', )
 
     def __init__(self):
         self._state = False
@@ -479,11 +490,11 @@ class IndicatorType(DataType):
 
 class NumericType(DataType, Number):
 
-    __slots__ = ('_value', '__meta__', '__desc__')
+    __slots__ = '_value'
 
     def __init__(self, *args, **kwargs):
         self._value = float()
-        self.__meta__ = kwargs.get('__meta__', None)
+        self.__meta__ = kwargs.get('__meta__', {})
         self.__desc__ = kwargs.get('__desc__', None)
 
     def update(self, value):
@@ -542,31 +553,20 @@ class NumericType(DataType, Number):
         else:
             return NotImplemented
 
-    def __lshift__(self, other):
-        """
-        Left shift operation on numeric type is not supported
-        :param other: numeric value represent int|float or string equivalent
-        :return: NotImplemented
-        """
-        return NotImplemented
-
-    def __rshift__(self, other):
-        return NotImplemented
-
     def __and__(self, other):
         if isinstance(other, (int, float, bool)):
             return self._value and other
         else:
             return NotImplemented
 
-    def __xor__(self, other):
-        return NotImplemented
-
     def __or__(self, other):
         if isinstance(other, (int, float, bool)):
             return self._value or other
         else:
             return NotImplemented
+
+    def __xor__(self, other):
+        return NotImplemented
 
 
 class MeasureType(NumericType):
@@ -575,4 +575,3 @@ class MeasureType(NumericType):
 
 class QuantityType(NumericType):
     pass
-
