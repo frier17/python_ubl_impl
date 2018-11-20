@@ -2320,13 +2320,20 @@ class BusinessDocumentTemplate(metaclass=Singleton):
             self._schemas = self.Schemas()
         super().__init__()
 
+    @staticmethod
+    def __get_definition__(self, document):
+        document_fields = getattr(self._template, document, None)
+        fields = ((x, None) for x in document_fields if x is not None)
+        if fields:
+            return OrderedDict.fromkeys(fields)
+
     def document_fields(self, document):
-        return getattr(self._template, document, None)
+        definition = self.__get_definition__(document)
+        if definition:
+            return vars(definition).keys()
 
     def document_definition(self, document):
-        fields = ((x, None) for x in getattr(self._template, document,
-                                             None) if x is not None)
-        return OrderedDict.fromkeys(fields)
+        return self.__get_definition__(document)
 
     def schema(self, document):
         return getattr(self._schemas, document, None)
@@ -2340,38 +2347,23 @@ class BusinessDocumentTemplate(metaclass=Singleton):
         return vars(self._template).keys()
 
 
-class DocumentAttributeMixin:
+class BusinessDocument:
 
-    # @todo: deprecated class as behaviour defined dynamically
-
-    def __getitem__(self, item):
-        if item not in self.__slots__ or item not in self.__dict__:
-            raise IndexError('Index does not exist in Business Document')
-        return getattr(self, item, None)
-
-    def __setitem__(self, key, value):
-        if key not in self.__slots__ or key not in self.__dict__:
-            raise IndexError('Index does not exist in Business Document')
-        setattr(self, key, value)
-
-    def __delattr__(self, item):
-        raise AttributeError('Attribute cannot be deleted in Business Document')
-
-    def __getattribute__(self, name):
-        if name in self._definition:
-            return getattr(self, name, None)
-        return object.__getattribute__(self, name)
-
-
-def _dynamic_document(document_type, fields, module=None):
-
-    class_definition = """\
-class {document_type}:
-    __slots__ = {fields}.keys()
+    __slots__ = []
 
     def __init__(self):
-        for field, value in {fields}.items():
-            setattr(self, field, value)
+        # Namespace can be defined by individual documents
+        self.__namespace__ = None
+        # @todo: define annotation lookups for document and field level
+        self.__annotation__ = None
+
+    def __iter__(self):
+        if self.__slots__:
+            for field in self.__slots__:
+                yield (field, getattr(self, field, None))
+        else:
+            for field in self.__dict__:
+                yield (field, getattr(self, field, None))
 
     def __getitem__(self, item):
         if item not in self.__slots__ or item not in self.__dict__:
@@ -2379,6 +2371,7 @@ class {document_type}:
         return getattr(self, item, None)
 
     def __setitem__(self, key, value):
+        # @todo: add the lookup for the allowed values and datatype
         if key not in self.__slots__ or key not in self.__dict__:
             raise IndexError('Index does not exist in Business Document')
         setattr(self, key, value)
@@ -2390,18 +2383,6 @@ class {document_type}:
         if name in self._definition:
             return getattr(self, name, None)
         return object.__getattribute__(self, name)
-
-    """
-    class_definition.format(document_type=document_type, fields=fields)
-    tmp_namespace = 'ubl_%s' % document_type.lower()
-    namespace = dict(__name__=tmp_namespace)
-    exec(class_definition, namespace)
-    class_impl = namespace[tmp_namespace]
-    class_impl._source = class_definition
-    if module is None:
-        module = 'ubl'
-    class_impl.__module__ = str(module)
-    return class_impl()
 
 
 class BusinessDocumentPrototype:
@@ -2433,17 +2414,23 @@ class BusinessDocumentPrototype:
         if not isinstance(document, str):
             document = str(document)
         if document not in BusinessDocumentTemplate.document_registry:
+            # @todo: define business logic error for wrong document type
             raise TypeError('Unrecognised document type specified')
         else:
             bt = BusinessDocumentTemplate()
-            if not self.instance:
+            if not self.instance or document != self.instance.__name__:
                 self._name = document
                 self._definition = bt.document_definition(document)
                 self._fields = bt.document_fields(document)
                 self._schema = bt.schema(document)
-                self.instance = _dynamic_document(self._name, self._fields)
-            elif document != self.instance.__name__:
-                self.instance = _dynamic_document(self._name, self._fields)
+                instance = \
+                    type(
+                        self._name, (
+                            BusinessDocument.__class__,
+                            object,),
+                        {'__slots__': self._fields},
+                    )
+                self.instance = instance()
 
         return copy.deepcopy(self.instance)
 

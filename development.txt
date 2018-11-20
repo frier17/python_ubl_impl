@@ -219,3 +219,19 @@ The BusinessDocumentPrototype.produce_document(document) can be called in a
 for loop or similar iterator to generate multiple documents. By keeping a
 reference of document generated as instance, future request for that document
  can simply be copied instead of created.
+
+[PARSING XML]
+The application can be used to parse xml document into python dictionary or
+equivalent data structure. Existing parsers convert xml to dict enabling
+developers access information in a dictionary-like manner. BSO was designed
+to enable application developer access fields as attributes or items of a
+collection abstracting the xml parent-child nested structure. Future edition
+can incorporate a more elaborate scheme as described below:
+Example
+order = Order(definitions)
+order.get('field', None)
+order.set('field', value)
+order.field
+order.field.__meta__ # returns tha xml metadata for this field
+order.field.__parent__ # return the parent node of this field or None if root
+order.field.__children__ # return children nodes of this field as a list
