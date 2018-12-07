@@ -27,6 +27,7 @@ from collections import OrderedDict
 from datetime import datetime
 from hashlib import sha512
 import copy
+from weakref import WeakValueDictionary
 
 # @todo: do you export the various template or only the factory?
 
@@ -2321,19 +2322,19 @@ class BusinessDocumentTemplate(metaclass=Singleton):
         super().__init__()
 
     @staticmethod
-    def __get_definition__(self, document):
+    def get_definition(self, document):
         document_fields = getattr(self._template, document, None)
         fields = ((x, None) for x in document_fields if x is not None)
         if fields:
             return OrderedDict.fromkeys(fields)
 
     def document_fields(self, document):
-        definition = self.__get_definition__(document)
+        definition = self.get_definition(document)
         if definition:
             return vars(definition).keys()
 
     def document_definition(self, document):
-        return self.__get_definition__(document)
+        return self.get_definition(document)
 
     def schema(self, document):
         return getattr(self._schemas, document, None)
@@ -2349,16 +2350,16 @@ class BusinessDocumentTemplate(metaclass=Singleton):
 
 class BusinessDocument:
 
-    __slots__ = []
+    __slots__ = ['__desc__', 'xml_namespace']
 
     def __init__(self):
         # Namespace can be defined by individual documents
-        self.__namespace__ = None
+        self.xml_namespace = None
         # @todo: define annotation lookups for document and field level
-        self.__annotation__ = None
+        self.__desc__ = None
 
     def __iter__(self):
-        if self.__slots__:
+        if self.__slots__ is not None:
             for field in self.__slots__:
                 yield (field, getattr(self, field, None))
         else:
@@ -2380,9 +2381,45 @@ class BusinessDocument:
         raise AttributeError('Attribute cannot be deleted in Business Document')
 
     def __getattribute__(self, name):
-        if name in self._definition:
-            return getattr(self, name, None)
-        return object.__getattribute__(self, name)
+        return getattr(self, name, None)
+
+
+class DocumentRevisions:
+    """
+    Keeps instances of Business documents generated during the life cycle of
+    an operation or business service.
+    Each record is a signed timestamp and retrievable from internal list
+    """
+    _cache = OrderedDict()
+
+    def __init__(self):
+        raise RuntimeError('Instantiating this class is not allowed')
+
+    @classmethod
+    def revisions(cls):
+        return cls._cache.items()
+
+    @classmethod
+    def set_revision(cls, key, value):
+        stamped_key = sha512(datetime.utcnow() + key).hexdigest()
+        cls._cache[stamped_key] = value
+
+
+class DocumentCache:
+
+    _cache = WeakValueDictionary()
+
+    def __init__(self):
+        raise RuntimeError('Instantiating this class is not allowed')
+
+    @classmethod
+    def save(cls, key, value):
+        if key not in cls._cache:
+            cls._cache[key] = value
+
+    @classmethod
+    def cached_instance(cls, key):
+        return cls._cache.get(key, None)
 
 
 class BusinessDocumentPrototype:
@@ -2418,35 +2455,17 @@ class BusinessDocumentPrototype:
             raise TypeError('Unrecognised document type specified')
         else:
             bt = BusinessDocumentTemplate()
-            if not self.instance or document != self.instance.__name__:
+            if not DocumentCache.cached_instance(document):
                 self._name = document
                 self._definition = bt.document_definition(document)
                 self._fields = bt.document_fields(document)
                 self._schema = bt.schema(document)
                 instance = \
                     type(
-                        self._name, (
-                            BusinessDocument.__class__,
-                            object,),
+                        self._name,
+                        (BusinessDocument, object,),
                         {'__slots__': self._fields},
                     )
-                self.instance = instance()
-
-        return copy.deepcopy(self.instance)
-
-
-class DocumentRevisions:
-    """
-    Keeps instances of Business documents generated during the life cycle of
-    an operation or business service.
-    Each record is a signed timestamp and retrievable from internal list
-    """
-    def __init__(self):
-        self._revisions = OrderedDict()
-
-    def revisions(self):
-        return self._revisions.items()
-
-    def __setitem__(self, key, value):
-        stamped_key = sha512(datetime.utcnow() + key).hexdigest()
-        self._revisions[stamped_key] = value
+                prototype = instance()
+                DocumentCache.save(self._name, prototype)
+                return copy.deepcopy(DocumentCache.cached_instance(self._name))

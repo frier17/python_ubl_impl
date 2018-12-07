@@ -1,6 +1,5 @@
 # define the various CCTS data types for UBL components
 from datetime import datetime
-from enum import IntFlag
 from numbers import Real, Number
 import math
 from re import search, compile
@@ -14,13 +13,14 @@ class DocumentAnnotation:
                  'version_id', 'definition', 'representation_term_name',
                  'primitive_type', )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *, kwargs):
         self.unique_id = kwargs.get('unique_id', None)
         self.category_code = kwargs.get('category_code', None)
         self.dictionary_entry_name = kwargs.get('dictionary_entry_name', None)
         self.version_id = kwargs.get('version_id', None)
         self.definition = kwargs.get('definition', None)
-        self.representation_term_name = kwargs.get('representation_term_name', None)
+        self.representation_term_name = \
+            kwargs.get('representation_term_name', None)
         self.primitive_type = kwargs.get('primitive_type', None)
 
 
@@ -34,14 +34,14 @@ class DocumentFieldAnnotation:
     pass
 
 
-class CCTSCategoryCode(IntFlag):
-    pass
-
-
 class DataType:
     __slots__ = '__desc__', '__meta__'
 
     def update(self, value):
+        raise NotImplementedError
+
+    @classmethod
+    def mock(cls, *args, **kwargs):
         raise NotImplementedError
 
 
@@ -49,6 +49,30 @@ def _prepare_meta(*args, **kwargs):
     if isinstance(args[0], dict):
         meta = args[0]
         meta.update({x: str(y) for x, y in enumerate(kwargs) if x in meta})
+
+
+class AssociatedBusinessEntity(DataType):
+    __slots__ = 'associations'
+
+    def __init__(self):
+        pass
+
+    def update(self, value):
+        pass
+
+    @classmethod
+    def mock(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
+    @staticmethod
+    def associate(self, entity, **kwargs):
+        # associate a given asbie with the target
+        if isinstance(entity, self):
+            # create association
+            if entity not in self.associations:
+                key = entity.__class__.__name__
+                value = (entity, dict(kwargs)) if kwargs is not None else entity
+                self.associations[key] = value
 
 
 class AmountType(DataType, Real):
@@ -65,7 +89,7 @@ class AmountType(DataType, Real):
             _prepare_meta(self.__meta__, currency=currency,
                           currency_code=currency_code,
                           version_id=version_id)
-            self.__desc__ = DocumentAnnotation({
+            self.__desc__ = DocumentAnnotation(kwargs={
                 'unique_id': 'UNDT000001',
                 'category_code': 'CCT',
                 'dictionary_entry_name': 'Amount. Type',
@@ -141,6 +165,11 @@ class AmountType(DataType, Real):
             self._amount = money.get('amount')
         else:
             return NotImplemented
+
+    @classmethod
+    def mock(cls, *args, **kwargs):
+        # make default instance with no currency or code
+        return cls(0.0, currency='', currency_code='', version_id='')
 
     def convert_currency(self, other):
         # convert other amount in different currencies to self if currencies
@@ -344,6 +373,10 @@ class BinaryObjectType(DataType, bytearray):
     def update(self, value):
         pass
 
+    @classmethod
+    def mock(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
 
 class TextType(DataType, str):
     # define the attributes common to all text type for components
@@ -364,6 +397,10 @@ class TextType(DataType, str):
 
     def update(self, value):
         pass
+
+    @classmethod
+    def mock(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
 
 
 class CodeType(TextType):
@@ -388,6 +425,17 @@ class CodeType(TextType):
         return NotImplemented
 
 
+class NameType(TextType):
+    __slots__ = '_name'
+
+    def __init__(self, name):
+        if len(name) > 150:
+            raise RuntimeError('Name should not be longer than 150 characters')
+        else:
+            self._name = name
+            super(NameType, self).__init__(max_length=150)
+
+
 class DateTimeType(DataType, datetime):
 
     def __new__(cls, year, month, day, hour=0, minute=0, second=0,
@@ -409,6 +457,13 @@ class DateTimeType(DataType, datetime):
             cls._tzinfo = value.tzinfo
         else:
             return NotImplemented
+
+    @classmethod
+    def mock(cls, *args, **kwargs):
+        if args is not None or kwargs is not None:
+            return cls(*args, **kwargs)
+        else:
+            return datetime.now()
 
 
 class IdentifierType(TextType):
@@ -433,12 +488,13 @@ class IdentifierType(TextType):
 
 class IndicatorType(DataType):
 
-    __slots__ = ('_state', )
+    __slots__ = ('_state', 'indicator_name')
 
-    def __init__(self):
-        self._state = False
+    def __init__(self, indicator=None, state=False):
+        self._state = state
         self.__meta__ = None
         self.__desc__ = None
+        self.indicator_name = indicator
 
     def update(self, value):
         self._state = bool(value)
@@ -487,15 +543,22 @@ class IndicatorType(DataType):
         else:
             return bool(other) ^ self._state
 
+    @classmethod
+    def mock(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
 
 class NumericType(DataType, Number):
 
     __slots__ = '_value'
 
-    def __init__(self, *args, **kwargs):
-        self._value = float()
-        self.__meta__ = kwargs.get('__meta__', {})
-        self.__desc__ = kwargs.get('__desc__', None)
+    def __init__(self, value, *, kwargs):
+        try:
+            self._value = float(value)
+            self.__meta__ = kwargs.get('__meta__', {})
+            self.__desc__ = kwargs.get('__desc__', None)
+        except TypeError:
+            raise TypeError('Invalid type provided as number')
 
     def update(self, value):
         try:
@@ -565,8 +628,9 @@ class NumericType(DataType, Number):
         else:
             return NotImplemented
 
-    def __xor__(self, other):
-        return NotImplemented
+    @classmethod
+    def mock(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
 
 
 class MeasureType(NumericType):

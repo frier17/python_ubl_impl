@@ -235,3 +235,19 @@ order.field
 order.field.__meta__ # returns tha xml metadata for this field
 order.field.__parent__ # return the parent node of this field or None if root
 order.field.__children__ # return children nodes of this field as a list
+
+[CACHING DOCUMENT]
+Using metaclasses or a cache manager that relies on the weakref value
+dictionary, business documents can be created and cached by the prototyping
+class or factory. This will enable objects to be removed only during garbage
+collection and created only if non existent in memory/cache.
+
+[EXTENDING DOCUMENT FIELDS]
+The UBL document library specifies the fields of each electronic document.
+The implementation of this specification may not meet requirement of various
+businesses. The need to extend a document field thus arises. One approach
+will entail simply patching extra fields to the base document definition.
+Another approach, the one adopted herein, uses an __ext class variable as an
+expansion slot to which extra fields and their corresponding values or
+definitions can be appended to a document. Having this attribute will enable
+the various classes to expand functionality to meet specific business needs
