@@ -251,3 +251,13 @@ Another approach, the one adopted herein, uses an __ext class variable as an
 expansion slot to which extra fields and their corresponding values or
 definitions can be appended to a document. Having this attribute will enable
 the various classes to expand functionality to meet specific business needs
+
+[ASSOCIATING DOCUMENT COMPONENT]
+The various document may have relationship fields that references other
+components or documents. These fields are generally depicted by the asbie
+type which is lazily evaluated. In essence, the actual component that is
+reference may not be known ahead or can be set after creating document. This
+lazy evaluation allows for flexible and easier control of the document life
+cycle also enabling document designers swap components dynamically by
+changing the target of the association. asbie types simply serve as 'blank'
+association objects or as dynamic reference pointers.

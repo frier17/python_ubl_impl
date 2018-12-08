@@ -53,6 +53,7 @@ class StrDataIndexes(IntFlag):
     EMPTY = 1
     ABOVE_ALLOWED_MIN = 2
     BELOW_ALLOWED_MAX = 3
+    EQUAL_TARGET = 4
 
 
 class CCTSCategoryCode(IntFlag):
