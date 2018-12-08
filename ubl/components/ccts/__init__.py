@@ -1,9 +1,9 @@
-# define the various CCTS data types for UBL components
 from datetime import datetime
 from numbers import Real, Number
 import math
 from re import search, compile
 from collections import namedtuple
+from ubl.exceptions import ComponentValueError
 
 
 class DocumentAnnotation:
@@ -92,7 +92,7 @@ class AmountType(DataType, Real):
             self.__desc__ = DocumentAnnotation(kwargs={
                 'unique_id': 'UNDT000001',
                 'category_code': 'CCT',
-                'dictionary_entry_name': 'Amount. Type',
+                'dictionary_entry_name': 'Amount.Type',
                 'version_id': '1.0',
                 'definition': 'A number of monetary units specified in a '
                               'currency where the unit of the currency is '
@@ -100,8 +100,9 @@ class AmountType(DataType, Real):
                 'representation_term_name': 'Amount',
                 'primitive_type': 'float',
             })
-        except TypeError:
-            raise TypeError('Invalid amount provided')
+        except ComponentValueError:
+            raise ComponentValueError('Invalid parameters provided for '
+                                      'component type')
 
     @property
     def amount(self):
@@ -127,15 +128,15 @@ class AmountType(DataType, Real):
     def currency(self):
         return self.__meta__.get('currency', None)
 
-    def get(self, name, default=0.0):
-        name = str(name).lower()
-        if name == 'amount':
+    def __getattribute__(self, item):
+        default = 0.0
+        if item == 'amount':
             return self._amount if self._amount > 0 else default
-        if name == 'currency' or name == 'currency_code' or name == \
+        if item == 'currency' or item == 'currency_code' or item == \
                 'version_id':
-            return self.__meta__.get(name, default)
+            return self.__meta__.get(item, default)
         else:
-            raise KeyError('Invalid key provided')
+            raise AttributeError
 
     def update(self, value):
         # override a given amount only if currency, currency_code are identical
@@ -155,21 +156,23 @@ class AmountType(DataType, Real):
                 self._amount = amount
             else:
                 # monetary objects are not equal
-                money = AmountType(amount, currency=currency,
-                                   currency_code=currency_code,
-                                   version_id=version_id)
+                money = AmountType.mock(amount, currency=currency,
+                                        currency_code=currency_code,
+                                        version_id=version_id)
                 target = self.convert_currency(money)
-                self._amount = target.get('amount')
+                self._amount = target.amount
         elif isinstance(value, self):
             money = self.convert_currency(value)
-            self._amount = money.get('amount')
+            self._amount = money.amount
         else:
             return NotImplemented
 
     @classmethod
     def mock(cls, *args, **kwargs):
         # make default instance with no currency or code
-        return cls(0.0, currency='', currency_code='', version_id='')
+        return cls(0.0, currency=kwargs.get('currency', None),
+                   currency_code=kwargs.get('currency_code', None),
+                   version_id=kwargs.get('version_id', None))
 
     def convert_currency(self, other):
         # convert other amount in different currencies to self if currencies
@@ -430,7 +433,7 @@ class NameType(TextType):
 
     def __init__(self, name):
         if len(name) > 150:
-            raise RuntimeError('Name should not be longer than 150 characters')
+            raise ValueError('Name should not be longer than 150 characters')
         else:
             self._name = name
             super(NameType, self).__init__(max_length=150)
@@ -557,14 +560,16 @@ class NumericType(DataType, Number):
             self._value = float(value)
             self.__meta__ = kwargs.get('__meta__', {})
             self.__desc__ = kwargs.get('__desc__', None)
-        except TypeError:
-            raise TypeError('Invalid type provided as number')
+        except ValueError:
+            raise ValueError('Invalid parameter provided as number')
 
     def update(self, value):
         try:
             self._value = float(value)
         except ValueError:
             raise ValueError
+        except Exception:
+            raise Exception('Invalid numeric data provided')
 
     def __add__(self, other):
         if isinstance(other, (int, float)):

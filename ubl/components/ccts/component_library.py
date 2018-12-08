@@ -4,6 +4,7 @@ from ubl.components.ccts import CodeType, AmountType, BinaryObjectType, \
 import itertools
 from collections import OrderedDict
 from enum import IntEnum, unique
+from ubl.exceptions import UnknownDocumentError
 
 
 @unique
@@ -6371,7 +6372,8 @@ class DocumentMap:
         if key in self.__slots__:
             return getattr(self, key)
         else:
-            raise IndexError('Document not defined in current library')
+            raise UnknownDocumentError('Document not defined in current '
+                                       'library')
 
     def __setitem__(self, key, value):
         raise RuntimeError('Document library cannot be modified')

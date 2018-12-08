@@ -1,4 +1,37 @@
-# Define the list of business exceptions or logical errors in the
-# business process
+"""
+Define the list of business exceptions or logical errors in the business
+process and generation of documents
+BusinessDocumentTypeError
+MalformedDocumentError
+UnknownDocumentError
+ComponentValueError
+DocumentValueError
+DocumentAssociationError
+"""
 
-# BusinessDocumentTypeError
+
+class DocumentAssociationError(Exception):
+    pass
+
+
+class BusinessDocumentTypeError(TypeError):
+    pass
+
+
+class MalformedDocumentError(Exception):
+    pass
+
+
+class UnknownDocumentError(IndexError):
+    pass
+
+
+class ComponentValueError(ValueError):
+    pass
+
+
+class DocumentValueError(ValueError):
+    pass
+
+
+

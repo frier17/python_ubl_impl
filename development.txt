@@ -1,7 +1,7 @@
 [UNIVERSAL BUSINESS LANGUAGE]
 This application is python implementation of the UBL 2.0 specification for
 business documents and processes. The core ideas of the this project are
-geared towards building faster business application for web, mobile, and others.
+geared towards building faster business application for web, mobile etc.
 
 [DESIGN AND IMPLEMENTATION CONSIDERATIONS]
 The abstract base types of the UBL will be implemented using the abc.ABC
@@ -45,20 +45,6 @@ This will enable various businesses simply specify their parameters,
 attributes to ignore or hide, compulsory fields etc. and have the application
 create corresponding datatypes using the type('BSOType', (), {}) to make
 instances or classes.
-
-[FIELD LIST]
-Each Component type may have a field list which defines all possible tags or
-attributes of the component. Permissions or restrictions of these fields can
-be hardcoded into properties or defined by expressions.
-Example:
- # in python script
- # define the allowed fields as list or named tuple
- _fields = (field_1, field_2, field_3)
-
-@property
-def field_1(self):
- # do processing applying rules
- return self._field.named_field
 
 [STANDARD BUSINESS SERVICES]
 "Every business services consist of activities performed at a cost and
