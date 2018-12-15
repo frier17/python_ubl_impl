@@ -92,11 +92,11 @@ def data_checker(data, *, asbie_associations, asbie_component,
                  float_allowed_min, float_max, float_min, int_allowed_max,
                  int_allowed_min, int_max, int_min, str_max_length,
                  str_min_length, str_pattern, str_target):
-    # define means of validating various datatypes and base components
+    # define means of validating various data types and base components
     truth_table = []
     data = ()
 
-    def _int_check(*, allowed_min, allowed_max, min_, max_):
+    def _int_check(*, allowed_min, allowed_max, sys_min, sys_max):
         nonlocal truth_table
         nonlocal data
         check = all(x for x in [isinstance(data, int), isinstance(
@@ -105,8 +105,8 @@ def data_checker(data, *, asbie_associations, asbie_component,
         if check:
             a = 1 if data >= allowed_min else 0
             b = 1 if data <= allowed_max else 0
-            c = 1 if data > min_ else 0,
-            d = 1 if data < max_ else 0,
+            c = 1 if data > sys_min else 0,
+            d = 1 if data < sys_max else 0,
             truth_table[DataTypeIndexes.INT] = dict(zip(
                 (IntDataIndexes.ABOVE_ALLOWED_MIN,
                  IntDataIndexes.BELOW_ALLOWED_MAX,
@@ -116,7 +116,7 @@ def data_checker(data, *, asbie_associations, asbie_component,
             ))
         return all(truth_table[DataTypeIndexes.INT].values())
 
-    def _float_check(*, allowed_min, allowed_max, min_, max_):
+    def _float_check(*, allowed_min, allowed_max, sys_min, sys_max):
         nonlocal truth_table
         nonlocal data
         check = all(x for x in [isinstance(allowed_max, float), isinstance(
@@ -124,8 +124,8 @@ def data_checker(data, *, asbie_associations, asbie_component,
         if check:
             a = 1 if data >= allowed_min else 0
             b = 1 if data <= allowed_max else 0
-            c = 1 if data != min_ else 0,
-            d = 1 if data != max_ else 0,
+            c = 1 if data != sys_min else 0,
+            d = 1 if data != sys_max else 0,
             truth_table[DataTypeIndexes.FLOAT] = dict(zip(
                 (FloatDataIndexes.ABOVE_ALLOWED_MIN,
                  FloatDataIndexes.BELOW_ALLOWED_MAX,
@@ -150,15 +150,16 @@ def data_checker(data, *, asbie_associations, asbie_component,
     def _str_check(*, allowed_min, allowed_max, target, pattern):
         # validate if the data is string type and if the specification is
         # reached or satisfied
-        # @todo: review function
-        nonlocal truth_table
-        data_type, value = data
-        if isinstance(data_type, str):
-            a = 1 if len(value) <= allowed_max else 0
-            b = 1 if len(value) >= allowed_min else 0
-            c = 1 if value == target else 0
-            d = 1 if re.search(pattern, data) else 0
-            f = 1 if value is None else 0
+        nonlocal truth_table, data
+        check = any(x for x in [isinstance(data, str), len(data) <=
+                                allowed_max, len(data) >= allowed_min,
+                                data == target, data is None, ])
+        if check:
+            a = 1 if len(data) <= allowed_max else 0
+            b = 1 if len(data) >= allowed_min else 0
+            c = 1 if data == target else 0
+            d = 1 if re.search(pattern, data) is not None else 0
+            f = 1 if data is None else 0
             truth_table[DataTypeIndexes.STR] = dict(zip(
                 (StrDataIndexes.BELOW_ALLOWED_MAX,
                  StrDataIndexes.ABOVE_ALLOWED_MIN,
@@ -235,26 +236,28 @@ def data_checker(data, *, asbie_associations, asbie_component,
             ))
 
     try:
-        return _bool_check() or \
-            _int_check(allowed_max=int_allowed_max,
-                       allowed_min=int_allowed_min, max_=int_max,
-                       min_=int_min) or \
-            _float_check(allowed_min=float_allowed_min,
-                         allowed_max=float_allowed_max, min_=float_min,
-                         max_=float_max) or \
-            _datetime_check(start=datetime_earliest, end=datetime_latest,
-                            start_duration=datetime_within_start_duration,
-                            end_duration=datetime_within_end_duration,
-                            before=datetime_before, after=datetime_after) or \
-            _str_check(allowed_min=str_min_length,
-                       allowed_max=str_max_length, pattern=str_pattern,
-                       target=str_target) or \
-            _asbie_check(component=asbie_component,
-                         associations=asbie_associations) or \
-            _binary_object_check(target=binary_object_target)
+        return _str_check(allowed_min=str_min_length,
+                          allowed_max=str_max_length, pattern=str_pattern,
+                          target=str_target) or \
+               _asbie_check(component=asbie_component,
+                            associations=asbie_associations) or \
+               _float_check(allowed_min=float_allowed_min,
+                            allowed_max=float_allowed_max, sys_min=float_min,
+                            sys_max=float_max) or \
+               _int_check(allowed_min=int_allowed_min,
+                          allowed_max=int_allowed_max, sys_min=int_min,
+                          sys_max=int_max) or \
+               _datetime_check(start=datetime_earliest, end=datetime_latest,
+                               start_duration=datetime_within_start_duration,
+                               end_duration=datetime_within_end_duration,
+                               before=datetime_before, after=datetime_after) \
+               or _bool_check() or \
+               _binary_object_check(target=binary_object_target)
 
     except SyntaxError:
         raise SyntaxError('Invalid string argument being parsed')
 
     except TypeError:
-        raise TypeError('Invalid datatype being assigned')
+        raise TypeError('Invalid data type being assigned')
+    except ValueError:
+        raise ValueError('Invalid parameters provided as data')
