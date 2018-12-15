@@ -247,3 +247,7 @@ lazy evaluation allows for flexible and easier control of the document life
 cycle also enabling document designers swap components dynamically by
 changing the target of the association. asbie types simply serve as 'blank'
 association objects or as dynamic reference pointers.
+
+[DOCUMENT WRITER]
+This feature will convert the various document templates into designated
+electronic formats such as DOCX, PDF etc.

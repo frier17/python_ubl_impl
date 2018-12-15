@@ -2,9 +2,9 @@ from ubl.components.ccts import CodeType, AmountType, BinaryObjectType, \
     AssociatedBusinessEntity, DateTimeType, NumericType, TextType, \
     MeasureType, QuantityType, IdentifierType, IndicatorType, NameType
 import itertools
-from collections import OrderedDict
 from enum import IntEnum, unique
 from ubl.exceptions import UnknownDocumentError
+from ubl.components.ccts import BusinessDocument
 
 
 @unique
@@ -6385,17 +6385,21 @@ class DocumentMap:
     def is_valid(cls, document, definition=None):
         # determine if a given document meets the specified or
         # default definition
-        # definition should be an iterable of types or values
-        pass
-
-    @classmethod
-    def document(cls, name):
-        if name in cls.__slots__:
-            return getattr(cls, name)
+        # definition should be an iterable of fields and respective values
+        document_map = dict()
+        if isinstance(document, str) and definition is None:
+            definition = dict(getattr(cls, document, {}))
+        elif isinstance(document, BusinessDocument) and definition is None:
+            definition = dict(getattr(cls, document.__class__.__name__, {}))
+            fields = document.__slots__ if document.__slots__ else dir(document)
+            document_map = {x: v for x in fields for v in getattr(document,
+                                                                  x, None)}
+        return document_map == definition
 
     @classmethod
     def document_definition(cls, name):
-        return OrderedDict(cls.document(name))
+        if name in cls.__slots__:
+            return dict(getattr(cls, name))
 
     @property
     def registry(self):

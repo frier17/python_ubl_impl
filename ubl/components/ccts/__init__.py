@@ -55,7 +55,7 @@ class AssociatedBusinessEntity(DataType):
     __slots__ = 'associations'
 
     def __init__(self):
-        pass
+        self.associations = {}
 
     def update(self, value):
         pass
@@ -67,12 +67,10 @@ class AssociatedBusinessEntity(DataType):
     @staticmethod
     def associate(self, entity, **kwargs):
         # associate a given asbie with the target
-        if isinstance(entity, self):
-            # create association
-            if entity not in self.associations:
-                key = entity.__class__.__name__
-                value = (entity, dict(kwargs)) if kwargs is not None else entity
-                self.associations[key] = value
+        if entity not in self.associations:
+            key = entity.__class__.__name__
+            value = (entity, kwargs) if kwargs is not None else entity
+            self.associations[key] = value
 
 
 class AmountType(DataType, Real):
@@ -373,8 +371,12 @@ class AmountType(DataType, Real):
 
 class BinaryObjectType(DataType, bytearray):
 
+    def __init__(self, *, source, encoding, error):
+        super(BinaryObjectType, self).__init__(source=source,
+                                               encoding=encoding, errors=error)
+
     def update(self, value):
-        pass
+        raise NotImplementedError
 
     @classmethod
     def mock(cls, *args, **kwargs):
@@ -571,6 +573,10 @@ class NumericType(DataType, Number):
         except Exception:
             raise Exception('Invalid numeric data provided')
 
+    @property
+    def value(self):
+        return self._value
+
     def __add__(self, other):
         if isinstance(other, (int, float)):
             return self._value + other
@@ -644,3 +650,43 @@ class MeasureType(NumericType):
 
 class QuantityType(NumericType):
     pass
+
+
+class BusinessDocument:
+
+    __slots__ = ['__desc__', 'xml_namespace']
+
+    def __init__(self):
+        # Namespace can be defined by individual documents
+        self.xml_namespace = None
+        # @todo: define annotation lookups for document and field level
+        self.__desc__ = None
+
+    def __iter__(self):
+        if self.__slots__ is not None:
+            for field in self.__slots__:
+                yield (field, getattr(self, field, None))
+        else:
+            for field in self.__dict__:
+                yield (field, getattr(self, field, None))
+
+    def __getitem__(self, item):
+        if item not in self.__slots__ or item not in self.__dict__:
+            raise IndexError('Index does not exist in Business Document')
+        return getattr(self, item, None)
+
+    def __setitem__(self, key, value):
+        # @todo: add the lookup for the allowed values and datatype
+        if key not in self.__slots__ or key not in self.__dict__:
+            raise IndexError('Index does not exist in Business Document')
+        setattr(self, key, value)
+
+    def __delattr__(self, item):
+        raise AttributeError('Attribute cannot be deleted in Business Document')
+
+    def __getattribute__(self, name):
+        return getattr(self, name, None)
+
+    @staticmethod
+    def initialize(cls):
+        pass

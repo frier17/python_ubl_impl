@@ -1,11 +1,22 @@
-import heapq
-import ast
-from collections import defaultdict
-from enum import IntFlag, unique
+import re
+from enum import IntFlag, unique, auto
+from datetime import datetime, timedelta
+
+
+class DataTypeIndexes(IntFlag):
+    INT = auto()
+    FLOAT = auto()
+    BOOL = auto()
+    STR = auto()
+    DATETIME = auto()
+    ASBIE = auto()
+    BINARY = auto()
+    NONE = auto()
+    NOT_IMPLEMENTED = auto()
 
 
 class NoneDataIndexes(IntFlag):
-    NONE_DATA = 0
+    IS_NONE = 0
 
 
 class NotImplementedDataIndexes(IntFlag):
@@ -14,7 +25,6 @@ class NotImplementedDataIndexes(IntFlag):
 
 @unique
 class IntDataIndexes(IntFlag):
-    INT_DATA = 2
     ABOVE_ALLOWED_MIN = 3
     BELOW_ALLOWED_MAX = 4
     ABOVE_INT_MIN = 2
@@ -23,14 +33,12 @@ class IntDataIndexes(IntFlag):
 
 @unique
 class BoolDataIndexes(IntFlag):
-    BOOL_DATA = 0
     TRUE = 1
     FALSE = 2
 
 
 @unique
 class FloatDataIndexes(IntFlag):
-    FLOAT_DATA = 0
     ABOVE_ALLOWED_MIN = 4
     BELOW_ALLOWED_MAX = 5
     ABOVE_FLOAT_MIN = 2
@@ -39,110 +47,211 @@ class FloatDataIndexes(IntFlag):
 
 @unique
 class DateTimeDataIndexes(IntFlag):
-    DATETIME_DATA = 0
-    NULL = 1
-    ABOVE_ALLOWED_MIN = 3
-    BELOW_ALLOWED_MAX = 4
-    BEFORE_DATETIME = 2
-    AFTER_DATETIME = 3
+    AFTER_LATEST = 1
+    BEFORE_EARLIEST = 2
+    BELOW_ALLOWED_MAX = 3
+    BEFORE_DATETIME = 4
+    AFTER_DATETIME = 5
+    WITHIN_START_DURATION = 6
+    WITHIN_END_DURATION = 7
 
 
 @unique
 class StrDataIndexes(IntFlag):
-    STRING_DATA = 0
-    EMPTY = 1
+    EMPTY_STR = 1
     ABOVE_ALLOWED_MIN = 2
     BELOW_ALLOWED_MAX = 3
     EQUAL_TARGET = 4
+    MATCHED_PATTERN = 5
+
+
+@unique
+class AsbieDataIndexes(IntFlag):
+    TARGET_COMPONENT = 1
+    FULL_ASSOCIATION = 2
+    PARTIAL_ASSOCIATION = 3
+    NO_ASSOCIATION = 4
+
+
+@unique
+class BinaryObjectIndexes(IntFlag):
+    IS_BYTE_ARRAY = 1
+    IS_EMPTY_BYTES = 2
+    IS_TARGET_BYTES = 3
 
 
 class CCTSCategoryCode(IntFlag):
     pass
 
 
-class DocumentFieldDict(dict):
-    # defines the lookup table for the document fields.
-    # Each field has a given data type it accepts
-    _fields = ()
-    _values = ()
-    _type_match = {}
-
-    def __init__(self, *args, **kwargs):
-        super(DocumentFieldDict, self).__init__(*args, **kwargs)
-        allowed_datatype = defaultdict()
-        heapq.heapify(allowed_datatype)
-        self._type_match = {
-            'string': 1,
-            'int': 2
-        }
-        self.value_map = [0, 0, 0, 0]
-
-    def __getitem__(self, item):
-        # retrieve value for the given item matching a key
-        result = ast.literal_eval(item)
-        data_type = type(result)
-        index = self._type_match.get(data_type.__class__.__name__, None)
-        v = self.value_map
-        v[index] = 1
-
-    def __setitem__(self, key, value):
-        # set the value for the given key matching a named field
-        pass
-
-
-def data_checker(*args, **kwargs):
-    # define means of validating various datatypes
+def data_checker(data, *, asbie_associations, asbie_component,
+                 binary_object_target, datetime_after, datetime_before,
+                 datetime_earliest, datetime_latest,
+                 datetime_within_end_duration,
+                 datetime_within_start_duration, float_allowed_max,
+                 float_allowed_min, float_max, float_min, int_allowed_max,
+                 int_allowed_min, int_max, int_min, str_max_length,
+                 str_min_length, str_pattern, str_target):
+    # define means of validating various datatypes and base components
     truth_table = []
+    data = ()
 
-    def _int_check(int_data, *, allowed_min, allowed_max, int_min, int_max):
+    def _int_check(*, allowed_min, allowed_max, min_, max_):
         nonlocal truth_table
-        data_type, value = int_data
-        if data_type == 'int':
-            a = 1 if value < allowed_min else 0
-            b = 1 if value > allowed_max else 0
-            c = 1 if value > int_min else 0,
-            d = 1 if value > int_max else 0,
-            truth_table[IntDataIndexes.INT_DATA] = (a, b, c, d)
-        return all(truth_table[IntDataIndexes.INT_DATA])
+        nonlocal data
+        check = all(x for x in [isinstance(data, int), isinstance(
+            allowed_max, int), isinstance(allowed_min, int), isinstance(
+            int_min, int), isinstance(int_max, int)])
+        if check:
+            a = 1 if data >= allowed_min else 0
+            b = 1 if data <= allowed_max else 0
+            c = 1 if data > min_ else 0,
+            d = 1 if data < max_ else 0,
+            truth_table[DataTypeIndexes.INT] = dict(zip(
+                (IntDataIndexes.ABOVE_ALLOWED_MIN,
+                 IntDataIndexes.BELOW_ALLOWED_MAX,
+                 IntDataIndexes.ABOVE_INT_MIN,
+                 IntDataIndexes.BELOW_INT_MAX,),
+                (a, b, c, d)
+            ))
+        return all(truth_table[DataTypeIndexes.INT].values())
 
-    def _float_check(float_data, *, allowed_min, allowed_max, float_min,
-                     float_max):
+    def _float_check(*, allowed_min, allowed_max, min_, max_):
         nonlocal truth_table
-        data_type, value = float_data
-        if data_type == 'float':
-            a = 1 if value < allowed_min else 0
-            b = 1 if value > allowed_max else 0
-            c = 1 if value > float_min else 0,
-            d = 1 if value > float_max else 0,
-            truth_table[FloatDataIndexes.FLOAT_DATA] = (a, b, c, d)
-        return all(truth_table[FloatDataIndexes.FLOAT_DATA])
+        nonlocal data
+        check = all(x for x in [isinstance(allowed_max, float), isinstance(
+            allowed_min, float)])
+        if check:
+            a = 1 if data >= allowed_min else 0
+            b = 1 if data <= allowed_max else 0
+            c = 1 if data != min_ else 0,
+            d = 1 if data != max_ else 0,
+            truth_table[DataTypeIndexes.FLOAT] = dict(zip(
+                (FloatDataIndexes.ABOVE_ALLOWED_MIN,
+                 FloatDataIndexes.BELOW_ALLOWED_MAX,
+                 FloatDataIndexes.ABOVE_FLOAT_MIN,
+                 FloatDataIndexes.BELOW_FLOAT_MAX,),
+                (a, b, c, d)
+            ))
+        return all(truth_table[DataTypeIndexes.FLOAT].values())
 
-    def _bool_check(bool_data):
+    def _bool_check():
         nonlocal truth_table
-        data_type, value = bool_data
-        if data_type == 'bool':
-            a = 1 if value is True else 0
-            b = 1 if value is False else 0
-            truth_table[BoolDataIndexes.BOOL_DATA] = (a, b, None, None)
-        return any(truth_table[FloatDataIndexes.FLOAT_DATA])
+        nonlocal data
+        if isinstance(data, bool):
+            a = 1 if data is True else 0
+            b = 1 if data is False else 0
+            truth_table[DataTypeIndexes.BOOL] = dict(zip(
+                (BoolDataIndexes.TRUE, BoolDataIndexes.FALSE),
+                (a, b, None, None)
+            ))
+        return any(truth_table[DataTypeIndexes.BOOL].values())
 
-    def _datetime_check(*args):
+    def _str_check(*, allowed_min, allowed_max, target, pattern):
+        # validate if the data is string type and if the specification is
+        # reached or satisfied
+        # @todo: review function
         nonlocal truth_table
-        pass
+        data_type, value = data
+        if isinstance(data_type, str):
+            a = 1 if len(value) <= allowed_max else 0
+            b = 1 if len(value) >= allowed_min else 0
+            c = 1 if value == target else 0
+            d = 1 if re.search(pattern, data) else 0
+            f = 1 if value is None else 0
+            truth_table[DataTypeIndexes.STR] = dict(zip(
+                (StrDataIndexes.BELOW_ALLOWED_MAX,
+                 StrDataIndexes.ABOVE_ALLOWED_MIN,
+                 StrDataIndexes.EQUAL_TARGET, StrDataIndexes.MATCHED_PATTERN,
+                 StrDataIndexes.EMPTY),
+                (a, b, c, d, f)
+            ))
+        return any(truth_table[DataTypeIndexes.STR].values())
 
-    def _str_check(*args):
+    def _asbie_check(*, component, associations):
+        # evaluate if the data has listed associations or elements of
+        # associations.
+        # association must be dict of class_name: (data_type, **kwargs)
         nonlocal truth_table
-        pass
+        nonlocal data
+        check = any(x for x in [isinstance(data, component),
+                                data.associations == associations])
+        if check:
+            a = 1 if isinstance(data, component) else 0
+            b = 1 if data.associations == associations else 0
+            c = 1 if not b and any(x for x in data.associations if
+                                   x in associations) else 0
+            truth_table[DataTypeIndexes.ASBIE] = dict(zip(
+                (AsbieDataIndexes.TARGET_COMPONENT,
+                 AsbieDataIndexes.FULL_ASSOCIATION,
+                 AsbieDataIndexes.PARTIAL_ASSOCIATION,),
+                (a, b, c)
+            ))
+        return any(truth_table[DataTypeIndexes.ASBIE].values())
+
+    def _binary_object_check(*, target):
+        nonlocal truth_table, data
+        check = any(x for x in [isinstance(data, bytearray), isinstance(
+            target, bytearray), data is not None])
+        if check:
+            a = 1 if isinstance(data, bytearray) else 0
+            b = 1 if isinstance(data, bytearray) and data is None else 0
+            c = 1 if data == target else 0
+            truth_table[DataTypeIndexes.BINARY] = dict(zip(
+                (BinaryObjectIndexes.IS_BYTE_ARRAY,
+                 BinaryObjectIndexes.IS_EMPTY_BYTES,
+                 BinaryObjectIndexes.IS_TARGET_BYTES),
+                (a, b, c)
+            ))
+        return any(truth_table[DataTypeIndexes.BINARY].values())
+
+    def _datetime_check(*, start, end, start_duration, end_duration, before,
+                        after):
+        nonlocal truth_table, data
+        check = any(x for x in [isinstance(data, datetime),
+                                isinstance(start, datetime),
+                                isinstance(end, datetime),
+                                isinstance(start_duration, timedelta),
+                                isinstance(end_duration, timedelta),
+                                isinstance(before, datetime),
+                                isinstance(after, datetime)])
+        if check:
+            a = 1 if isinstance(data, datetime) else 0
+            b = 1 if data <= start else 0
+            c = 1 if data >= end else 0
+            d = 1 if data - start == start_duration else 0
+            e = 1 if end - data == end_duration else 0
+            f = 1 if data < before else 0
+            g = 1 if data > after else 0
+            truth_table[DataTypeIndexes.DATETIME] = dict(zip(
+                (DateTimeDataIndexes.IS_DATETIME,
+                 DateTimeDataIndexes.BEFORE_EARLIEST,
+                 DateTimeDataIndexes.AFTER_LASTEST,
+                 DateTimeDataIndexes.WITHIN_START_DURATION,
+                 DateTimeDataIndexes.WITHIN_END_DURATION,
+                 DateTimeDataIndexes.BEFORE_DATETIME,
+                 DateTimeDataIndexes.AFTER_DATETIME,),
+                (a, b, c, d, e, f, g)
+            ))
 
     try:
-        dt = ast.literal_eval(args[0])
-        dd = type(dt)
-        data = dd.__class__.__name__, dt
-        return _bool_check(data) or \
-            _int_check(data) or \
-            _float_check(data) or \
-            _datetime_check(data) or \
-            _str_check(data)
+        return _bool_check() or \
+            _int_check(allowed_max=int_allowed_max,
+                       allowed_min=int_allowed_min, max_=int_max,
+                       min_=int_min) or \
+            _float_check(allowed_min=float_allowed_min,
+                         allowed_max=float_allowed_max, min_=float_min,
+                         max_=float_max) or \
+            _datetime_check(start=datetime_earliest, end=datetime_latest,
+                            start_duration=datetime_within_start_duration,
+                            end_duration=datetime_within_end_duration,
+                            before=datetime_before, after=datetime_after) or \
+            _str_check(allowed_min=str_min_length,
+                       allowed_max=str_max_length, pattern=str_pattern,
+                       target=str_target) or \
+            _asbie_check(component=asbie_component,
+                         associations=asbie_associations) or \
+            _binary_object_check(target=binary_object_target)
 
     except SyntaxError:
         raise SyntaxError('Invalid string argument being parsed')

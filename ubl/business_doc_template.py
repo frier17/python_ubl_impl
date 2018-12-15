@@ -27,6 +27,7 @@ from datetime import datetime
 from hashlib import sha512
 import copy
 from weakref import WeakValueDictionary
+from ubl.components.ccts import BusinessDocument
 from ubl.components.ccts.component_library import DocumentMap, Schemas
 
 # @todo: do you export the various template or only the factory?
@@ -131,46 +132,6 @@ class BusinessDocumentTemplate(metaclass=Singleton):
     @property
     def document_registry(self):
         return DocumentMap.registry
-
-
-class BusinessDocument:
-
-    __slots__ = ['__desc__', 'xml_namespace']
-
-    def __init__(self):
-        # Namespace can be defined by individual documents
-        self.xml_namespace = None
-        # @todo: define annotation lookups for document and field level
-        self.__desc__ = None
-
-    def __iter__(self):
-        if self.__slots__ is not None:
-            for field in self.__slots__:
-                yield (field, getattr(self, field, None))
-        else:
-            for field in self.__dict__:
-                yield (field, getattr(self, field, None))
-
-    def __getitem__(self, item):
-        if item not in self.__slots__ or item not in self.__dict__:
-            raise IndexError('Index does not exist in Business Document')
-        return getattr(self, item, None)
-
-    def __setitem__(self, key, value):
-        # @todo: add the lookup for the allowed values and datatype
-        if key not in self.__slots__ or key not in self.__dict__:
-            raise IndexError('Index does not exist in Business Document')
-        setattr(self, key, value)
-
-    def __delattr__(self, item):
-        raise AttributeError('Attribute cannot be deleted in Business Document')
-
-    def __getattribute__(self, name):
-        return getattr(self, name, None)
-
-    @staticmethod
-    def initialize(cls):
-        pass
 
 
 class DocumentRevisions:
