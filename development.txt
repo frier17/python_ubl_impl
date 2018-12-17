@@ -200,7 +200,7 @@ fixed values and keys. The keys can serve as a lookup to trace source of
 error during debugging. This system will enable centralized location of all
 messages
 
-[DOCUMENT GENERATOR]
+[DOCUMENT GENERATOR] - IMPLEMENTED
 The BusinessDocumentFactory.produce_document(document) can be called in a
 for loop or similar iterator to generate multiple documents. By keeping a
 reference of document generated as instance, future request for that document
@@ -222,13 +222,13 @@ order.field.__meta__ # returns tha xml metadata for this field
 order.field.__parent__ # return the parent node of this field or None if root
 order.field.__children__ # return children nodes of this field as a list
 
-[CACHING DOCUMENT]
+[CACHING DOCUMENT] - IMPLEMENTED
 Using metaclasses or a cache manager that relies on the weakref value
 dictionary, business documents can be created and cached by the prototyping
 class or factory. This will enable objects to be removed only during garbage
 collection and created only if non existent in memory/cache.
 
-[EXTENDING DOCUMENT FIELDS]
+[EXTENDING DOCUMENT FIELDS] - IMPLEMENTED
 The UBL document library specifies the fields of each electronic document.
 The implementation of this specification may not meet requirement of various
 businesses. The need to extend a document field thus arises. One approach

@@ -654,7 +654,7 @@ class QuantityType(NumericType):
 
 class BusinessDocument:
 
-    __slots__ = ['__desc__', 'xml_namespace']
+    __slots__ = '__desc__', 'xml_namespace', 'extension'
 
     def __init__(self):
         # Namespace can be defined by individual documents
