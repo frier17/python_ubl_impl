@@ -2,6 +2,8 @@ import re
 from enum import IntFlag, unique, auto
 from datetime import datetime, timedelta
 
+__all__ = 'validate'
+
 
 class DataTypeIndexes(IntFlag):
     INT = auto()
@@ -84,14 +86,13 @@ class CCTSCategoryCode(IntFlag):
     pass
 
 
-def data_checker(data, *, asbie_associations, asbie_component,
-                 binary_object_target, datetime_after, datetime_before,
-                 datetime_earliest, datetime_latest,
-                 datetime_within_end_duration,
-                 datetime_within_start_duration, float_allowed_max,
-                 float_allowed_min, float_max, float_min, int_allowed_max,
-                 int_allowed_min, int_max, int_min, str_max_length,
-                 str_min_length, str_pattern, str_target):
+def validate(data, *, asbie_associations, asbie_component, binary_object_target,
+             datetime_after, datetime_before, datetime_earliest,
+             datetime_latest, datetime_within_end_duration,
+             datetime_within_start_duration, float_allowed_max,
+             float_allowed_min, float_max, float_min, int_allowed_max,
+             int_allowed_min, int_max, int_min, str_max_length, str_min_length,
+             str_pattern, str_target):
     # define means of validating various data types and base components
     truth_table = []
     data = ()

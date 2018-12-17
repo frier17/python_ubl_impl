@@ -1,3 +1,0 @@
-@todo: Behave test suite
-Create a behave test suite for the UBL application to enable testing of all
-packages

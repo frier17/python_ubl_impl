@@ -28,10 +28,10 @@ from hashlib import sha512
 import copy
 from weakref import WeakValueDictionary
 from ubl.components.ccts import BusinessDocument
-from ubl.components.ccts.component_library import DocumentMap, Schemas, \
-    TransactionDocumentMap as Tm
+from ubl.components.ccts.component_library import Documents, Schemas, \
+    BusinessProcesses as Bp
+from ubl.exceptions import DocumentTypeError
 
-# @todo: do you export the various template or only the factory?
 
 __all__ = (
     'BusinessDocumentFactory',
@@ -51,11 +51,11 @@ class BusinessDocumentTemplate(metaclass=Singleton):
 
     @classmethod
     def get_definition(cls, document):
-        return DocumentMap.document_definition(name=document)
+        return Documents.document_definition(name=document)
 
     @classmethod
     def document_fields(cls, document):
-        definition = DocumentMap.document_definition(name=document)
+        definition = Documents.document_definition(name=document)
         if definition:
             return definition.keys()
 
@@ -69,7 +69,7 @@ class BusinessDocumentTemplate(metaclass=Singleton):
 
     @property
     def document_registry(self):
-        return DocumentMap.registry
+        return Documents.registry
 
 
 class DocumentRevisions:
@@ -139,29 +139,25 @@ class BusinessDocumentFactory:
         if not isinstance(document, str):
             document = str(document)
         if document not in BusinessDocumentTemplate.document_registry:
-            # @todo: define business logic error for wrong document type
-            raise TypeError('Unrecognised document type specified')
+            raise DocumentTypeError('Unrecognised document type specified')
         else:
             bt = BusinessDocumentTemplate()
             if not DocumentCache.cached_instance(document):
                 cls._name = document
                 cls._definition = bt.get_definition(document)
                 cls._fields = bt.document_fields(document)
+                definition = {'__slots__': cls._fields, **cls._definition}
                 cls._schema = bt.schema(document)
-                instance = \
-                    type(
+                instance = type(
                         cls._name,
-                        (BusinessDocument, object,),
-                        {'__slots__': cls._fields},
+                        (BusinessDocument, object),
+                        definition,
                     )
-                # @todo: define the initialize method
-                # initialize: get associations and set default values for fields
-                prototype = instance().initialize()
+                prototype = instance()
                 DocumentCache.save(cls._name, prototype)
                 return copy.deepcopy(DocumentCache.cached_instance(cls._name))
 
     @classmethod
     def generate_transaction_document(cls, documents=None, process=None):
         # generate set of documents for the given process
-        return map(cls.produce_document, Tm.document_process_lookup(process,
-                                                                    documents))
+        return map(cls.produce_document, Bp.document_lookup(process, documents))

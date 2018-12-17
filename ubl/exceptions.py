@@ -14,7 +14,7 @@ class DocumentAssociationError(Exception):
     pass
 
 
-class BusinessDocumentTypeError(TypeError):
+class DocumentTypeError(TypeError):
     pass
 
 

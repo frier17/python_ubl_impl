@@ -8,9 +8,9 @@ from ubl.components.ccts import BusinessDocument
 
 
 @unique
-class _BusinessInformationElementFlag(IntFlag):
+class BIERegistry(IntFlag):
     """
-    List of the Business Information Elements as defined in UBL 2.1
+    List of the Business Information Elements (BIE) as defined in UBL 2.1
     """
     ACCEPTED_INDICATOR = 1
     ACCEPTED_VARIANTS_DESCRIPTION = 2
@@ -888,7 +888,7 @@ class _BusinessInformationElementFlag(IntFlag):
 
 
 @unique
-class _AggregateBusinessInformationElementFlag(IntFlag):
+class ABIERegistry(IntFlag):
     """
     List of the Aggregate Business Information Elements as defined in UBL 2.1
     """
@@ -1564,7 +1564,7 @@ class _AggregateBusinessInformationElementFlag(IntFlag):
 
 
 @unique
-class _BusinessDocumentFlag(IntFlag):
+class BusinessDocumentRegistry(IntFlag):
     """
     Defines a list of named constants which identifies all
     Business Documents supported by this Python implementation of UBL 2.1
@@ -1637,7 +1637,7 @@ class _BusinessDocumentFlag(IntFlag):
 
 
 @unique
-class TransactionType(IntFlag):
+class BusinessProcessRegistry(IntFlag):
     ANY_COLLABORATION = 2
     BILLING = 3
     CATALOGUE = 5
@@ -1671,7 +1671,7 @@ class TransactionType(IntFlag):
     VENDOR_INVENTORY = 127
 
 
-class ComponentMap:
+class Components:
     # list the entire components for the UBL documents system
     __slots__ = (
         'ActivityDataLine',
@@ -4525,7 +4525,7 @@ class ComponentMap:
         return type(data)
 
 
-class DocumentMap:
+class Documents:
 
     __slots__ = (
         'ApplicationResponse',
@@ -6642,42 +6642,42 @@ class Schemas:
         return getattr(cls, name, None)
 
 
-class TransactionDocumentMap:
+class BusinessProcesses:
     __slots__ = 'lookup'
 
     def __init__(self):
         self.lookup = dict(zip(
             (
-                TransactionType.BILLING,
-                TransactionType.CATALOGUE,
-                TransactionType.CERTIFICATE_OF_ORIGIN_OF_GOODS,
-                TransactionType.CHANGES_TO_THE_ARTICLE_CATALOGUE,
-                TransactionType.CHANGES_TO_THE_ITEM_CATALOGUE,
-                TransactionType.COLLABORATIVE_PLANNING,
-                TransactionType.CREATE_CATALOGUE,
-                TransactionType.CYCLIC_REPLENISHMENT_PROGRAM,
-                TransactionType.DELETE_CATALOGUE,
-                TransactionType.FORECASTING,
-                TransactionType.FREIGHT_BILLING,
-                TransactionType.FREIGHT_MANAGEMENT,
-                TransactionType.FREIGHT_STATUS_REPORTING,
-                TransactionType.FULFILLMENT,
-                TransactionType.FULFILMENT_WITH_DESPATCH_ADVICE,
-                TransactionType.FULFILMENT_WITH_RECEIPT_ADVICE,
-                TransactionType.INITIAL_STOCKING_OF_THE_AREA_BY_PRODUCER,
-                TransactionType.INTERMODAL_FREIGHT_MANAGEMENT,
-                TransactionType.ORDERING,
-                TransactionType.PAYMENT_NOTIFICATION,
-                TransactionType.PERMANENT_REPLENISHMENT,
-                TransactionType.PRICE_ADJUSTMENTS,
-                TransactionType.QUOTATION,
-                TransactionType.REPLENISHMENT,
-                TransactionType.TENDERING,
-                TransactionType.TRANSFER_OF_BASE_ITEM_CATALOGUE,
-                TransactionType.UPDATE_CATALOGUE_ITEM_SPECIFICATION,
-                TransactionType.UPDATE_CATALOGUE_PRICING,
-                TransactionType.UTILITY_BILLING,
-                TransactionType.VENDOR_INVENTORY,
+                BusinessProcessRegistry.BILLING,
+                BusinessProcessRegistry.CATALOGUE,
+                BusinessProcessRegistry.CERTIFICATE_OF_ORIGIN_OF_GOODS,
+                BusinessProcessRegistry.CHANGES_TO_THE_ARTICLE_CATALOGUE,
+                BusinessProcessRegistry.CHANGES_TO_THE_ITEM_CATALOGUE,
+                BusinessProcessRegistry.COLLABORATIVE_PLANNING,
+                BusinessProcessRegistry.CREATE_CATALOGUE,
+                BusinessProcessRegistry.CYCLIC_REPLENISHMENT_PROGRAM,
+                BusinessProcessRegistry.DELETE_CATALOGUE,
+                BusinessProcessRegistry.FORECASTING,
+                BusinessProcessRegistry.FREIGHT_BILLING,
+                BusinessProcessRegistry.FREIGHT_MANAGEMENT,
+                BusinessProcessRegistry.FREIGHT_STATUS_REPORTING,
+                BusinessProcessRegistry.FULFILLMENT,
+                BusinessProcessRegistry.FULFILMENT_WITH_DESPATCH_ADVICE,
+                BusinessProcessRegistry.FULFILMENT_WITH_RECEIPT_ADVICE,
+                BusinessProcessRegistry.INITIAL_STOCKING_OF_THE_AREA_BY_PRODUCER,
+                BusinessProcessRegistry.INTERMODAL_FREIGHT_MANAGEMENT,
+                BusinessProcessRegistry.ORDERING,
+                BusinessProcessRegistry.PAYMENT_NOTIFICATION,
+                BusinessProcessRegistry.PERMANENT_REPLENISHMENT,
+                BusinessProcessRegistry.PRICE_ADJUSTMENTS,
+                BusinessProcessRegistry.QUOTATION,
+                BusinessProcessRegistry.REPLENISHMENT,
+                BusinessProcessRegistry.TENDERING,
+                BusinessProcessRegistry.TRANSFER_OF_BASE_ITEM_CATALOGUE,
+                BusinessProcessRegistry.UPDATE_CATALOGUE_ITEM_SPECIFICATION,
+                BusinessProcessRegistry.UPDATE_CATALOGUE_PRICING,
+                BusinessProcessRegistry.UTILITY_BILLING,
+                BusinessProcessRegistry.VENDOR_INVENTORY,
             ),
             (
                 ('ApplicationResponse', 'AttachedDocument', 'DocumentStatus',
@@ -6740,9 +6740,9 @@ class TransactionDocumentMap:
         ))
 
     @staticmethod
-    def document_process_lookup(self, process, documents=None):
+    def document_lookup(self, process, documents=None):
         transaction_docs = self.lookup.get(process, None)
-        docs = ComponentMap()
+        docs = Components()
         if transaction_docs:
             return itertools.chain(transaction_docs, (x for x in documents if
                                                       x in docs))
