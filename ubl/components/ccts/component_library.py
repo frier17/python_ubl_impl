@@ -2,13 +2,13 @@ from ubl.components.ccts import CodeType, AmountType, BinaryObjectType, \
     AssociatedBusinessEntity, DateTimeType, NumericType, TextType, \
     MeasureType, QuantityType, IdentifierType, IndicatorType, NameType
 import itertools
-from enum import IntEnum, unique
+from enum import unique, IntFlag
 from ubl.exceptions import UnknownDocumentError
 from ubl.components.ccts import BusinessDocument
 
 
 @unique
-class _BusinessInformationElementFlag(IntEnum):
+class _BusinessInformationElementFlag(IntFlag):
     """
     List of the Business Information Elements as defined in UBL 2.1
     """
@@ -888,7 +888,7 @@ class _BusinessInformationElementFlag(IntEnum):
 
 
 @unique
-class _AggregateBusinessInformationElementFlag(IntEnum):
+class _AggregateBusinessInformationElementFlag(IntFlag):
     """
     List of the Aggregate Business Information Elements as defined in UBL 2.1
     """
@@ -1564,7 +1564,7 @@ class _AggregateBusinessInformationElementFlag(IntEnum):
 
 
 @unique
-class _BusinessDocumentFlag(IntEnum):
+class _BusinessDocumentFlag(IntFlag):
     """
     Defines a list of named constants which identifies all
     Business Documents supported by this Python implementation of UBL 2.1
@@ -1633,6 +1633,42 @@ class _BusinessDocumentFlag(IntEnum):
     TRANSPORT_SERVICE_DESCRIPTION_REQUEST = 293
     UTILITY_STATEMENT = 307
     WAYBILL = 311
+    AWARDED_NOTIFICATION = 313
+
+
+@unique
+class TransactionType(IntFlag):
+    ANY_COLLABORATION = 2
+    BILLING = 3
+    CATALOGUE = 5
+    CERTIFICATE_OF_ORIGIN_OF_GOODS = 7
+    CHANGES_TO_THE_ARTICLE_CATALOGUE = 11
+    CHANGES_TO_THE_ITEM_CATALOGUE = 13
+    COLLABORATIVE_PLANNING = 17
+    CREATE_CATALOGUE = 19
+    CYCLIC_REPLENISHMENT_PROGRAM = 23
+    DELETE_CATALOGUE = 29
+    FORECASTING = 31
+    FREIGHT_BILLING = 37
+    FREIGHT_MANAGEMENT = 41
+    FREIGHT_STATUS_REPORTING = 43
+    FULFILLMENT = 47
+    FULFILMENT_WITH_DESPATCH_ADVICE = 53
+    FULFILMENT_WITH_RECEIPT_ADVICE = 59
+    INITIAL_STOCKING_OF_THE_AREA_BY_PRODUCER = 61
+    INTERMODAL_FREIGHT_MANAGEMENT = 67
+    ORDERING = 71
+    PAYMENT_NOTIFICATION = 73
+    PERMANENT_REPLENISHMENT = 79
+    PRICE_ADJUSTMENTS = 83
+    QUOTATION = 89
+    REPLENISHMENT = 97
+    TENDERING = 101
+    TRANSFER_OF_BASE_ITEM_CATALOGUE = 103
+    UPDATE_CATALOGUE_ITEM_SPECIFICATION = 107
+    UPDATE_CATALOGUE_PRICING = 109
+    UTILITY_BILLING = 113
+    VENDOR_INVENTORY = 127
 
 
 class ComponentMap:
@@ -4476,6 +4512,9 @@ class ComponentMap:
     def __setattr__(self, key, value):
         raise RuntimeError('Component definitions cannot be modified')
 
+    def __contains__(self, item):
+        return item in self.__slots__
+
     def field_definition(self, component, field):
         data = None
         if component in self.__slots__:
@@ -4491,6 +4530,7 @@ class DocumentMap:
     __slots__ = (
         'ApplicationResponse',
         'AttachedDocument',
+        'AwardedNotification',
         'UnawardedNotification',
         'BillOfLading',
         'CallForTenders',
@@ -4607,6 +4647,27 @@ class DocumentMap:
             ('receiver_party', asbie),
             ('attachment', asbie),
             ('parent_document_line_reference', asbie),
+        ])
+        self.AwardedNotification = iter([
+            ('ubl_version_id', identifier),
+            ('customization_id', identifier),
+            ('profile_id', identifier),
+            ('profile_execution_id', identifier),
+            ('id', identifier),
+            ('copy_indicator', indicator),
+            ('uuid', indicator),
+            ('contract_folder_id', identifier),
+            ('issue_date', datetime),
+            ('issue_time', datetime),
+            ('contract_name', name),
+            ('note', text),
+            ('sender_party', asbie),
+            ('receiver_party', asbie),
+            ('minutes_document_reference', asbie),
+            ('additional_document_reference', asbie),
+            ('tender_result', asbie),
+            ('final_financial_guarantee', asbie),
+            ('signature', asbie),
         ])
         self.BillOfLading = iter([
             ('ubl_version_id', identifier),
@@ -6579,3 +6640,109 @@ class Schemas:
     @classmethod
     def document_schema(cls, name):
         return getattr(cls, name, None)
+
+
+class TransactionDocumentMap:
+    __slots__ = 'lookup'
+
+    def __init__(self):
+        self.lookup = dict(zip(
+            (
+                TransactionType.BILLING,
+                TransactionType.CATALOGUE,
+                TransactionType.CERTIFICATE_OF_ORIGIN_OF_GOODS,
+                TransactionType.CHANGES_TO_THE_ARTICLE_CATALOGUE,
+                TransactionType.CHANGES_TO_THE_ITEM_CATALOGUE,
+                TransactionType.COLLABORATIVE_PLANNING,
+                TransactionType.CREATE_CATALOGUE,
+                TransactionType.CYCLIC_REPLENISHMENT_PROGRAM,
+                TransactionType.DELETE_CATALOGUE,
+                TransactionType.FORECASTING,
+                TransactionType.FREIGHT_BILLING,
+                TransactionType.FREIGHT_MANAGEMENT,
+                TransactionType.FREIGHT_STATUS_REPORTING,
+                TransactionType.FULFILLMENT,
+                TransactionType.FULFILMENT_WITH_DESPATCH_ADVICE,
+                TransactionType.FULFILMENT_WITH_RECEIPT_ADVICE,
+                TransactionType.INITIAL_STOCKING_OF_THE_AREA_BY_PRODUCER,
+                TransactionType.INTERMODAL_FREIGHT_MANAGEMENT,
+                TransactionType.ORDERING,
+                TransactionType.PAYMENT_NOTIFICATION,
+                TransactionType.PERMANENT_REPLENISHMENT,
+                TransactionType.PRICE_ADJUSTMENTS,
+                TransactionType.QUOTATION,
+                TransactionType.REPLENISHMENT,
+                TransactionType.TENDERING,
+                TransactionType.TRANSFER_OF_BASE_ITEM_CATALOGUE,
+                TransactionType.UPDATE_CATALOGUE_ITEM_SPECIFICATION,
+                TransactionType.UPDATE_CATALOGUE_PRICING,
+                TransactionType.UTILITY_BILLING,
+                TransactionType.VENDOR_INVENTORY,
+            ),
+            (
+                ('ApplicationResponse', 'AttachedDocument', 'DocumentStatus',
+                 'DocumentStatusRequest'),
+                ('CreditNote', 'DebitNote', 'Invoice', 'Reminder'),
+                ('Catalogue', 'CatalogueDeletion',
+                 'CatalogueItemSpecificationUpdate', 'CataloguePricingUpdate'),
+                ('CertificateOfOrigin', 'Catalogue', 'Catalogue',
+                 'ExceptionCriteria'),
+                ('Catalogue', 'Catalogue', 'ExceptionCriteria',
+                 'ExceptionNotification'),
+                ('Catalogue', 'ExceptionCriteria', 'ExceptionNotification',
+                 'Forecast'),
+                ('ExceptionCriteria', 'ExceptionNotification', 'Forecast',
+                 'ItemInformationRequest'),
+                ('TradeItemLocationProfile', 'Catalogue',
+                 'InstructionForReturns', 'InventoryReport'),
+                ('Catalogue', 'InstructionForReturns', 'InventoryReport',
+                 'RetailEvent'),
+                ('InstructionForReturns', 'InventoryReport', 'RetailEvent',
+                 'StockAvailabilityReport'),
+                ('Catalogue', 'ExceptionCriteria', 'ExceptionNotification',
+                 'Forecast'),
+                ('ExceptionCriteria', 'ExceptionNotification', 'Forecast',
+                 'ForecastRevision'),
+                ('FreightInvoice', 'BillOfLading', 'ForwardingInstructions',
+                 'PackingList'),
+                ('BillOfLading', 'ForwardingInstructions', 'PackingList',
+                 'Waybill'),
+                ('TransportationStatus', 'TransportationStatusRequest',
+                 'DespatchAdvice', 'OrderCancellation'),
+                ('DespatchAdvice', 'OrderCancellation', 'OrderChange',
+                 'ReceiptAdvice'),
+                ('FulfilmentCancellation', 'FulfilmentCancellation',
+                 'Catalogue', 'GoodsItemItinerary'),
+                ('FulfilmentCancellation', 'Catalogue', 'GoodsItemItinerary',
+                 'TransportExecutionPlan'),
+                ('Catalogue', 'GoodsItemItinerary', 'TransportExecutionPlan',
+                 'TransportExecutionPlanRequest'),
+                ('GoodsItemItinerary', 'TransportExecutionPlan',
+                 'TransportExecutionPlanRequest', 'TransportProgressStatus'),
+                ('Order', 'OrderCancellation', 'OrderChange', 'OrderResponse'),
+                ('RemittanceAdvice', 'Catalogue', 'Catalogue', 'Quotation'),
+                ('Catalogue', 'Catalogue', 'Quotation', 'RequestForQuotation'),
+                ('Catalogue', 'Quotation', 'RequestForQuotation',
+                 'ExceptionCriteria'),
+                ('Quotation', 'RequestForQuotation', 'ExceptionCriteria',
+                 'ExceptionNotification'),
+                ('ExceptionCriteria', 'ExceptionNotification', 'Forecast',
+                 'ForecastRevision'),
+                ('AwardedNotification', 'CallForTenders', 'ContractAwardNotice',
+                 'ContractNotice'),
+                ('Catalogue', 'Catalogue', 'Catalogue', 'UtilityStatement'),
+                ('Catalogue', 'Catalogue', 'UtilityStatement',
+                 'ProductActivity'),
+                ('Catalogue', 'UtilityStatement', 'ProductActivity'),
+                ('UtilityStatement', 'ProductActivity'),
+                ('ProductActivity',),
+            )
+        ))
+
+    @staticmethod
+    def document_process_lookup(self, process, documents=None):
+        transaction_docs = self.lookup.get(process, None)
+        docs = ComponentMap()
+        if transaction_docs:
+            return itertools.chain(transaction_docs, (x for x in documents if
+                                                      x in docs))

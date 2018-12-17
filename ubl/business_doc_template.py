@@ -28,77 +28,15 @@ from hashlib import sha512
 import copy
 from weakref import WeakValueDictionary
 from ubl.components.ccts import BusinessDocument
-from ubl.components.ccts.component_library import DocumentMap, Schemas
+from ubl.components.ccts.component_library import DocumentMap, Schemas, \
+    TransactionDocumentMap as Tm
 
 # @todo: do you export the various template or only the factory?
 
 __all__ = (
-    'ApplicationResponse',
-    'AttachedDocument',
-    'UnawardedNotification',
-    'BillOfLading',
-    'CallForTenders',
-    'Catalogue',
-    'CatalogueDeletion',
-    'CatalogueItemSpecificationUpdate',
-    'CataloguePricingUpdate',
-    'CatalogueRequest',
-    'CertificateOfOrigin',
-    'ContractAwardNotice',
-    'ContractNotice',
-    'CreditNote',
-    'DebitNote',
-    'DespatchAdvice',
-    'DocumentStatus',
-    'DocumentStatusRequest',
-    'ExceptionCriteria',
-    'ExceptionNotification',
-    'Forecast',
-    'ForecastRevision',
-    'ForwardingInstructions',
-    'FreightInvoice',
-    'FulfilmentCancellation',
-    'GoodsItemItinerary',
-    'GuaranteeCertificate',
-    'InstructionForReturns',
-    'InventoryReport',
-    'Invoice',
-    'ItemInformationRequest',
-    'Order',
-    'OrderCancellation',
-    'OrderChange',
-    'OrderResponse',
-    'OrderResponseSimple',
-    'PackingList',
-    'PriorInformationNotice',
-    'ProductActivity',
-    'Quotation',
-    'ReceiptAdvice',
-    'Reminder',
-    'RemittanceAdvice',
-    'RequestForQuotation',
-    'RetailEvent',
-    'SelfBilledCreditNote',
-    'SelfBilledInvoice',
-    'Statement',
-    'StockAvailabilityReport',
-    'Tender',
-    'TendererQualification',
-    'TendererQualificationResponse',
-    'TenderReceipt',
-    'TradeItemLocationProfile',
-    'TransportationStatus',
-    'TransportationStatusRequest',
-    'TransportExecutionPlan',
-    'TransportExecutionPlanRequest',
-    'TransportProgressStatus',
-    'TransportProgressStatusRequest',
-    'TransportServiceDescription',
-    'TransportServiceDescriptionRequest',
-    'UtilityStatement',
-    'Waybill',
-    'BusinessDocumentPrototype',
-    'DocumentRevisions'
+    'BusinessDocumentFactory',
+    'BusinessDocumentTemplate',
+    'DocumentRevisions',
 )
 
 
@@ -172,7 +110,7 @@ class DocumentCache:
         return cls._cache.get(key, None)
 
 
-class BusinessDocumentPrototype:
+class BusinessDocumentFactory:
     """
     The document prototype used to produce the various types of documents
     defined in the UBL 2.1 implementation.
@@ -182,7 +120,7 @@ class BusinessDocumentPrototype:
     Upon creating a new type of document, the instance is replaced. This is
     resource saving where a given type of document is created in a loop
     """
-    __slots__ = ('instance', '_fields', '_definition', '_schema')
+    __slots__ = ('instance', '_fields', '_definition', '_schema', '_name')
 
     def __init__(self):
         self.instance = None
@@ -193,8 +131,8 @@ class BusinessDocumentPrototype:
     def __init_subclass__(self, *args, **kwargs):
         raise Exception('Document Factory not to be extended')
 
-    @staticmethod
-    def produce_document(self, document):
+    @classmethod
+    def produce_document(cls, document):
         # if the document is not in document lists, exit
         # if the document is in list, then check if it's instance
         # else create instance and return a copy
@@ -206,18 +144,24 @@ class BusinessDocumentPrototype:
         else:
             bt = BusinessDocumentTemplate()
             if not DocumentCache.cached_instance(document):
-                self._name = document
-                self._definition = bt.get_definition(document)
-                self._fields = bt.document_fields(document)
-                self._schema = bt.schema(document)
+                cls._name = document
+                cls._definition = bt.get_definition(document)
+                cls._fields = bt.document_fields(document)
+                cls._schema = bt.schema(document)
                 instance = \
                     type(
-                        self._name,
+                        cls._name,
                         (BusinessDocument, object,),
-                        {'__slots__': self._fields},
+                        {'__slots__': cls._fields},
                     )
                 # @todo: define the initialize method
                 # initialize: get associations and set default values for fields
                 prototype = instance().initialize()
-                DocumentCache.save(self._name, prototype)
-                return copy.deepcopy(DocumentCache.cached_instance(self._name))
+                DocumentCache.save(cls._name, prototype)
+                return copy.deepcopy(DocumentCache.cached_instance(cls._name))
+
+    @classmethod
+    def generate_transaction_document(cls, documents=None, process=None):
+        # generate set of documents for the given process
+        return map(cls.produce_document, Tm.document_process_lookup(process,
+                                                                    documents))

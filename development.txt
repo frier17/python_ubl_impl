@@ -201,7 +201,7 @@ error during debugging. This system will enable centralized location of all
 messages
 
 [DOCUMENT GENERATOR]
-The BusinessDocumentPrototype.produce_document(document) can be called in a
+The BusinessDocumentFactory.produce_document(document) can be called in a
 for loop or similar iterator to generate multiple documents. By keeping a
 reference of document generated as instance, future request for that document
  can simply be copied instead of created.
