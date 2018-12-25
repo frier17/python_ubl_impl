@@ -686,7 +686,3 @@ class BusinessDocument:
 
     def __getattribute__(self, name):
         return getattr(self, name, None)
-
-    @staticmethod
-    def initialize(cls):
-        pass

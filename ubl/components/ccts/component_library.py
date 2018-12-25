@@ -4545,6 +4545,9 @@ class Components:
     def __setattr__(self, key, value):
         raise RuntimeError('Component definitions cannot be modified')
 
+    def __delattr__(self, item):
+        raise RuntimeError('Attribute cannot be deleted')
+
     def __contains__(self, item):
         return _key_gen(item, lookup=self.__slots__) is True
 
@@ -6483,6 +6486,9 @@ class Documents:
     def __setattr__(self, key, value):
         raise RuntimeError('Document library cannot be modified')
 
+    def __delattr__(self, item):
+        raise RuntimeError('Attribute cannot be deleted')
+
     def __contains__(self, item):
         return _key_gen(item) in self.__slots__
 
@@ -6699,6 +6705,9 @@ class Schemas:
 
     def __setattr__(self, key, value):
         raise RuntimeError('Schema definitions cannot be modified')
+
+    def __delattr__(self, item):
+        raise RuntimeError('Attribute cannot be deleted')
 
     def __contains__(self, item):
         return _key_gen(item, lookup=self.__slots__) is True

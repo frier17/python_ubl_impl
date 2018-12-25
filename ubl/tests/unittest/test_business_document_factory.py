@@ -1,5 +1,8 @@
 import pytest
 from ubl.business_doc_template import BusinessDocumentFactory
+from ubl.components.ccts.component_library import ProcessRegistry, \
+    BusinessDocumentRegistry
+from ubl.components.ccts import BusinessDocument
 
 """
 Test the following features:
@@ -14,22 +17,38 @@ Parse python document to xml
 Parse xml to python document
 Generate pdf from the python document
 Extend the behaviour and data attribute of component or document
+
+test_business_document_factory
+    Units: Base class - BusinessDocumentFactory
+    .__init__
+    -- Assert instances cannot be created
+    -- Assert creating instances raise a RuntimeError
+    Assert attributes _definition is set
+    Assert attributes _fields is set
+    Assert attributes _name is set
+    Assert attributes _schema is set
+
+    .generate_transaction_document(*args, **kwargs)
+    Assert iterator of documents is returned by method
+    Assert instances of documents are in default form
+
+    .instance
+    Assert .instance is either None or a default instance of UBL document
+
+    .produce_documents(*args, **kwargs)
+    Assert a default instance of UBL document
 """
 
 
 def test_init():
     with pytest.raises(RuntimeError):
         a = BusinessDocumentFactory()
-        assert a.instance is None
-
-
-def test_document_factory():
-    order_docs = BusinessDocumentFactory.generate_transaction_document(
-        process=ProcessRegistry.ORDERING)
-    tender_docs = BusinessDocumentFactory.generate_transaction_document(
-        process=ProcessRegistry.TENDERING)
-    assert order_docs is not None
-    assert tender_docs is not None
-    # ensure each entry in list is a document type
-    assert isinstance(order_docs[0], BusinessDocument)
-    assert isinstance(tender_docs[0], BusinessDocument)
+        business_doc = BusinessDocumentFactory.produce_document(
+            BusinessDocumentRegistry.BILL_OF_LADING)
+        documents = BusinessDocumentFactory.generate_transaction_document(
+            process=ProcessRegistry.TENDERING)
+        assert a.instance is not None
+        assert business_doc is not None
+        assert isinstance(business_doc, BusinessDocument)
+        assert documents is not None
+        assert isinstance(documents[0], BusinessDocument)
