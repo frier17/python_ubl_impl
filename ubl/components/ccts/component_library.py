@@ -1637,7 +1637,7 @@ class BusinessDocumentRegistry(IntFlag):
 
 
 @unique
-class BusinessProcessRegistry(IntFlag):
+class ProcessRegistry(IntFlag):
     ANY_COLLABORATION = 2
     BILLING = 3
     CATALOGUE = 5
@@ -1669,6 +1669,31 @@ class BusinessProcessRegistry(IntFlag):
     UPDATE_CATALOGUE_PRICING = 109
     UTILITY_BILLING = 113
     VENDOR_INVENTORY = 127
+
+
+def _key_gen(item, lookup=None):
+    key = None
+
+    def generator(x):
+        return ''.join(str.title(x).split('_'))
+
+    if any([
+        isinstance(item, BIERegistry),
+        isinstance(item, ABIERegistry),
+        isinstance(item, BusinessDocumentRegistry),
+        isinstance(item, ProcessRegistry),
+    ]):
+        key = generator(item.name)
+    elif isinstance(item, str) and any([
+        item in BIERegistry.__members__,
+        item in ABIERegistry.__members__,
+        item in BusinessDocumentRegistry.__members__,
+        item in ProcessRegistry.__members__
+    ]):
+        key = generator(item)
+    elif isinstance(item, str) and item in lookup:
+        key = item
+    return key
 
 
 class Components:
@@ -4500,11 +4525,19 @@ class Components:
             yield definition
 
     def __getitem__(self, item):
-        key = str(item)
+        # compare item as string or enum or enum alias
+        key = _key_gen(item, lookup=self.__slots__)
         if key in self.__slots__:
             return getattr(self, key)
         else:
             raise IndexError('Component not defined in library')
+
+    def __getattr__(self, item):
+        attr = _key_gen(item, lookup=self.__slots__)
+        if attr in self.__slots__:
+            return getattr(self, attr)
+        else:
+            raise AttributeError('Named component property not defined')
 
     def __setitem__(self, key, value):
         raise RuntimeError('Component definitions cannot be modified')
@@ -4513,7 +4546,7 @@ class Components:
         raise RuntimeError('Component definitions cannot be modified')
 
     def __contains__(self, item):
-        return item in self.__slots__
+        return _key_gen(item, lookup=self.__slots__) is True
 
     def field_definition(self, component, field):
         data = None
@@ -6429,9 +6462,17 @@ class Documents:
             yield document
 
     def __getitem__(self, item):
-        key = str(item)
+        key = _key_gen(item)
         if key in self.__slots__:
             return getattr(self, key)
+        else:
+            raise UnknownDocumentError('Document not defined in current '
+                                       'library')
+
+    def __getattr__(self, item):
+        attr = _key_gen(item, lookup=self.__slots__)
+        if attr in self.__slots__:
+            return getattr(self, attr)
         else:
             raise UnknownDocumentError('Document not defined in current '
                                        'library')
@@ -6441,6 +6482,9 @@ class Documents:
 
     def __setattr__(self, key, value):
         raise RuntimeError('Document library cannot be modified')
+
+    def __contains__(self, item):
+        return _key_gen(item) in self.__slots__
 
     @classmethod
     def is_valid(cls, document, definition=None):
@@ -6469,169 +6513,195 @@ class Documents:
 
 class Schemas:
     # URI schema definition for listed documents
-    __slots__ = 'base_url', 'application_response', 'attached', \
-                'awarded_notification', 'bill_of_lading', 'call_for_tenders',\
-                'catalogue', 'catalogue_deletion', \
-                'catalogue_item_specification_update', \
-                'catalogue_pricing_update', 'catalogue_request', \
-                'certificate_of_origin', 'contract_award_notice', \
-                'contract_notice', 'credit_note', 'debit_note', \
-                'despatch_advice', 'document_status', \
-                'document_status_request', 'exception_criteria', \
-                'exception_notification', 'forecast', 'forecast_revision', \
-                'forwarding_instructions', 'freight_invoice', \
-                'fulfilment_cancellation', 'goods_item_itinerary', \
-                'guarantee_certificate', 'instruction_for_returns', \
-                'inventory_report', 'invoice', 'item_information_request', \
-                'order', 'order_cancellation', 'order_change', \
-                'order_response', 'order_response_simple', 'packing_list', \
-                'prior_information_notice', 'product_activity', 'quotation', \
-                'receipt_advice', 'reminder', 'remittance_advice', \
-                'request_for_quotation', 'retail_event', \
-                'self_billed_credit_note', 'self_billed_invoice', \
-                'statement', 'stock_availability_report', 'tender', \
-                'tender_receipt', 'tenderer_qualification_response', \
-                'tenderer_qualification', 'trade_item_location_profile', \
-                'transport_execution_plan', \
-                'transport_execution_plan_request', \
-                'transport_progress_status', \
-                'transport_progress_status_request', \
-                'transport_service_description', \
-                'transport_service_description_request', \
-                'transportation_status', 'transportation_status_request', \
-                'unawarded_notification', 'utility_statement', 'waybill',
+    __slots__ = 'base_url', 'ApplicationResponse', 'AttachedDocument', \
+                'AwardedNotification', 'UnawardedNotification', \
+                'BillOfLading', 'CallForTenders', 'Catalogue', \
+                'CatalogueDeletion', 'CatalogueItemSpecificationUpdate', \
+                'CataloguePricingUpdate', 'CatalogueRequest', \
+                'CertificateOfOrigin', 'ContractAwardNotice', \
+                'ContractNotice', 'CreditNote', 'DebitNote', \
+                'DespatchAdvice', 'DocumentStatus', 'DocumentStatusRequest', \
+                'ExceptionCriteria', 'ExceptionNotification', 'Forecast', \
+                'ForecastRevision', 'ForwardingInstructions', \
+                'FreightInvoice', 'FulfilmentCancellation', \
+                'GoodsItemItinerary', 'GuaranteeCertificate', \
+                'InstructionForReturns', 'InventoryReport', 'Invoice', \
+                'ItemInformationRequest', 'Order', 'OrderCancellation', \
+                'OrderChange', 'OrderResponse', 'OrderResponseSimple', \
+                'PackingList', 'PriorInformationNotice', 'ProductActivity', \
+                'Quotation', 'ReceiptAdvice', 'Reminder', 'RemittanceAdvice',\
+                'RequestForQuotation', 'RetailEvent', 'SelfBilledCreditNote',\
+                'SelfBilledInvoice', 'Statement', 'StockAvailabilityReport', \
+                'Tender', 'TendererQualification', \
+                'TendererQualificationResponse', 'TenderReceipt', \
+                'TradeItemLocationProfile', 'TransportationStatus', \
+                'TransportationStatusRequest', 'TransportExecutionPlan', \
+                'TransportExecutionPlanRequest', 'TransportProgressStatus', \
+                'TransportProgressStatusRequest', \
+                'TransportServiceDescription', \
+                'TransportServiceDescriptionRequest', 'UtilityStatement', \
+                'Waybill',
     
     def __init__(self):
         base_url = 'http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html'
-        self.application_response = \
+        self.ApplicationResponse = \
             '%s%s' % (base_url, '#T-APPLICATION-RESPONSE')
-        self.attached = '%s%s' % (base_url, '#T-ATTACHED-DOCUMENT')
-        self.awarded_notification = \
+        self.AttachedDocument = '%s%s' % (base_url, '#T-ATTACHED-DOCUMENT')
+        self.AwardedNotification = \
             '%s%s' % (base_url, '#T-AWARDED-NOTIFICATION')
-        self.bill_of_lading = \
+        self.BillOfLading = \
             '%s%s' % (base_url, '#T-BILL-OF-LADING')
-        self.call_for_tenders = \
+        self.CallForTenders = \
             '%s%s' % (base_url, '#T-CALL-FOR-TENDERS')
-        self.catalogue = \
+        self.Catalogue = \
             '%s%s' % (base_url, '#T-CATALOGUE')
-        self.catalogue_deletion = \
+        self.CatalogueDeletion = \
             '%s%s' % (base_url, '#T-CATALOGUE-DELETION')
-        self.catalogue_item_specification_update = \
+        self.CatalogueItemSpecificationUpdate = \
             '%s%s' % (base_url, '#T-CATALOGUE-ITEM-SPECIFICATION-UPDATE')
-        self.catalogue_pricing_update = \
+        self.CataloguePricingUpdate = \
             '%s%s' % (base_url, '#T-CATALOGUE-PRICING-UPDATE')
-        self.catalogue_request = \
+        self.CatalogueRequest = \
             '%s%s' % (base_url, '#T-CATALOGUE-REQUEST')
-        self.certificate_of_origin = \
+        self.CertificateOfOrigin = \
             '%s%s' % (base_url, '#T-CERTIFICATE-OF-ORIGIN')
-        self.contract_award_notice = \
+        self.ContractAwardNotice = \
             '%s%s' % (base_url, '#T-CONTRACT-AWARD-NOTICE')
-        self.contract_notice = \
+        self.ContractNotice = \
             '%s%s' % (base_url, '#T-CONTRACT-NOTICE')
-        self.credit_note = \
+        self.CreditNote = \
             '%s%s' % (base_url, '#T-CREDIT-NOTE')
-        self.debit_note = \
+        self.DebitNote = \
             '%s%s' % (base_url, '#T-DEBIT-NOTE')
-        self.despatch_advice = \
+        self.DespatchAdvice = \
             '%s%s' % (base_url, '#T-DESPATCH-ADVICE')
-        self.document_status = \
+        self.DocumentStatus = \
             '%s%s' % (base_url, '#T-DOCUMENT-STATUS')
-        self.document_status_request = \
+        self.DocumentStatusRequest = \
             '%s%s' % (base_url, '#T-DOCUMENT-STATUS-REQUEST')
-        self.exception_criteria = \
+        self.ExceptionCriteria = \
             '%s%s' % (base_url, '#T-EXCEPTION-CRITERIA')
-        self.exception_notification = \
+        self.ExceptionNotification = \
             '%s%s' % (base_url, '#T-EXCEPTION-NOTIFICATION')
-        self.forecast = \
+        self.Forecast = \
             '%s%s' % (base_url, '#T-FORECAST')
-        self.forecast_revision = \
+        self.ForecastRevision = \
             '%s%s' % (base_url, '#T-FORECAST-REVISION')
-        self.forwarding_instructions = \
+        self.ForwardingInstructions = \
             '%s%s' % (base_url, '#T-FORWARDING-INSTRUCTIONS')
-        self.freight_invoice = \
+        self.FreightInvoice = \
             '%s%s' % (base_url, '#T-FREIGHT-INVOICE')
-        self.fulfilment_cancellation = \
+        self.FulfilmentCancellation = \
             '%s%s' % (base_url, '#T-FULFILMENT-CANCELLATION')
-        self.goods_item_itinerary = \
+        self.GoodsItemItinerary = \
             '%s%s' % (base_url, '#T-GOODS-ITEM-ITINERARY')
-        self.guarantee_certificate = \
+        self.GuaranteeCertificate = \
             '%s%s' % (base_url, '#T-GUARANTEE-CERTIFICATE')
-        self.instruction_for_returns = \
+        self.InstructionForReturns = \
             '%s%s' % (base_url, '#T-INSTRUCTION-FOR-RETURNS')
-        self.inventory_report = \
+        self.InventoryReport = \
             '%s%s' % (base_url, '#T-INVENTORY-REPORT')
-        self.invoice = \
+        self.Invoice = \
             '%s%s' % (base_url, '#T-INVOICE')
-        self.item_information_request = \
+        self.ItemInformationRequest = \
             '%s%s' % (base_url, '#T-ITEM-INFORMATION-REQUEST')
-        self.order = \
+        self.Order = \
             '%s%s' % (base_url, '#T-ORDER')
-        self.order_cancellation = \
+        self.OrderCancellation = \
             '%s%s' % (base_url, '#T-ORDER-CANCELLATION')
-        self.order_change = \
+        self.OrderChange = \
             '%s%s' % (base_url, '#T-ORDER-CHANGE')
-        self.order_response = \
+        self.OrderResponse = \
             '%s%s' % (base_url, '#T-ORDER-RESPONSE')
-        self.order_response_simple = \
+        self.OrderResponseSimple = \
             '%s%s' % (base_url, '#T-ORDER-RESPONSE-SIMPLE')
-        self.packing_list = \
+        self.PackingList = \
             '%s%s' % (base_url, '#T-PACKING-LIST')
-        self.prior_information_notice = \
+        self.PriorInformationNotice = \
             '%s%s' % (base_url, '#T-PRIOR-INFORMATION-NOTICE')
-        self.product_activity = \
+        self.ProductActivity = \
             '%s%s' % (base_url, '#T-PRODUCT-ACTIVITY')
-        self.quotation = \
+        self.Quotation = \
             '%s%s' % (base_url, '#T-QUOTATION')
-        self.receipt_advice = \
+        self.ReceiptAdvice = \
             '%s%s' % (base_url, '#T-RECEIPT-ADVICE')
-        self.reminder = \
+        self.Reminder = \
             '%s%s' % (base_url, '#T-REMINDER')
-        self.remittance_advice = \
+        self.ReceiptAdvice = \
             '%s%s' % (base_url, '#T-REMITTANCE-ADVICE')
-        self.request_for_quotation = \
+        self.RequestForQuotation = \
             '%s%s' % (base_url, '#T-REQUEST-FOR-QUOTATION')
-        self.retail_event = \
+        self.RetailEvent = \
             '%s%s' % (base_url, '#T-RETAIL-EVENT')
-        self.self_billed_credit_note = \
+        self.SelfBilledCreditNote = \
             '%s%s' % (base_url, '#T-SELF-BILLED-CREDIT-NOTE')
-        self.self_billed_invoice = \
+        self.SelfBilledInvoice = \
             '%s%s' % (base_url, '#T-SELF-BILLED-INVOICE')
-        self.statement = \
+        self.Statement = \
             '%s%s' % (base_url, '#T-STATEMENT')
-        self.stock_availability_report = \
+        self.StockAvailabilityReport = \
             '%s%s' % (base_url, '#T-STOCK-AVAILABILITY-REPORT')
-        self.tender = \
+        self.Tender = \
             '%s%s' % (base_url, '#T-TENDER')
-        self.tender_receipt = \
+        self.TenderReceipt = \
             '%s%s' % (base_url, '#T-TENDER-RECEIPT')
-        self.tenderer_qualification_response = \
+        self.TendererQualificationResponse = \
             '%s%s' % (base_url, '#T-TENDERER-QUALIFICATION-RESPONSE')
-        self.tenderer_qualification = \
+        self.TendererQualification = \
             '%s%s' % (base_url, '#T-TENDERER-QUALIFICATION')
-        self.trade_item_location_profile = \
+        self.TradeItemLocationProfile = \
             '%s%s' % (base_url, '#T-TRADE-ITEM-LOCATION-PROFILE')
-        self.transport_execution_plan = \
+        self.TransportExecutionPlan = \
             '%s%s' % (base_url, '#T-TRANSPORT-EXECUTION-PLAN')
-        self.transport_execution_plan_request = \
+        self.TransportExecutionPlanRequest = \
             '%s%s' % (base_url, '#T-TRANSPORT-EXECUTION-PLAN-REQUEST')
-        self.transport_progress_status = \
+        self.TransportProgressStatus = \
             '%s%s' % (base_url, '#T-TRANSPORT-PROGRESS-STATUS')
-        self.transport_progress_status_request = \
+        self.TransportProgressStatusRequest = \
             '%s%s' % (base_url, '#T-TRANSPORT-PROGRESS-STATUS-REQUEST')
-        self.transport_service_description = \
+        self.TransportServiceDescription = \
             '%s%s' % (base_url, '#T-TRANSPORT-SERVICE-DESCRIPTION')
-        self.transport_service_description_request = \
+        self.TransportServiceDescriptionRequest = \
             '%s%s' % (base_url, '#T-TRANSPORT-SERVICE-DESCRIPTION-REQUEST')
-        self.transportation_status = \
+        self.TransportationStatus = \
             '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS')
-        self.transportation_status_request = \
+        self.TransportationStatusRequest = \
             '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS-REQUEST')
-        self.unawarded_notification = \
+        self.UnawardedNotification = \
             '%s%s' % (base_url, '#T-UNAWARDED-NOTIFICATION')
-        self.utility_statement = \
+        self.UtilityStatement = \
             '%s%s' % (base_url, '#T-UTILITY-STATEMENT')
-        self.waybill = \
+        self.Waybill = \
             '%s%s' % (base_url, '#T-WAYBILL')
+
+    def __getitem__(self, item):
+        key = _key_gen(item, lookup=self.__slots__)
+        if key in self.__slots__:
+            return getattr(self, key)
+        else:
+            raise IndexError('Schema not defined in library')
+
+    def __getattr__(self, item):
+        attr = _key_gen(item, lookup=self.__slots__)
+        if attr in self.__slots__:
+            return getattr(self, attr)
+        else:
+            raise UnknownDocumentError('Schema not defined in library')
+
+    def __iter__(self):
+        schemas = itertools.filterfalse(lambda x: x == 'base_url',
+                                        self.__slots__)
+        for schema in schemas:
+            yield schema
+
+    def __setitem__(self, key, value):
+        raise RuntimeError('Schema definitions cannot be modified')
+
+    def __setattr__(self, key, value):
+        raise RuntimeError('Schema definitions cannot be modified')
+
+    def __contains__(self, item):
+        return _key_gen(item, lookup=self.__slots__) is True
 
     @property
     def schemas(self):
@@ -6648,36 +6718,36 @@ class BusinessProcesses:
     def __init__(self):
         self.lookup = dict(zip(
             (
-                BusinessProcessRegistry.BILLING,
-                BusinessProcessRegistry.CATALOGUE,
-                BusinessProcessRegistry.CERTIFICATE_OF_ORIGIN_OF_GOODS,
-                BusinessProcessRegistry.CHANGES_TO_THE_ARTICLE_CATALOGUE,
-                BusinessProcessRegistry.CHANGES_TO_THE_ITEM_CATALOGUE,
-                BusinessProcessRegistry.COLLABORATIVE_PLANNING,
-                BusinessProcessRegistry.CREATE_CATALOGUE,
-                BusinessProcessRegistry.CYCLIC_REPLENISHMENT_PROGRAM,
-                BusinessProcessRegistry.DELETE_CATALOGUE,
-                BusinessProcessRegistry.FORECASTING,
-                BusinessProcessRegistry.FREIGHT_BILLING,
-                BusinessProcessRegistry.FREIGHT_MANAGEMENT,
-                BusinessProcessRegistry.FREIGHT_STATUS_REPORTING,
-                BusinessProcessRegistry.FULFILLMENT,
-                BusinessProcessRegistry.FULFILMENT_WITH_DESPATCH_ADVICE,
-                BusinessProcessRegistry.FULFILMENT_WITH_RECEIPT_ADVICE,
-                BusinessProcessRegistry.INITIAL_STOCKING_OF_THE_AREA_BY_PRODUCER,
-                BusinessProcessRegistry.INTERMODAL_FREIGHT_MANAGEMENT,
-                BusinessProcessRegistry.ORDERING,
-                BusinessProcessRegistry.PAYMENT_NOTIFICATION,
-                BusinessProcessRegistry.PERMANENT_REPLENISHMENT,
-                BusinessProcessRegistry.PRICE_ADJUSTMENTS,
-                BusinessProcessRegistry.QUOTATION,
-                BusinessProcessRegistry.REPLENISHMENT,
-                BusinessProcessRegistry.TENDERING,
-                BusinessProcessRegistry.TRANSFER_OF_BASE_ITEM_CATALOGUE,
-                BusinessProcessRegistry.UPDATE_CATALOGUE_ITEM_SPECIFICATION,
-                BusinessProcessRegistry.UPDATE_CATALOGUE_PRICING,
-                BusinessProcessRegistry.UTILITY_BILLING,
-                BusinessProcessRegistry.VENDOR_INVENTORY,
+                ProcessRegistry.BILLING,
+                ProcessRegistry.CATALOGUE,
+                ProcessRegistry.CERTIFICATE_OF_ORIGIN_OF_GOODS,
+                ProcessRegistry.CHANGES_TO_THE_ARTICLE_CATALOGUE,
+                ProcessRegistry.CHANGES_TO_THE_ITEM_CATALOGUE,
+                ProcessRegistry.COLLABORATIVE_PLANNING,
+                ProcessRegistry.CREATE_CATALOGUE,
+                ProcessRegistry.CYCLIC_REPLENISHMENT_PROGRAM,
+                ProcessRegistry.DELETE_CATALOGUE,
+                ProcessRegistry.FORECASTING,
+                ProcessRegistry.FREIGHT_BILLING,
+                ProcessRegistry.FREIGHT_MANAGEMENT,
+                ProcessRegistry.FREIGHT_STATUS_REPORTING,
+                ProcessRegistry.FULFILLMENT,
+                ProcessRegistry.FULFILMENT_WITH_DESPATCH_ADVICE,
+                ProcessRegistry.FULFILMENT_WITH_RECEIPT_ADVICE,
+                ProcessRegistry.INITIAL_STOCKING_OF_THE_AREA_BY_PRODUCER,
+                ProcessRegistry.INTERMODAL_FREIGHT_MANAGEMENT,
+                ProcessRegistry.ORDERING,
+                ProcessRegistry.PAYMENT_NOTIFICATION,
+                ProcessRegistry.PERMANENT_REPLENISHMENT,
+                ProcessRegistry.PRICE_ADJUSTMENTS,
+                ProcessRegistry.QUOTATION,
+                ProcessRegistry.REPLENISHMENT,
+                ProcessRegistry.TENDERING,
+                ProcessRegistry.TRANSFER_OF_BASE_ITEM_CATALOGUE,
+                ProcessRegistry.UPDATE_CATALOGUE_ITEM_SPECIFICATION,
+                ProcessRegistry.UPDATE_CATALOGUE_PRICING,
+                ProcessRegistry.UTILITY_BILLING,
+                ProcessRegistry.VENDOR_INVENTORY,
             ),
             (
                 ('ApplicationResponse', 'AttachedDocument', 'DocumentStatus',
