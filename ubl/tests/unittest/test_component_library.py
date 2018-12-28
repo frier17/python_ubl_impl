@@ -1,10 +1,12 @@
-import pytest
-from ubl.components.ccts.component_library import ABIERegistry, BIERegistry, \
-    BusinessDocumentRegistry, ProcessRegistry, Components, Documents, Schemas
 from enum import IntFlag
+
+import pytest
+
 from ubl.components.ccts import CodeType, AmountType, BinaryObjectType, \
     AssociatedBusinessEntity, DateTimeType, NumericType, TextType, \
     MeasureType, QuantityType, IdentifierType, IndicatorType, NameType
+from ubl.components import ABIERegistry, BIERegistry, \
+    BusinessDocumentRegistry, ProcessRegistry, Components, Documents, Schemas
 
 """
 test_component_library

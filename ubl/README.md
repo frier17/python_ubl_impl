@@ -24,40 +24,25 @@ This package was built in Python 3.6 and tested on a Linux installation.
 Ensure the dependent packages or tools are installed. Prerequisite of this
 package includes:
 Python 3.6 or later
-Nose test runner
+Pytest test runner
 Behave test runner
-
-```
-Give examples
-```
 
 ### Installing
 
-Developers can download it using pip command:
+Developers will be able to download the package using pip command:
 pip install python_ubl_impl
 
 
-End with an example of getting some data out of the system or using it for a little demo
-
 ## Running the tests
 
-Explain how to run the automated tests for this system
+All tests are in the tests directory. Behave tests are saved in the features
+directory while functional tests are in the unittest directory.
 
-### Break down into end to end tests
+Behave tests were written with the python behave framework as the target test
+ runner while functional tests were written for pytest framework.
 
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
+Simply run the various tests from command line using appropriate commands and
+ flags. Consult respective test frameworks for further details.
 
 ## Deployment
 
@@ -70,26 +55,29 @@ Add additional notes about how to deploy this on a live system
 * [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
 
 ## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+Individuals interested in contributing to this project can do. Kindly adhere
+to any defined code of conducts or procedure. For more information on
+joining the project contact [frier17](https://github.com/frier17)
 
 ## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+Version control was done using git version control
+For document history, see the [repository](https://github.com/your/project/tags).
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Aniefiok Friday** - *Initial work* - [frier17](https://github.com/frier17)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/your/project/) who
+participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE
+.md) file for details
 
 ## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+This work was made possible from the immense work done by OASIS Technical
+Committee on the Universal Business Langauge. Their detail definition of
+business document schemas and processes form the foundation upon which this
+project was created.
 

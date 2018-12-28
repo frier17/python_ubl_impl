@@ -21,17 +21,19 @@ types of Business documents such as Order, Invoice etc. dynamically from
 specifying the named document type.
 
 """
-from ubl.utils import Singleton
+import copy
 from collections import OrderedDict
 from datetime import datetime
 from hashlib import sha512
-import copy
 from weakref import WeakValueDictionary
-from ubl.components.ccts import BusinessDocument
-from ubl.components.ccts.component_library import Documents, Schemas, \
-    BusinessProcesses as Bp
-from ubl.exceptions import DocumentTypeError
 
+from ubl.components.ccts import BusinessDocument
+from ubl.components import Documents, Schemas, \
+    BusinessProcesses as Bp, key_gen
+from ubl.exceptions import DocumentTypeError
+from ubl.utils import Singleton
+from ubl.components import ABIERegistry, BIERegistry, \
+    BusinessDocumentRegistry, ProcessRegistry
 
 __all__ = (
     'BusinessDocumentFactory',
@@ -63,13 +65,13 @@ class BusinessDocumentTemplate(metaclass=Singleton):
     def schema(cls, document):
         return Schemas.document_schema(name=document)
 
-    @property
-    def document_schemas(self):
-        return Schemas.schemas
+    @classmethod
+    def document_schemas(cls):
+        return Schemas.schemas()
 
-    @property
-    def document_registry(self):
-        return Documents.registry
+    @classmethod
+    def document_registry(cls):
+        return Documents.registry()
 
 
 class DocumentRevisions:
@@ -136,18 +138,17 @@ class BusinessDocumentFactory:
         # if the document is not in document lists, exit
         # if the document is in list, then check if it's instance
         # else create instance and return a copy
-        if not isinstance(document, str):
-            document = str(document)
-        if document not in BusinessDocumentTemplate.document_registry:
+        document_alias = document
+        if document_alias not in BusinessDocumentTemplate.document_registry():
             raise DocumentTypeError('Unrecognised document type specified')
         else:
             bt = BusinessDocumentTemplate()
-            if not DocumentCache.cached_instance(document):
-                cls._name = document
-                cls._definition = bt.get_definition(document)
-                cls._fields = bt.document_fields(document)
+            if not DocumentCache.cached_instance(document_alias):
+                cls._name = document_alias
+                cls._definition = bt.get_definition(document_alias)
+                cls._fields = bt.document_fields(document_alias)
                 definition = {'__slots__': cls._fields, **cls._definition}
-                cls._schema = bt.schema(document)
+                cls._schema = bt.schema(document_alias)
                 instance = type(
                         cls._name,
                         (BusinessDocument, object),

@@ -1,7 +1,7 @@
 from datetime import datetime
 from numbers import Real, Number
 import math
-from re import search, compile
+from re import compile
 from collections import namedtuple
 from ubl.exceptions import ComponentValueError
 
@@ -35,7 +35,10 @@ class DocumentFieldAnnotation:
 
 
 class DataType:
-    __slots__ = '__desc__', '__meta__'
+    __slots__ = '__desc__', '__meta__', 'value'
+    
+    def __init__(self, *args, **kwargs):
+        super(DataType, self).__init__()
 
     def update(self, value):
         raise NotImplementedError
@@ -56,6 +59,7 @@ class AssociatedBusinessEntity(DataType):
 
     def __init__(self):
         self.associations = {}
+        super(AssociatedBusinessEntity, self).__init__()
 
     def update(self, value):
         pass
@@ -78,15 +82,19 @@ class AmountType(DataType, Real):
     # all numeric operations are carried on the magnitude and the description
     # may be used to explain results or convert results to other monetary values
 
-    __slots__ = ('_amount',)
+    __slots__ = '_amount', 'currency', 'currency_code',
 
-    def __init__(self, amount, *, currency, currency_code, version_id):
-        self.__meta__ = {}
+    def __init__(self, amount, *, currency=None, currency_code=None,
+                 version_id=None):
+        self.__meta__ = dict.fromkeys(['version_id', ])
         try:
             self._amount = float(amount)
-            _prepare_meta(self.__meta__, currency=currency,
-                          currency_code=currency_code,
-                          version_id=version_id)
+            code = currency_code
+            if code:
+                self.currency_code = code
+            if isinstance(currency, str) and len(currency) > 0:
+                self.currency = currency
+            _prepare_meta(self.__meta__, version_id=version_id)
             self.__desc__ = DocumentAnnotation(kwargs={
                 'unique_id': 'UNDT000001',
                 'category_code': 'CCT',
@@ -98,6 +106,7 @@ class AmountType(DataType, Real):
                 'representation_term_name': 'Amount',
                 'primitive_type': 'float',
             })
+            super(AmountType, self).__init__()
         except ComponentValueError:
             raise ComponentValueError('Invalid parameters provided for '
                                       'component type')
@@ -121,20 +130,6 @@ class AmountType(DataType, Real):
             version_id=self.__meta__['version_id'],
             annotations=self.__desc__
         )
-
-    @property
-    def currency(self):
-        return self.__meta__.get('currency', None)
-
-    def __getattribute__(self, item):
-        default = 0.0
-        if item == 'amount':
-            return self._amount if self._amount > 0 else default
-        if item == 'currency' or item == 'currency_code' or item == \
-                'version_id':
-            return self.__meta__.get(item, default)
-        else:
-            raise AttributeError
 
     def update(self, value):
         # override a given amount only if currency, currency_code are identical
@@ -369,11 +364,11 @@ class AmountType(DataType, Real):
             return other + self._amount
 
 
-class BinaryObjectType(DataType, bytearray):
+class BinaryObjectType(DataType):
 
-    def __init__(self, *, source, encoding, error):
-        super(BinaryObjectType, self).__init__(source=source,
-                                               encoding=encoding, errors=error)
+    def __init__(self, source, encoding, errors):
+        self.value = bytearray(source, encoding, errors)
+        super(BinaryObjectType, self).__init__()
 
     def update(self, value):
         raise NotImplementedError
@@ -383,25 +378,24 @@ class BinaryObjectType(DataType, bytearray):
         return cls(*args, **kwargs)
 
 
-class TextType(DataType, str):
+class TextType(DataType):
     # define the attributes common to all text type for components
-    __slots__ = '_pattern', 'max_length'
+    __slots__ = '_pattern', 'max_length', 'value',
 
-    def __init__(self, pattern=None, max_length=200):
-        if compile(pattern):
-            self._pattern = pattern
-        if max_length > 0:
-            if len(self) <= max_length:
+    def __init__(self, value, pattern=None, max_length=200, **kwargs):
+        self._pattern = compile(pattern)
+        if isinstance(value, str) and len(value) > 0:
+            self.value = value if self._pattern.search(value) else None
+        if max_length > 0 and self.value:
+            if len(self.value) > max_length:
                 raise ValueError('Max length exceeded')
         super(TextType, self).__init__()
 
     def is_valid(self):
-        # return true if the regex pattern is matched by self
-        if self._pattern:
-            return search(self._pattern, self)
+        return self.value is not None
 
     def update(self, value):
-        pass
+        return NotImplemented
 
     @classmethod
     def mock(cls, *args, **kwargs):
@@ -409,77 +403,105 @@ class TextType(DataType, str):
 
 
 class CodeType(TextType):
-    __slots__ = 'code'
+    __slots__ = 'code', '__meta__'
 
-    def __init__(self, code, *, list_id, list_agency_id, list_agency_name,
-                 list_name, list_version_id, name, language_id, list_uri,
-                 list_scheme_uri):
-        self.__meta__ = {}
+    def __init__(self, code, *, pattern=None, max_length=None, list_id=None,
+                 list_agency_id=None, list_agency_name=None,
+                 list_name=None, list_version_id=None, name=None,
+                 language_id=None, list_uri=None, list_scheme_uri=None):
+        self.__meta__ = dict.fromkeys(['list_id', 'list_agency_id',
+                                       'list_agency_name', 'list_name',
+                                       'list_version_id', 'name', 'language_id',
+                                       'list_uri', 'list_scheme_uri'])
+        _prepare_meta(self.__meta__, list_id=list_id,
+                      list_agency_id=list_agency_id,
+                      list_agency_name=list_agency_name, list_name=list_name,
+                      list_version_id=list_version_id, name=name,
+                      language_id=language_id, list_uri=list_uri,
+                      list_scheme_uri=list_scheme_uri)
         if code:
-            self.code = str(code).upper()
-            _prepare_meta(self.__meta__, list_id=list_id,
-                          list_agency_id=list_agency_id,
-                          list_agency_name=list_agency_name,
-                          list_name=list_name,
-                          list_version_id=list_version_id, name=name,
-                          language_id=language_id, list_uri=list_uri,
-                          list_scheme_uri=list_scheme_uri, )
-        super(CodeType, self).__init__()
-
-    def update(self, value):
-        return NotImplemented
+            code = str(code).upper()
+            super(CodeType, self).__init__(code, pattern=pattern,
+                                           max_length=max_length,
+                                           list_id=list_id,
+                                           list_agency_id=list_agency_id,
+                                           list_agency_name=list_agency_name,
+                                           list_name=list_name,
+                                           list_version_id=list_version_id,
+                                           name=name,
+                                           language_id=language_id,
+                                           list_uri=list_uri,
+                                           list_scheme_uri=list_scheme_uri,)
 
 
 class NameType(TextType):
-    __slots__ = '_name'
 
-    def __init__(self, name):
-        if len(name) > 150:
+    def __init__(self, name, pattern=None, max_length=150):
+        if isinstance(name, str) and len(name) > 150:
             raise ValueError('Name should not be longer than 150 characters')
         else:
-            self._name = name
-            super(NameType, self).__init__(max_length=150)
+            self.value = name
+            super(NameType, self).__init__(self.value, pattern=pattern,
+                                           max_length=max_length)
 
 
-class DateTimeType(DataType, datetime):
+class DateTimeType(DataType):
+    __slots__ = 'year', 'month', 'day', 'hour', 'minute', 'second', \
+                'microsecond', 'tzinfo', 'fold', 'value'
 
     def __new__(cls, year, month, day, hour=0, minute=0, second=0,
                 microsecond=0, tzinfo=None, *, fold=0):
-        return super(DateTimeType, cls).__new__(
+        return datetime(DateTimeType, cls).__new__(
             year, month, day, hour=hour, minute=minute, second=second,
             microsecond=microsecond, tzinfo=tzinfo, fold=fold)
+
+    def __init__(self, value, year=None, month=None, day=None,
+                 hour=None, minute=None, second=None,
+                 microsecond=None, tzinfo=None, fold=None):
+        if isinstance(value, datetime):
+            self.value = value
+        else:
+            self.value = datetime(year=year, month=month, day=day, hour=hour,
+                                  minute=minute, second=second,
+                                  microsecond=microsecond, tzinfo=tzinfo,
+                                  fold=fold)
+        super(DateTimeType, self).__init__()
 
     @classmethod
     def update(cls, value):
         if isinstance(value, datetime):
-            cls._year = value.year
-            cls._month = value.month
-            cls._day = value.day
-            cls._hour = value.hour
-            cls._minute = value.minute
-            cls._second = value.second
-            cls._microsecond = value.microsecond
-            cls._tzinfo = value.tzinfo
+            cls.year = value.year
+            cls.month = value.month
+            cls.day = value.day
+            cls.hour = value.hour
+            cls.minute = value.minute
+            cls.second = value.second
+            cls.microsecond = value.microsecond
+            cls.tzinfo = value.tzinfo
         else:
             return NotImplemented
 
     @classmethod
     def mock(cls, *args, **kwargs):
-        if args is not None or kwargs is not None:
-            return cls(*args, **kwargs)
+        if len(args) > 0:
+            return args[0] if isinstance(args[0], datetime) else datetime.now()
+        elif kwargs:
+            return datetime(**kwargs)
         else:
             return datetime.now()
 
 
 class IdentifierType(TextType):
-    __slots__ = ('_identifier', 'scheme_id', 'scheme_name', 'scheme_agency_id',
-                 'scheme_agency_name', 'scheme_version_id',
-                 'scheme_data_uri', 'scheme_uri', )
+    def __init__(self, value, *, pattern=None, max_length=100, scheme_id=None,
+                 scheme_name=None, scheme_agency_id=None,
+                 scheme_agency_name=None,
+                 scheme_version_id=None, scheme_data_uri=None, scheme_uri=None):
 
-    def __init__(self, *, scheme_id, scheme_name, scheme_agency_id,
-                 scheme_agency_name, scheme_version_id, scheme_data_uri,
-                 scheme_uri):
-        self.__meta__ = {}
+        self.__meta__ = dict.fromkeys(['scheme_id', 'scheme_name',
+                                       'scheme_agency_id',
+                                       'scheme_agency_name',
+                                       'scheme_version_id',
+                                       'scheme_data_uri', 'scheme_uri', ])
         _prepare_meta(self.__meta__, scheme_id=scheme_id,
                       scheme_name=scheme_name,
                       scheme_agency_id=scheme_agency_id,
@@ -487,8 +509,8 @@ class IdentifierType(TextType):
                       scheme_version_id=scheme_version_id,
                       scheme_data_uri=scheme_data_uri,
                       scheme_uri=scheme_uri)
-        self.__desc__ = None
-        super(IdentifierType, self).__init__()
+        super(IdentifierType, self).__init__(value, pattern=pattern,
+                                             max_length=max_length)
 
 
 class IndicatorType(DataType):
@@ -500,6 +522,7 @@ class IndicatorType(DataType):
         self.__meta__ = None
         self.__desc__ = None
         self.indicator_name = indicator
+        super(IndicatorType, self).__init__()
 
     def update(self, value):
         self._state = bool(value)
@@ -555,13 +578,13 @@ class IndicatorType(DataType):
 
 class NumericType(DataType, Number):
 
-    __slots__ = '_value'
+    __slots__ = '_value',
 
     def __init__(self, value, *, kwargs):
         try:
             self._value = float(value)
-            self.__meta__ = kwargs.get('__meta__', {})
             self.__desc__ = kwargs.get('__desc__', None)
+            super(NumericType, self).__init__()
         except ValueError:
             raise ValueError('Invalid parameter provided as number')
 
