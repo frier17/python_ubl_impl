@@ -366,7 +366,7 @@ class AmountType(DataType, Real):
 
 class BinaryObjectType(DataType):
 
-    def __init__(self, source, encoding, errors):
+    def __init__(self, source=None, encoding=None, errors=None):
         self.value = bytearray(source, encoding, errors)
         super(BinaryObjectType, self).__init__()
 
@@ -375,7 +375,7 @@ class BinaryObjectType(DataType):
 
     @classmethod
     def mock(cls, *args, **kwargs):
-        return cls(*args, **kwargs)
+        return bytearray()
 
 
 class TextType(DataType):

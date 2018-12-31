@@ -2,7 +2,7 @@ from enum import IntFlag
 
 import pytest
 
-from ubl.components.ccts import CodeType, AmountType, BinaryObjectType, \
+from ubl.components.ccts import CodeType, AmountType, \
     AssociatedBusinessEntity, DateTimeType, NumericType, TextType, \
     MeasureType, QuantityType, IdentifierType, IndicatorType, NameType
 from ubl.components import ABIERegistry, BIERegistry, \
@@ -53,8 +53,6 @@ def bie_registry_test(alias, registry, expected):
     assert alias in registry.__members__ is expected
 
 
-# Assert Components obeys the mapping protocol with support for __get__,
-# __contains__, __getattr__, __setitem__, __setattr__
 @pytest.mark.parametrize("component_map, attribute, expected", [
     (Components, '__getitem__', True),
     (Components, '__setitem__', True),
@@ -73,47 +71,47 @@ def bie_registry_test(alias, registry, expected):
     (Schemas, '__contains__', True),
 ])
 def test_component_maps(component_map, attribute, expected):
+    # Assert Components obeys the mapping protocol with support for __get__,
+    # __contains__, __getattr__, __setitem__, __setattr__
     with pytest.raises(AttributeError):
-        assert hasattr(component_map, attribute) is expected
+        instance = component_map()
+        assert hasattr(instance, attribute) is expected
     with pytest.raises(RuntimeError):
-        component_map[attribute] = None
-        setattr(component_map, attribute, None)
+        instance[attribute] = None
+        setattr(instance, attribute, None)
+
+
+code = CodeType.mock('SAMPLE', pattern=r'/(\w+)/', max_length=5)
+asbie = AssociatedBusinessEntity.mock()
+measure = MeasureType.mock(0.0, kwargs={})
+quantity = QuantityType.mock(0, kwargs={})
+datetime_ = DateTimeType.mock()
+numeric = NumericType.mock(0.0, kwargs={})
+text = TextType.mock('Sample', pattern=r'\w+', max_length=100)
+identifier = IdentifierType.mock('sample', pattern=r'/w+/')
+indicator = IndicatorType.mock()
+name = NameType.mock('Sample Name', pattern=r'\w+', max_length=20)
+amount = AmountType.mock(0.0, currency='NAIRA', currency_code='NGN',
+                         version_id='2.1')
 
 
 @pytest.mark.parametrize("component_map, attribute, expected", [
-    (Components, 'ActivityDataLine', True),
-    (Components, 'BillingReferenceLine', True),
-    (Components, 'Consignment', True),
+    (Components, ABIERegistry.BILLING_REFERENCE, True),
+    (Components, ABIERegistry.ACCOUNTING_CONTACT, True),
     (Components, ABIERegistry.ACTIVITY_DATA_LINE, True),
-    (Documents, 'Order', True),
-    (Documents, 'Catalogue', True),
-    (Documents, 'DebitNote', True),
+    (Documents, BusinessDocumentRegistry.ORDER_CANCELLATION, True),
     (Documents, BusinessDocumentRegistry.CATALOGUE, True),
-    (Schemas, 'Order', True),
-    (Schemas, 'Catalogue', True),
-    (Schemas, 'DebitNote', True),
+    (Documents, BusinessDocumentRegistry.CATALOGUE, True),
+    (Schemas, BusinessDocumentRegistry.CATALOGUE, True),
+    (Schemas, BusinessDocumentRegistry.CREDIT_NOTE, True),
+    (Schemas, BusinessDocumentRegistry.DEBIT_NOTE, True),
     (Schemas, BusinessDocumentRegistry.ORDER, True),
 ])
 def test_component_maps(component_map, attribute, expected):
     with pytest.raises(AttributeError):
-        if isinstance(attribute, str):
-            assert hasattr(component_map, attribute) is expected
-        elif isinstance(attribute, IntFlag):
-            assert component_map[attribute] and expected is True
-
-
-code = CodeType.mock()
-asbie = AssociatedBusinessEntity.mock()
-measure = MeasureType.mock()
-quantity = QuantityType.mock()
-datetime = DateTimeType.mock()
-numeric = NumericType.mock()
-text = TextType.mock()
-identifier = IdentifierType.mock()
-indicator = IndicatorType.mock()
-amount = AmountType.mock()
-binary = BinaryObjectType.mock()
-name = NameType.mock()
+        instance = component_map()
+        assert component_map.get(attribute) == expected
+        assert instance[attribute] == expected
 
 
 @pytest.mark.parametrize("component_map, attribute, expected", [
@@ -136,10 +134,10 @@ name = NameType.mock()
             ('profile_execution_id', identifier),
             ('id', identifier),
             ('uuid', identifier),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-            ('response_date', datetime),
-            ('response_time', datetime),
+            ('issue_date', datetime_),
+            ('issue_time', datetime_),
+            ('response_date', datetime_),
+            ('response_time', datetime_),
             ('note', text),
             ('version_id', identifier),
             ('signature', asbie),
@@ -154,8 +152,8 @@ name = NameType.mock()
             ('profile_execution_id', identifier),
             ('id', identifier),
             ('uuid', identifier),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
+            ('issue_date', datetime_),
+            ('issue_time', datetime_),
             ('note', text),
             ('document_type_code', code),
             ('document_type', text),
@@ -176,6 +174,11 @@ name = NameType.mock()
      '#T-ATTACHED-DOCUMENT'),
 ])
 def test_business_maps(component_map, attribute, expected):
+    with pytest.raises(IndexError):
+        instance = component_map()
+        assert component_map.get(attribute) == expected
+        assert instance[attribute] == expected
+
     with pytest.raises(AttributeError):
-        record = getattr(component_map, attribute)
+        record = component_map.get(attribute)
         assert record == expected

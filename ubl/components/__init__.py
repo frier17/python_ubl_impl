@@ -2,11 +2,11 @@ from ubl.components.ccts import CodeType, AmountType, BinaryObjectType, \
     AssociatedBusinessEntity, DateTimeType, NumericType, TextType, \
     MeasureType, QuantityType, IdentifierType, IndicatorType, NameType
 import itertools
-from collections import namedtuple
+from collections import namedtuple, Iterable
 from enum import unique, IntFlag
 from ubl.exceptions import UnknownDocumentError
 from ubl.components.ccts import BusinessDocument
-from ubl.utils import key_gen
+from ubl.utils import Singleton
 
 
 @unique
@@ -1566,6 +1566,238 @@ class ABIERegistry(IntFlag):
 
 
 @unique
+class ComponentRegistry(IntFlag):
+    ACTIVITY_DATA_LINE = 1
+    ACTIVITY_PROPERTY = 2
+    ADDRESS = 3
+    ADDRESS_LINE = 4
+    AIR_TRANSPORT = 5
+    ALLOWANCE_CHARGE = 6
+    APPEAL_TERMS = 7
+    ATTACHMENT = 8
+    AUCTION_TERMS = 9
+    AWARDING_CRITERION = 10
+    AWARDING_CRITERION_RESPONSE = 11
+    AWARDING_TERMS = 12
+    BILLING_REFERENCE = 13
+    BILLING_REFERENCE_LINE = 14
+    BRANCH = 15
+    BUDGET_ACCOUNT = 16
+    BUDGET_ACCOUNT_LINE = 17
+    CAPABILITY = 18
+    CARD_ACCOUNT = 19
+    CATALOGUE_ITEM_SPECIFICATION_UPDATE_LINE = 20
+    CATALOGUE_LINE = 21
+    CATALOGUE_PRICING_UPDATE_LINE = 22
+    CATALOGUE_REFERENCE = 23
+    CATALOGUE_REQUEST_LINE = 24
+    CERTIFICATE = 25
+    CERTIFICATE_OF_ORIGIN_APPLICATION = 26
+    CLASSIFICATION_CATEGORY = 27
+    CLASSIFICATION_SCHEME = 28
+    CLAUSE = 29
+    COMMODITY_CLASSIFICATION = 30
+    COMMUNICATION = 31
+    COMPLETED_TASK = 32
+    CONDITION = 33
+    CONSIGNMENT = 34
+    CONSUMPTION = 35
+    CONSUMPTION_AVERAGE = 36
+    CONSUMPTION_CORRECTION = 37
+    CONSUMPTION_HISTORY = 38
+    CONSUMPTION_LINE = 39
+    CONSUMPTION_POINT = 40
+    CONSUMPTION_REPORT = 41
+    CONSUMPTION_REPORT_REFERENCE = 42
+    CONTACT = 43
+    CONTRACT = 44
+    CONTRACT_EXECUTION_REQUIREMENT = 45
+    CONTRACT_EXTENSION = 46
+    CONTRACTING_ACTIVITY = 47
+    CONTRACTING_PARTY = 48
+    CONTRACTING_PARTY_TYPE = 49
+    CORPORATE_REGISTRATION_SCHEME = 50
+    COUNTRY = 51
+    CREDIT_ACCOUNT = 52
+    CREDIT_NOTE_LINE = 53
+    CUSTOMER_PARTY = 54
+    CUSTOMS_DECLARATION = 55
+    DEBIT_NOTE_LINE = 56
+    DECLARATION = 57
+    DELIVERY = 58
+    DELIVERY_TERMS = 59
+    DELIVERY_UNIT = 60
+    DEPENDENT_PRICE_REFERENCE = 61
+    DESPATCH = 62
+    DESPATCH_LINE = 63
+    DIMENSION = 64
+    DOCUMENT_DISTRIBUTION = 65
+    DOCUMENT_REFERENCE = 66
+    DOCUMENT_RESPONSE = 67
+    DUTY = 68
+    ECONOMIC_OPERATOR_ROLE = 69
+    ECONOMIC_OPERATOR_SHORT_LIST = 70
+    EMISSION_CALCULATION_METHOD = 71
+    ENDORSEMENT = 72
+    ENDORSER_PARTY = 73
+    ENERGY_TAX_REPORT = 74
+    ENERGY_WATER_SUPPLY = 75
+    ENVIRONMENTAL_EMISSION = 76
+    EVALUATION_CRITERION = 77
+    EVENT = 78
+    EVENT_COMMENT = 79
+    EVENT_LINE_ITEM = 80
+    EVENT_TACTIC = 81
+    EVENT_TACTIC_ENUMERATION = 82
+    EVIDENCE = 83
+    EVIDENCE_SUPPLIED = 84
+    EXCEPTION_CRITERIA_LINE = 85
+    EXCEPTION_NOTIFICATION_LINE = 86
+    EXCHANGE_RATE = 87
+    EXTERNAL_REFERENCE = 88
+    FINANCIAL_ACCOUNT = 89
+    FINANCIAL_GUARANTEE = 90
+    FINANCIAL_INSTITUTION = 91
+    FORECAST_EXCEPTION = 92
+    FORECAST_EXCEPTION_CRITERION_LINE = 93
+    FORECAST_LINE = 94
+    FORECAST_REVISION_LINE = 95
+    FRAMEWORK_AGREEMENT = 96
+    GOODS_ITEM = 97
+    GOODS_ITEM_CONTAINER = 98
+    HAZARDOUS_GOODS_TRANSIT = 99
+    HAZARDOUS_ITEM = 100
+    IMMOBILIZED_SECURITY = 101
+    INSTRUCTION_FOR_RETURNS_LINE = 102
+    INVENTORY_REPORT_LINE = 103
+    INVOICE_LINE = 104
+    ITEM = 105
+    ITEM_COMPARISON = 106
+    ITEM_IDENTIFICATION = 107
+    ITEM_INFORMATION_REQUEST_LINE = 108
+    ITEM_INSTANCE = 109
+    ITEM_LOCATION_QUANTITY = 110
+    ITEM_MANAGEMENT_PROFILE = 111
+    ITEM_PROPERTY = 112
+    ITEM_PROPERTY_GROUP = 113
+    ITEM_PROPERTY_RANGE = 114
+    LANGUAGE = 115
+    LINE_ITEM = 116
+    LINE_REFERENCE = 117
+    LINE_RESPONSE = 118
+    LOCATION = 119
+    LOCATION_COORDINATE = 120
+    LOT_IDENTIFICATION = 121
+    MARITIME_TRANSPORT = 122
+    METER = 123
+    METER_PROPERTY = 124
+    METER_READING = 125
+    MISCELLANEOUS_EVENT = 126
+    MONETARY_TOTAL = 127
+    NOTIFICATION_REQUIREMENT = 128
+    ON_ACCOUNT_PAYMENT = 129
+    ORDERED_SHIPMENT = 130
+    ORDER_LINE = 131
+    ORDER_LINE_REFERENCE = 132
+    ORDER_REFERENCE = 133
+    PACKAGE = 134
+    PARTY = 135
+    PARTY_IDENTIFICATION = 136
+    PARTY_LEGAL_ENTITY = 137
+    PARTY_NAME = 138
+    PARTY_TAX_SCHEME = 139
+    PAYMENT = 140
+    PAYMENT_MANDATE = 141
+    PAYMENT_MEANS = 142
+    PAYMENT_TERMS = 143
+    PERFORMANCE_DATA_LINE = 144
+    PERIOD = 145
+    PERSON = 146
+    PHYSICAL_ATTRIBUTE = 147
+    PICKUP = 148
+    POWER_OF_ATTORNEY = 149
+    PRICE = 150
+    PRICE_EXTENSION = 151
+    PRICE_LIST = 152
+    PRICING_REFERENCE = 153
+    PROCESS_JUSTIFICATION = 154
+    PROCUREMENT_PROJECT = 155
+    PROCUREMENT_PROJECT_LOT = 156
+    PROJECT_REFERENCE = 157
+    PROMOTIONAL_EVENT = 158
+    PROMOTIONAL_EVENT_LINE_ITEM = 159
+    PROMOTIONAL_SPECIFICATION = 160
+    QUALIFICATION_RESOLUTION = 161
+    QUALIFYING_PARTY = 162
+    QUOTATION_LINE = 163
+    RAIL_TRANSPORT = 164
+    RECEIPT_LINE = 165
+    REGULATION = 166
+    RELATED_ITEM = 167
+    REMINDER_LINE = 168
+    REMITTANCE_ADVICE_LINE = 169
+    RENEWAL = 170
+    REQUESTED_TENDER_TOTAL = 171
+    REQUEST_FOR_QUOTATION_LINE = 172
+    REQUEST_FOR_TENDER_LINE = 173
+    RESPONSE = 174
+    RESULT_OF_VERIFICATION = 175
+    RETAIL_PLANNED_IMPACT = 176
+    ROAD_TRANSPORT = 177
+    SALES_ITEM = 178
+    SECONDARY_HAZARD = 179
+    SERVICE_FREQUENCY = 180
+    SERVICE_PROVIDER_PARTY = 181
+    SHAREHOLDER_PARTY = 182
+    SHIPMENT = 183
+    SHIPMENT_STAGE = 184
+    SIGNATURE = 185
+    STATEMENT_LINE = 186
+    STATUS = 187
+    STOCK_AVAILABILITY_REPORT_LINE = 188
+    STOWAGE = 189
+    SUBCONTRACT_TERMS = 190
+    SUBSCRIBER_CONSUMPTION = 191
+    SUPPLIER_CONSUMPTION = 192
+    SUPPLIER_PARTY = 193
+    TAX_CATEGORY = 194
+    TAX_SCHEME = 195
+    TAX_SUBTOTAL = 196
+    TAX_TOTAL = 197
+    TELECOMMUNICATIONS_SERVICE = 198
+    TELECOMMUNICATIONS_SUPPLY = 199
+    TELECOMMUNICATIONS_SUPPLY_LINE = 200
+    TEMPERATURE = 201
+    TENDERED_PROJECT = 202
+    TENDERER_PARTY_QUALIFICATION = 203
+    TENDERER_QUALIFICATION_REQUEST = 204
+    TENDERER_REQUIREMENT = 205
+    TENDERING_PROCESS = 206
+    TENDERING_TERMS = 207
+    TENDER_LINE = 208
+    TENDER_PREPARATION = 209
+    TENDER_REQUIREMENT = 210
+    TENDER_RESULT = 211
+    TRADE_FINANCING = 212
+    TRADING_TERMS = 213
+    TRANSACTION_CONDITIONS = 214
+    TRANSPORTATION_SEGMENT = 215
+    TRANSPORTATION_SERVICE = 216
+    TRANSPORT_EQUIPMENT = 217
+    TRANSPORT_EQUIPMENT_SEAL = 218
+    TRANSPORT_EVENT = 219
+    TRANSPORT_EXECUTION_TERMS = 220
+    TRANSPORT_HANDLING_UNIT = 221
+    TRANSPORT_MEANS = 222
+    TRANSPORT_SCHEDULE = 223
+    UNSTRUCTURED_PRICE = 224
+    UTILITY_ITEM = 225
+    WEB_SITE_ACCESS = 226
+    WINNING_PARTY = 227
+    WORK_PHASE_REFERENCE = 228
+
+
+@unique
 class BusinessDocumentRegistry(IntFlag):
     """
     Defines a list of named constants which identifies all
@@ -1926,649 +2158,657 @@ class CountryRegistry(IntFlag):
     ZIMBABWE = 716
 
 
+class RegistryMixin:
+    __slots__ = ()
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def get(cls, item):
+        registry = getattr(cls, 'registry', None)
+        if registry and isinstance(registry, dict):
+            return registry.get(item)
+
+
 class CountryCurrencyRegistry:
     # map countries to currency, code, numeric and minor
     __slots__ = '_currencies', '__weakref__'
 
     def __init__(self):
         self._currencies = dict()
+        cr = CountryRegistry
         fields = ['country', 'country_code', 'currency', 'currency_code',
                   'currency_numeric_code', 'currency_minor_unit']
         entries = namedtuple('CountryCurrency', fields)
-        self._currencies[CountryRegistry.AFGHANISTAN] = \
+        self._currencies[cr.AFGHANISTAN] = \
             entries('AFGHANISTAN', 'AFG', 'Afghani', 'AFN', '971', '2', )
-        self._currencies[CountryRegistry.ALAND_ISLANDS] = \
+        self._currencies[cr.ALAND_ISLANDS] = \
             entries('ALAND ISLANDS', 'ALA', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.ALBANIA] = \
+        self._currencies[cr.ALBANIA] = \
             entries('ALBANIA', 'ALB', 'Lek', 'ALL', '008', '2', )
-        self._currencies[CountryRegistry.ALGERIA] = \
+        self._currencies[cr.ALGERIA] = \
             entries('ALGERIA', 'DZA', 'Algerian Dinar', 'DZD', '012', '2', )
-        self._currencies[CountryRegistry.AMERICAN_SAMOA] = \
+        self._currencies[cr.AMERICAN_SAMOA] = \
             entries('AMERICAN SAMOA', 'ASM', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.ANDORRA] = \
+        self._currencies[cr.ANDORRA] = \
             entries('ANDORRA', 'AND', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.ANGOLA] = \
+        self._currencies[cr.ANGOLA] = \
             entries('ANGOLA', 'AGO', 'Kwanza', 'AOA', '973', '2', )
-        self._currencies[CountryRegistry.ANGUILLA] = \
+        self._currencies[cr.ANGUILLA] = \
             entries('ANGUILLA', 'AIA', 'East Caribbean Dollar', 'XCD', '951',
                     '2', )
-        self._currencies[CountryRegistry.ANTARCTICA] = \
+        self._currencies[cr.ANTARCTICA] = \
             entries('ANTARCTICA', 'ATA', 'No universal currency', '', '', '', )
-        self._currencies[CountryRegistry.ANTIGUA_AND_BARBUDA] = \
+        self._currencies[cr.ANTIGUA_AND_BARBUDA] = \
             entries('ANTIGUA AND BARBUDA', 'ATG', 'East Caribbean Dollar',
                     'XCD', '951', '2', )
-        self._currencies[CountryRegistry.ARGENTINA] = \
+        self._currencies[cr.ARGENTINA] = \
             entries('ARGENTINA', 'ARG', 'Argentine Peso', 'ARS', '032', '2', )
-        self._currencies[CountryRegistry.ARMENIA] = \
+        self._currencies[cr.ARMENIA] = \
             entries('ARMENIA', 'ARM', 'Armenian Dram', 'AMD', '051', '2', )
-        self._currencies[CountryRegistry.ARUBA] = \
+        self._currencies[cr.ARUBA] = \
             entries('ARUBA', 'ABW', 'Aruban Florin', 'AWG', '533', '2', )
-        self._currencies[CountryRegistry.AUSTRALIA] = \
-            entries('AUSTRALIA', 'AUS', 'Australian Dollar', 'AUD', '036',
-                    '2', )
-        self._currencies[CountryRegistry.AUSTRIA] = \
+        self._currencies[cr.AUSTRALIA] = \
+            entries('AUSTRALIA', 'AUS', 'Australian Dollar', 'AUD', '036', '2')
+        self._currencies[cr.AUSTRIA] = \
             entries('AUSTRIA', 'AUT', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.AZERBAIJAN] = \
-            entries('AZERBAIJAN', 'AZE', 'Azerbaijan Manat', 'AZN', '944',
-                    '2', )
-        self._currencies[CountryRegistry.THE_BAHAMAS] = \
-            entries('THE BAHAMAS', 'BHS', 'Bahamian Dollar', 'BSD', '044',
-                    '2', )
-        self._currencies[CountryRegistry.BAHRAIN] = \
+        self._currencies[cr.AZERBAIJAN] = \
+            entries('AZERBAIJAN', 'AZE', 'Azerbaijan Manat', 'AZN', '944', '2',)
+        self._currencies[cr.THE_BAHAMAS] = \
+            entries('THE BAHAMAS', 'BHS', 'Bahamian Dollar', 'BSD', '044', '2',)
+        self._currencies[cr.BAHRAIN] = \
             entries('BAHRAIN', 'BHR', 'Bahraini Dinar', 'BHD', '048', '3', )
-        self._currencies[CountryRegistry.BANGLADESH] = \
+        self._currencies[cr.BANGLADESH] = \
             entries('BANGLADESH', 'BGD', 'Taka', 'BDT', '050', '2', )
-        self._currencies[CountryRegistry.BARBADOS] = \
+        self._currencies[cr.BARBADOS] = \
             entries('BARBADOS', 'BRB', 'Barbados Dollar', 'BBD', '052', '2', )
-        self._currencies[CountryRegistry.BELARUS] = \
+        self._currencies[cr.BELARUS] = \
             entries('BELARUS', 'BLR', 'Belarusian Ruble', 'BYN', '933', '2', )
-        self._currencies[CountryRegistry.BELGIUM] = \
+        self._currencies[cr.BELGIUM] = \
             entries('BELGIUM', 'BEL', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.BELIZE] = \
+        self._currencies[cr.BELIZE] = \
             entries('BELIZE', 'BLZ', 'Belize Dollar', 'BZD', '084', '2', )
-        self._currencies[CountryRegistry.BENIN] = \
+        self._currencies[cr.BENIN] = \
             entries('BENIN', 'BEN', 'CFA Franc BCEAO', 'XOF', '952', '0', )
-        self._currencies[CountryRegistry.BERMUDA] = \
+        self._currencies[cr.BERMUDA] = \
             entries('BERMUDA', 'BMU', 'Bermudian Dollar', 'BMD', '060', '2', )
-        self._currencies[CountryRegistry.BHUTAN] = \
+        self._currencies[cr.BHUTAN] = \
             entries('BHUTAN', 'BTN', 'Indian Rupee', 'INR', '356', '2', )
-        self._currencies[CountryRegistry.BHUTAN] = \
+        self._currencies[cr.BHUTAN] = \
             entries('BHUTAN', '', 'Ngultrum', 'BTN', '064', '2', )
-        self._currencies[CountryRegistry.PLURINATIONAL_STATE_OF_BOLIVIA] = \
+        self._currencies[cr.PLURINATIONAL_STATE_OF_BOLIVIA] = \
             entries('PLURINATIONAL STATE OF BOLIVIA', 'BOL', 'Boliviano',
                     'BOB', '068', '2', )
-        self._currencies[CountryRegistry.PLURINATIONAL_STATE_OF_BOLIVIA] = \
+        self._currencies[cr.PLURINATIONAL_STATE_OF_BOLIVIA] = \
             entries('PLURINATIONAL STATE OF BOLIVIA', '', 'Mvdol', 'BOV',
                     '984', '2', )
-        self._currencies[CountryRegistry.BONAIRE_SINT_EUSTATIUS_AND_SABA] = \
+        self._currencies[cr.BONAIRE_SINT_EUSTATIUS_AND_SABA] = \
             entries('BONAIRE SINT EUSTATIUS AND SABA', 'BES', 'US Dollar',
                     'USD', '840', '2', )
-        self._currencies[CountryRegistry.BOSNIA_AND_HERZEGOVINA] = \
+        self._currencies[cr.BOSNIA_AND_HERZEGOVINA] = \
             entries('BOSNIA AND HERZEGOVINA', 'BIH', 'Convertible Mark',
-                           'BAM', '977', '2', )
-        self._currencies[CountryRegistry.BOTSWANA] = \
+                    'BAM', '977', '2', )
+        self._currencies[cr.BOTSWANA] = \
             entries('BOTSWANA', 'BWA', 'Pula', 'BWP', '072', '2', )
-        self._currencies[CountryRegistry.BOUVET_ISLAND] = \
+        self._currencies[cr.BOUVET_ISLAND] = \
             entries('BOUVET ISLAND', 'BVT', 'Norwegian Krone', 'NOK', '578',
                     '2', )
-        self._currencies[CountryRegistry.BRAZIL] = \
+        self._currencies[cr.BRAZIL] = \
             entries('BRAZIL', 'BRA', 'Brazilian Real', 'BRL', '986', '2', )
-        self._currencies[CountryRegistry.THE_BRITISH_INDIAN_OCEAN_TERRITORY] = \
+        self._currencies[cr.THE_BRITISH_INDIAN_OCEAN_TERRITORY] = \
             entries('THE BRITISH INDIAN OCEAN TERRITORY', 'IOT', 'US Dollar',
                     'USD', '840', '2', )
-        self._currencies[CountryRegistry.BRUNEI_DARUSSALAM] = \
+        self._currencies[cr.BRUNEI_DARUSSALAM] = \
             entries('BRUNEI DARUSSALAM', 'BRN', 'Brunei Dollar', 'BND',
                     '096', '2', )
-        self._currencies[CountryRegistry.BULGARIA] = \
+        self._currencies[cr.BULGARIA] = \
             entries('BULGARIA', 'BGR', 'Bulgarian Lev', 'BGN', '975', '2', )
-        self._currencies[CountryRegistry.BURKINA_FASO] = \
+        self._currencies[cr.BURKINA_FASO] = \
             entries('BURKINA FASO', 'BFA', 'CFA Franc BCEAO', 'XOF', '952',
                     '0', )
-        self._currencies[CountryRegistry.BURUNDI] = \
+        self._currencies[cr.BURUNDI] = \
             entries('BURUNDI', 'BDI', 'Burundi Franc', 'BIF', '108', '0', )
-        self._currencies[CountryRegistry.CABO_VERDE] = \
+        self._currencies[cr.CABO_VERDE] = \
             entries('CABO VERDE', 'CPV', 'Cabo Verde Escudo', 'CVE', '132',
                     '2', )
-        self._currencies[CountryRegistry.CAMBODIA] = \
+        self._currencies[cr.CAMBODIA] = \
             entries('CAMBODIA', 'KHM', 'Riel', 'KHR', '116', '2', )
-        self._currencies[CountryRegistry.CAMEROON] = \
+        self._currencies[cr.CAMEROON] = \
             entries('CAMEROON', 'CMR', 'CFA Franc BEAC', 'XAF', '950', '0', )
-        self._currencies[CountryRegistry.CANADA] = \
+        self._currencies[cr.CANADA] = \
             entries('CANADA', 'CAN', 'Canadian Dollar', 'CAD', '124', '2', )
-        self._currencies[CountryRegistry.THE_CAYMAN_ISLANDS] = \
+        self._currencies[cr.THE_CAYMAN_ISLANDS] = \
             entries('THE CAYMAN ISLANDS', 'CYM', 'Cayman Islands Dollar',
                     'KYD', '136', '2', )
-        self._currencies[CountryRegistry.THE_CENTRAL_AFRICAN_REPUBLIC] = \
+        self._currencies[cr.THE_CENTRAL_AFRICAN_REPUBLIC] = \
             entries('THE CENTRAL AFRICAN REPUBLIC', 'CAF', 'CFA Franc BEAC',
                     'XAF', '950', '0', )
-        self._currencies[CountryRegistry.CHAD] = \
+        self._currencies[cr.CHAD] = \
             entries('CHAD', 'TCD', 'CFA Franc BEAC', 'XAF', '950', '0', )
-        self._currencies[CountryRegistry.CHILE] = \
+        self._currencies[cr.CHILE] = \
             entries('CHILE', 'CHL', 'Chilean Peso', 'CLP', '152', '0', )
-        self._currencies[CountryRegistry.CHILE] = \
+        self._currencies[cr.CHILE] = \
             entries('CHILE', '', 'Unidad de Fomento', 'CLF', '990', '4', )
-        self._currencies[CountryRegistry.CHINA] = \
+        self._currencies[cr.CHINA] = \
             entries('CHINA', 'CHN', 'Yuan Renminbi', 'CNY', '156', '2', )
-        self._currencies[CountryRegistry.CHRISTMAS_ISLAND] = \
+        self._currencies[cr.CHRISTMAS_ISLAND] = \
             entries('CHRISTMAS ISLAND', 'CXR', 'Australian Dollar', 'AUD',
                     '036', '2', )
-        self._currencies[CountryRegistry.THE_COCOS_KEELING_ISLANDS] = \
+        self._currencies[cr.THE_COCOS_KEELING_ISLANDS] = \
             entries('THE COCOS KEELING ISLANDS', 'CCK', 'Australian Dollar',
                     'AUD', '036', '2', )
-        self._currencies[CountryRegistry.COLOMBIA] = \
+        self._currencies[cr.COLOMBIA] = \
             entries('COLOMBIA', 'COL', 'Colombian Peso', 'COP', '170', '2', )
-        self._currencies[CountryRegistry.COLOMBIA] = \
+        self._currencies[cr.COLOMBIA] = \
             entries('COLOMBIA', '', 'Unidad de Valor Real', 'COU', '970', '2', )
-        self._currencies[CountryRegistry.THE_COMOROS] = \
+        self._currencies[cr.THE_COMOROS] = \
             entries('THE COMOROS', 'COM', 'Comorian Franc ', 'KMF', '174',
                     '0', )
-        self._currencies[CountryRegistry.THE_DEMOCRATIC_REPUBLIC_OF_THE_CONGO
-        ] = \
+        self._currencies[cr.THE_DEMOCRATIC_REPUBLIC_OF_THE_CONGO] = \
             entries('THE DEMOCRATIC REPUBLIC OF THE CONGO', 'COD',
                     'Congolese Franc', 'CDF', '976', '2', )
-        self._currencies[CountryRegistry.THE_CONGO] = \
+        self._currencies[cr.THE_CONGO] = \
             entries('THE CONGO', 'COG', 'CFA Franc BEAC', 'XAF', '950', '0', )
-        self._currencies[CountryRegistry.THE_COOK_ISLANDS] = \
+        self._currencies[cr.THE_COOK_ISLANDS] = \
             entries('THE COOK ISLANDS', 'COK', 'New Zealand Dollar', 'NZD',
                     '554', '2', )
-        self._currencies[CountryRegistry.COSTA_RICA] = \
+        self._currencies[cr.COSTA_RICA] = \
             entries('COSTA RICA', 'CRI', 'Costa Rican Colon', 'CRC', '188',
                     '2', )
-        self._currencies[CountryRegistry.COTE_D_IVOIRE] = \
+        self._currencies[cr.COTE_D_IVOIRE] = \
             entries('COTE D IVOIRE', 'CIV', 'CFA Franc BCEAO', 'XOF', '952',
                     '0', )
-        self._currencies[CountryRegistry.CROATIA] = \
+        self._currencies[cr.CROATIA] = \
             entries('CROATIA', 'HRV', 'Kuna', 'HRK', '191', '2', )
-        self._currencies[CountryRegistry.CUBA] = \
+        self._currencies[cr.CUBA] = \
             entries('CUBA', 'CUB', 'Cuban Peso', 'CUP', '192', '2', )
-        self._currencies[CountryRegistry.CUBA] = \
+        self._currencies[cr.CUBA] = \
             entries('CUBA', '', 'Peso Convertible', 'CUC', '931', '2', )
-        self._currencies[CountryRegistry.CURACAO] = \
+        self._currencies[cr.CURACAO] = \
             entries('CURACAO', 'CUW', 'Netherlands Antillean Guilder', 'ANG',
                     '532', '2', )
-        self._currencies[CountryRegistry.CYPRUS] = \
+        self._currencies[cr.CYPRUS] = \
             entries('CYPRUS', 'CYP', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.CZECHIA] = \
+        self._currencies[cr.CZECHIA] = \
             entries('CZECHIA', 'CZE', 'Czech Koruna', 'CZK', '203', '2', )
-        self._currencies[CountryRegistry.DENMARK] = \
+        self._currencies[cr.DENMARK] = \
             entries('DENMARK', 'DNK', 'Danish Krone', 'DKK', '208', '2', )
-        self._currencies[CountryRegistry.DJIBOUTI] = \
+        self._currencies[cr.DJIBOUTI] = \
             entries('DJIBOUTI', 'DJI', 'Djibouti Franc', 'DJF', '262', '0', )
-        self._currencies[CountryRegistry.DOMINICA] = \
+        self._currencies[cr.DOMINICA] = \
             entries('DOMINICA', 'DMA', 'East Caribbean Dollar', 'XCD', '951',
                     '2', )
-        self._currencies[CountryRegistry.THE_DOMINICAN_REPUBLIC] = \
+        self._currencies[cr.THE_DOMINICAN_REPUBLIC] = \
             entries('THE DOMINICAN REPUBLIC', 'DOM', 'Dominican Peso',
                     'DOP', '214', '2', )
-        self._currencies[CountryRegistry.ECUADOR] = \
+        self._currencies[cr.ECUADOR] = \
             entries('ECUADOR', 'ECU', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.EGYPT] = \
+        self._currencies[cr.EGYPT] = \
             entries('EGYPT', 'EGY', 'Egyptian Pound', 'EGP', '818', '2', )
-        self._currencies[CountryRegistry.EL_SALVADOR] = \
+        self._currencies[cr.EL_SALVADOR] = \
             entries('EL SALVADOR', 'SLV', 'El Salvador Colon', 'SVC', '222',
                     '2', )
-        self._currencies[CountryRegistry.EL_SALVADOR] = \
+        self._currencies[cr.EL_SALVADOR] = \
             entries('EL SALVADOR', '', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.EQUATORIAL_GUINEA] = \
+        self._currencies[cr.EQUATORIAL_GUINEA] = \
             entries('EQUATORIAL GUINEA', 'GNQ', 'CFA Franc BEAC', 'XAF',
                     '950', '0', )
-        self._currencies[CountryRegistry.ERITREA] = \
+        self._currencies[cr.ERITREA] = \
             entries('ERITREA', 'ERI', 'Nakfa', 'ERN', '232', '2', )
-        self._currencies[CountryRegistry.ESTONIA] = \
+        self._currencies[cr.ESTONIA] = \
             entries('ESTONIA', 'EST', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.ETHIOPIA] = \
+        self._currencies[cr.ETHIOPIA] = \
             entries('ETHIOPIA', 'ETH', 'Ethiopian Birr', 'ETB', '230', '2', )
-        self._currencies[CountryRegistry.EUROPEAN_UNION] = \
+        self._currencies[cr.EUROPEAN_UNION] = \
             entries('EUROPEAN UNION', '', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.THE_FALKLAND_ISLANDS] = \
-            entries('THE FALKLAND ISLANDS', 'FLK',
-                           'Falkland Islands Pound', 'FKP', '238', '2', )
-        self._currencies[CountryRegistry.THE_FAROE_ISLANDS] = \
+        self._currencies[cr.THE_FALKLAND_ISLANDS] = \
+            entries('THE FALKLAND ISLANDS', 'FLK', 'Falkland Islands Pound',
+                    'FKP', '238', '2', )
+        self._currencies[cr.THE_FAROE_ISLANDS] = \
             entries('THE FAROE ISLANDS', 'FRO', 'Danish Krone', 'DKK', '208',
                     '2', )
-        self._currencies[CountryRegistry.FIJI] = \
+        self._currencies[cr.FIJI] = \
             entries('FIJI', 'FJI', 'Fiji Dollar', 'FJD', '242', '2', )
-        self._currencies[CountryRegistry.FINLAND] = \
+        self._currencies[cr.FINLAND] = \
             entries('FINLAND', 'FIN', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.FRANCE] = \
+        self._currencies[cr.FRANCE] = \
             entries('FRANCE', 'FRA', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.FRENCH_GUIANA] = \
+        self._currencies[cr.FRENCH_GUIANA] = \
             entries('FRENCH GUIANA', 'GUF', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.FRENCH_POLYNESIA] = \
+        self._currencies[cr.FRENCH_POLYNESIA] = \
             entries('FRENCH POLYNESIA', 'PYF', 'CFP Franc', 'XPF', '953', '0', )
-        self._currencies[CountryRegistry.THE_FRENCH_SOUTHERN_TERRITORIES] = \
+        self._currencies[cr.THE_FRENCH_SOUTHERN_TERRITORIES] = \
             entries('THE FRENCH SOUTHERN TERRITORIES', 'ATF', 'Euro', 'EUR',
                     '978', '2', )
-        self._currencies[CountryRegistry.GABON] = \
+        self._currencies[cr.GABON] = \
             entries('GABON', 'GAB', 'CFA Franc BEAC', 'XAF', '950', '0', )
-        self._currencies[CountryRegistry.THE_GAMBIA] = \
+        self._currencies[cr.THE_GAMBIA] = \
             entries('THE GAMBIA', 'GMB', 'Dalasi', 'GMD', '270', '2', )
-        self._currencies[CountryRegistry.GEORGIA] = \
+        self._currencies[cr.GEORGIA] = \
             entries('GEORGIA', 'GEO', 'Lari', 'GEL', '981', '2', )
-        self._currencies[CountryRegistry.GERMANY] = \
+        self._currencies[cr.GERMANY] = \
             entries('GERMANY', 'DEU', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.GHANA] = \
+        self._currencies[cr.GHANA] = \
             entries('GHANA', 'GHA', 'Ghana Cedi', 'GHS', '936', '2', )
-        self._currencies[CountryRegistry.GIBRALTAR] = \
+        self._currencies[cr.GIBRALTAR] = \
             entries('GIBRALTAR', 'GIB', 'Gibraltar Pound', 'GIP', '292', '2', )
-        self._currencies[CountryRegistry.GREECE] = \
+        self._currencies[cr.GREECE] = \
             entries('GREECE', 'GRC', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.GREENLAND] = \
+        self._currencies[cr.GREENLAND] = \
             entries('GREENLAND', 'GRL', 'Danish Krone', 'DKK', '208', '2', )
-        self._currencies[CountryRegistry.GRENADA] = \
+        self._currencies[cr.GRENADA] = \
             entries('GRENADA', 'GRD', 'East Caribbean Dollar', 'XCD', '951',
                     '2', )
-        self._currencies[CountryRegistry.GUADELOUPE] = \
+        self._currencies[cr.GUADELOUPE] = \
             entries('GUADELOUPE', 'GLP', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.GUAM] = \
+        self._currencies[cr.GUAM] = \
             entries('GUAM', 'GUM', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.GUATEMALA] = \
+        self._currencies[cr.GUATEMALA] = \
             entries('GUATEMALA', 'GTM', 'Quetzal', 'GTQ', '320', '2', )
-        self._currencies[CountryRegistry.GUERNSEY] = \
+        self._currencies[cr.GUERNSEY] = \
             entries('GUERNSEY', 'GGY', 'Pound Sterling', 'GBP', '826', '2', )
-        self._currencies[CountryRegistry.GUINEA] = \
+        self._currencies[cr.GUINEA] = \
             entries('GUINEA', 'GIN', 'Guinean Franc', 'GNF', '324', '0', )
-        self._currencies[CountryRegistry.GUINEA_BISSAU] = \
+        self._currencies[cr.GUINEA_BISSAU] = \
             entries('GUINEA_BISSAU', 'GNB', 'CFA Franc BCEAO', 'XOF', '952',
                     '0', )
-        self._currencies[CountryRegistry.GUYANA] = \
+        self._currencies[cr.GUYANA] = \
             entries('GUYANA', 'GUY', 'Guyana Dollar', 'GYD', '328', '2', )
-        self._currencies[CountryRegistry.HAITI] = \
+        self._currencies[cr.HAITI] = \
             entries('HAITI', 'HTI', 'Gourde', 'HTG', '332', '2', )
-        self._currencies[CountryRegistry.HAITI] = \
+        self._currencies[cr.HAITI] = \
             entries('HAITI', '', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.HEARD_ISLAND_AND_McDONALD_ISLANDS] = \
+        self._currencies[cr.HEARD_ISLAND_AND_McDONALD_ISLANDS] = \
             entries('HEARD ISLAND AND McDONALD ISLANDS', 'HMD',
                     'Australian Dollar', 'AUD', '036', '2', )
-        self._currencies[CountryRegistry.THE_HOLY_SEE] = \
+        self._currencies[cr.THE_HOLY_SEE] = \
             entries('THE HOLY SEE', 'VAT', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.HONDURAS] = \
+        self._currencies[cr.HONDURAS] = \
             entries('HONDURAS', 'HND', 'Lempira', 'HNL', '340', '2', )
-        self._currencies[CountryRegistry.HONG_KONG] = \
+        self._currencies[cr.HONG_KONG] = \
             entries('HONG KONG', 'HKG', 'Hong Kong Dollar', 'HKD', '344', '2', )
-        self._currencies[CountryRegistry.HUNGARY] = \
+        self._currencies[cr.HUNGARY] = \
             entries('HUNGARY', 'HUN', 'Forint', 'HUF', '348', '2', )
-        self._currencies[CountryRegistry.ICELAND] = \
+        self._currencies[cr.ICELAND] = \
             entries('ICELAND', 'ISL', 'Iceland Krona', 'ISK', '352', '0', )
-        self._currencies[CountryRegistry.INDIA] = \
+        self._currencies[cr.INDIA] = \
             entries('INDIA', 'IND', 'Indian Rupee', 'INR', '356', '2', )
-        self._currencies[CountryRegistry.INDONESIA] = \
+        self._currencies[cr.INDONESIA] = \
             entries('INDONESIA', 'IDN', 'Rupiah', 'IDR', '360', '2', )
-        self._currencies[CountryRegistry.INTERNATIONAL_MONETARY_FUND_IMF] = \
+        self._currencies[cr.INTERNATIONAL_MONETARY_FUND_IMF] = \
             entries('INTERNATIONAL MONETARY FUND IMF', '',
                     'SDR (Special Drawing Right)', 'XDR', '960', 'N.A.', )
-        self._currencies[CountryRegistry.ISLAMIC_REPUBLIC_OF_IRAN] = \
+        self._currencies[cr.ISLAMIC_REPUBLIC_OF_IRAN] = \
             entries('ISLAMIC REPUBLIC OF IRAN', 'IRN', 'Iranian Rial', 'IRR',
                     '364', '2', )
-        self._currencies[CountryRegistry.IRAQ] = \
+        self._currencies[cr.IRAQ] = \
             entries('IRAQ', 'IRQ', 'Iraqi Dinar', 'IQD', '368', '3', )
-        self._currencies[CountryRegistry.IRELAND] = \
+        self._currencies[cr.IRELAND] = \
             entries('IRELAND', 'IRL', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.ISLE_OF_MAN] = \
+        self._currencies[cr.ISLE_OF_MAN] = \
             entries('ISLE OF MAN', 'IMN', 'Pound Sterling', 'GBP', '826', '2', )
-        self._currencies[CountryRegistry.ISRAEL] = \
+        self._currencies[cr.ISRAEL] = \
             entries('ISRAEL', 'ISR', 'New Israeli Sheqel', 'ILS', '376', '2', )
-        self._currencies[CountryRegistry.ITALY] = \
+        self._currencies[cr.ITALY] = \
             entries('ITALY', 'ITA', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.JAMAICA] = \
+        self._currencies[cr.JAMAICA] = \
             entries('JAMAICA', 'JAM', 'Jamaican Dollar', 'JMD', '388', '2', )
-        self._currencies[CountryRegistry.JAPAN] = \
+        self._currencies[cr.JAPAN] = \
             entries('JAPAN', 'JPN', 'Yen', 'JPY', '392', '0', )
-        self._currencies[CountryRegistry.JERSEY] = \
+        self._currencies[cr.JERSEY] = \
             entries('JERSEY', 'JEY', 'Pound Sterling', 'GBP', '826', '2', )
-        self._currencies[CountryRegistry.JORDAN] = \
+        self._currencies[cr.JORDAN] = \
             entries('JORDAN', 'JOR', 'Jordanian Dinar', 'JOD', '400', '3', )
-        self._currencies[CountryRegistry.KAZAKHSTAN] = \
+        self._currencies[cr.KAZAKHSTAN] = \
             entries('KAZAKHSTAN', 'KAZ', 'Tenge', 'KZT', '398', '2', )
-        self._currencies[CountryRegistry.KENYA] = \
+        self._currencies[cr.KENYA] = \
             entries('KENYA', 'KEN', 'Kenyan Shilling', 'KES', '404', '2', )
-        self._currencies[CountryRegistry.KIRIBATI] = \
+        self._currencies[cr.KIRIBATI] = \
             entries('KIRIBATI', 'KIR', 'Australian Dollar', 'AUD', '036', '2', )
-        self._currencies[
-            CountryRegistry.THE_DEMOCRATIC_PEOPLES_REPUBLIC_OF_KOREA] = \
-                entries('THE DEMOCRATIC PEOPLE’S REPUBLIC OF KOREA', 'PRK',
-                        'North Korean Won', 'KPW', '408', '2', )
-        self._currencies[CountryRegistry.THE_REPUBLIC_OF_KOREA] = \
+        self._currencies[cr.THE_DEMOCRATIC_PEOPLES_REPUBLIC_OF_KOREA] = \
+            entries('THE DEMOCRATIC PEOPLE’S REPUBLIC OF KOREA', 'PRK', 
+                    'North Korean Won', 'KPW', '408', '2', )
+        self._currencies[cr.THE_REPUBLIC_OF_KOREA] = \
             entries('THE REPUBLIC OF KOREA', 'KOR', 'Won', 'KRW', '410', '0', )
-        self._currencies[CountryRegistry.KUWAIT] = \
+        self._currencies[cr.KUWAIT] = \
             entries('KUWAIT', 'KWT', 'Kuwaiti Dinar', 'KWD', '414', '3', )
-        self._currencies[CountryRegistry.KYRGYZSTAN] = \
+        self._currencies[cr.KYRGYZSTAN] = \
             entries('KYRGYZSTAN', 'KGZ', 'Som', 'KGS', '417', '2', )
-        self._currencies[CountryRegistry.THE_LAO_PEOPLES_DEMOCRATIC_REPUBLIC]\
+        self._currencies[cr.THE_LAO_PEOPLES_DEMOCRATIC_REPUBLIC]\
             = \
             entries('THE LAO PEOPLES DEMOCRATIC REPUBLIC', 'LAO', 'Lao Kip',
                     'LAK', '418', '2', )
-        self._currencies[CountryRegistry.LATVIA] = \
+        self._currencies[cr.LATVIA] = \
             entries('LATVIA', 'LVA', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.LEBANON] = \
+        self._currencies[cr.LEBANON] = \
             entries('LEBANON', 'LBN', 'Lebanese Pound', 'LBP', '422', '2', )
-        self._currencies[CountryRegistry.LESOTHO] = \
+        self._currencies[cr.LESOTHO] = \
             entries('LESOTHO', 'LSO', 'Loti', 'LSL', '426', '2', )
-        self._currencies[CountryRegistry.LESOTHO] = \
+        self._currencies[cr.LESOTHO] = \
             entries('LESOTHO', '', 'Rand', 'ZAR', '710', '2', )
-        self._currencies[CountryRegistry.LIBERIA] = \
+        self._currencies[cr.LIBERIA] = \
             entries('LIBERIA', 'LBR', 'Liberian Dollar', 'LRD', '430', '2', )
-        self._currencies[CountryRegistry.LIBYA] = \
+        self._currencies[cr.LIBYA] = \
             entries('LIBYA', 'LBY', 'Libyan Dinar', 'LYD', '434', '3', )
-        self._currencies[CountryRegistry.LIECHTENSTEIN] = \
+        self._currencies[cr.LIECHTENSTEIN] = \
             entries('LIECHTENSTEIN', 'LIE', 'Swiss Franc', 'CHF', '756', '2', )
-        self._currencies[CountryRegistry.LITHUANIA] = \
+        self._currencies[cr.LITHUANIA] = \
             entries('LITHUANIA', 'LTU', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.LUXEMBOURG] = \
+        self._currencies[cr.LUXEMBOURG] = \
             entries('LUXEMBOURG', 'LUX', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.MACAO] = \
+        self._currencies[cr.MACAO] = \
             entries('MACAO', 'MAC', 'Pataca', 'MOP', '446', '2', )
         self._currencies[
-            CountryRegistry.THE_FORMER_YUGOSLAV_REPUBLIC_OF_MACEDONIA] = \
+            cr.THE_FORMER_YUGOSLAV_REPUBLIC_OF_MACEDONIA] = \
             entries('THE FORMER YUGOSLAV REPUBLIC OF MACEDONIA', 'MKD',
                            'Denar', 'MKD', '807', '2', )
-        self._currencies[CountryRegistry.MADAGASCAR] = \
+        self._currencies[cr.MADAGASCAR] = \
             entries('MADAGASCAR', 'MDG', 'Malagasy Ariary', 'MGA', '969', '2', )
-        self._currencies[CountryRegistry.MALAWI] = \
+        self._currencies[cr.MALAWI] = \
             entries('MALAWI', 'MWI', 'Malawi Kwacha', 'MWK', '454', '2', )
-        self._currencies[CountryRegistry.MALAYSIA] = \
+        self._currencies[cr.MALAYSIA] = \
             entries('MALAYSIA', 'MYS', 'Malaysian Ringgit', 'MYR', '458', '2', )
-        self._currencies[CountryRegistry.MALDIVES] = \
+        self._currencies[cr.MALDIVES] = \
             entries('MALDIVES', 'MDV', 'Rufiyaa', 'MVR', '462', '2', )
-        self._currencies[CountryRegistry.MALI] = \
+        self._currencies[cr.MALI] = \
             entries('MALI', 'MLI', 'CFA Franc BCEAO', 'XOF', '952', '0', )
-        self._currencies[CountryRegistry.MALTA] = \
+        self._currencies[cr.MALTA] = \
             entries('MALTA', 'MLT', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.THE_MARSHALL_ISLANDS] = \
+        self._currencies[cr.THE_MARSHALL_ISLANDS] = \
             entries('THE MARSHALL ISLANDS', 'MHL', 'US Dollar', 'USD', '840',
                     '2', )
-        self._currencies[CountryRegistry.MARTINIQUE] = \
+        self._currencies[cr.MARTINIQUE] = \
             entries('MARTINIQUE', 'MTQ', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.MAURITANIA] = \
+        self._currencies[cr.MAURITANIA] = \
             entries('MAURITANIA', 'MRT', 'Ouguiya', 'MRU', '929', '2', )
-        self._currencies[CountryRegistry.MAURITIUS] = \
+        self._currencies[cr.MAURITIUS] = \
             entries('MAURITIUS', 'MUS', 'Mauritius Rupee', 'MUR', '480', '2', )
-        self._currencies[CountryRegistry.MAYOTTE] = \
+        self._currencies[cr.MAYOTTE] = \
             entries('MAYOTTE', 'MYT', 'Euro', 'EUR', '978', '2', )
         self._currencies[
-            CountryRegistry.MEMBER_COUNTRIES_OF_THE_AFRICAN_DEVELOPMENT_BANK_GROUP] = \
+            cr.MEMBER_COUNTRIES_OF_THE_AFRICAN_DEVELOPMENT_BANK_GROUP] = \
             entries(
                 'MEMBER COUNTRIES OF THE AFRICAN DEVELOPMENT BANK GROUP', '',
                 'ADB Unit of Account', 'XUA', '965', 'N.A.', )
-        self._currencies[CountryRegistry.MEXICO] = \
+        self._currencies[cr.MEXICO] = \
             entries('MEXICO', 'MEX', 'Mexican Peso', 'MXN', '484', '2', )
-        self._currencies[CountryRegistry.MEXICO] = \
+        self._currencies[cr.MEXICO] = \
             entries('MEXICO', '', 'Mexican Unidad de Inversion (UDI)', 'MXV',
                     '979', '2', )
-        self._currencies[CountryRegistry.FEDERATED_STATES_OF_MICRONESIA] = \
+        self._currencies[cr.FEDERATED_STATES_OF_MICRONESIA] = \
             entries('FEDERATED STATES OF MICRONESIA', 'FSM', 'US Dollar',
                     'USD', '840', '2', )
-        self._currencies[CountryRegistry.THE_REPUBLIC_OF_MOLDOVA] = \
+        self._currencies[cr.THE_REPUBLIC_OF_MOLDOVA] = \
             entries('THE REPUBLIC OF MOLDOVA', 'MDA', 'Moldovan Leu', 'MDL',
                     '498', '2', )
-        self._currencies[CountryRegistry.MONACO] = \
+        self._currencies[cr.MONACO] = \
             entries('MONACO', 'MCO', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.MONGOLIA] = \
+        self._currencies[cr.MONGOLIA] = \
             entries('MONGOLIA', 'MNG', 'Tugrik', 'MNT', '496', '2', )
-        self._currencies[CountryRegistry.MONTENEGRO] = \
+        self._currencies[cr.MONTENEGRO] = \
             entries('MONTENEGRO', 'MNE', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.MONTSERRAT] = \
+        self._currencies[cr.MONTSERRAT] = \
             entries('MONTSERRAT', 'MSR', 'East Caribbean Dollar', 'XCD',
                     '951', '2', )
-        self._currencies[CountryRegistry.MOROCCO] = \
+        self._currencies[cr.MOROCCO] = \
             entries('MOROCCO', 'MAR', 'Moroccan Dirham', 'MAD', '504', '2', )
-        self._currencies[CountryRegistry.MOZAMBIQUE] = \
+        self._currencies[cr.MOZAMBIQUE] = \
             entries('MOZAMBIQUE', 'MOZ', 'Mozambique Metical', 'MZN', '943',
                     '2', )
-        self._currencies[CountryRegistry.MYANMAR] = \
+        self._currencies[cr.MYANMAR] = \
             entries('MYANMAR', 'MMR', 'Kyat', 'MMK', '104', '2', )
-        self._currencies[CountryRegistry.NAMIBIA] = \
+        self._currencies[cr.NAMIBIA] = \
             entries('NAMIBIA', 'NAM', 'Namibia Dollar', 'NAD', '516', '2', )
-        self._currencies[CountryRegistry.NAMIBIA] = \
+        self._currencies[cr.NAMIBIA] = \
             entries('NAMIBIA', '', 'Rand', 'ZAR', '710', '2', )
-        self._currencies[CountryRegistry.NAURU] = \
+        self._currencies[cr.NAURU] = \
             entries('NAURU', 'NRU', 'Australian Dollar', 'AUD', '036', '2', )
-        self._currencies[CountryRegistry.NEPAL] = \
+        self._currencies[cr.NEPAL] = \
             entries('NEPAL', 'NPL', 'Nepalese Rupee', 'NPR', '524', '2', )
-        self._currencies[CountryRegistry.THE_NETHERLANDS] = \
+        self._currencies[cr.THE_NETHERLANDS] = \
             entries('THE NETHERLANDS', 'NLD', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.NEW_CALEDONIA] = \
+        self._currencies[cr.NEW_CALEDONIA] = \
             entries('NEW CALEDONIA', 'NCL', 'CFP Franc', 'XPF', '953', '0', )
-        self._currencies[CountryRegistry.NEW_ZEALAND] = \
+        self._currencies[cr.NEW_ZEALAND] = \
             entries('NEW ZEALAND', 'NZL', 'New Zealand Dollar', 'NZD',
                     '554', '2', )
-        self._currencies[CountryRegistry.NICARAGUA] = \
+        self._currencies[cr.NICARAGUA] = \
             entries('NICARAGUA', 'NIC', 'Cordoba Oro', 'NIO', '558', '2', )
-        self._currencies[CountryRegistry.NIGER] = \
+        self._currencies[cr.NIGER] = \
             entries('NIGER', 'NER', 'CFA Franc BCEAO', 'XOF', '952', '0', )
-        self._currencies[CountryRegistry.NIGERIA] = \
+        self._currencies[cr.NIGERIA] = \
             entries('NIGERIA', 'NGA', 'Naira', 'NGN', '566', '2', )
-        self._currencies[CountryRegistry.NIUE] = \
+        self._currencies[cr.NIUE] = \
             entries('NIUE', 'NIU', 'New Zealand Dollar', 'NZD', '554', '2', )
-        self._currencies[CountryRegistry.NORFOLK_ISLAND] = \
+        self._currencies[cr.NORFOLK_ISLAND] = \
             entries('NORFOLK ISLAND', 'NFK', 'Australian Dollar', 'AUD',
                            '036', '2', )
-        self._currencies[CountryRegistry.NORTHERN_MARIANA_ISLANDS] = \
-            entries('NORTHERN MARIANA ISLANDS', 'MNP', 'US Dollar',
-                           'USD', '840', '2', )
-        self._currencies[CountryRegistry.NORWAY] = \
-            entries('NORWAY', 'NOR', 'Norwegian Krone', 'NOK', '578',
-                           '2', )
-        self._currencies[CountryRegistry.OMAN] = \
+        self._currencies[cr.NORTHERN_MARIANA_ISLANDS] = \
+            entries('NORTHERN MARIANA ISLANDS', 'MNP', 'US Dollar', 'USD',
+                    '840', '2',)
+        self._currencies[cr.NORWAY] = \
+            entries('NORWAY', 'NOR', 'Norwegian Krone', 'NOK', '578', '2', )
+        self._currencies[cr.OMAN] = \
             entries('OMAN', 'OMN', 'Rial Omani', 'OMR', '512', '3', )
-        self._currencies[CountryRegistry.PAKISTAN] = \
+        self._currencies[cr.PAKISTAN] = \
             entries('PAKISTAN', 'PAK', 'Pakistan Rupee', 'PKR', '586', '2', )
-        self._currencies[CountryRegistry.PALAU] = \
+        self._currencies[cr.PALAU] = \
             entries('PALAU', 'PLW', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.PALESTINE_STATE_OF] = \
+        self._currencies[cr.PALESTINE_STATE_OF] = \
             entries('PALESTINE STATE OF', 'PSE', 'No universal currency', '',
                     '', '', )
-        self._currencies[CountryRegistry.PANAMA] = \
+        self._currencies[cr.PANAMA] = \
             entries('PANAMA', 'PAN', 'Balboa', 'PAB', '590', '2', )
-        self._currencies[CountryRegistry.PANAMA] = \
+        self._currencies[cr.PANAMA] = \
             entries('PANAMA', '', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.PAPUA_NEW_GUINEA] = \
+        self._currencies[cr.PAPUA_NEW_GUINEA] = \
             entries('PAPUA NEW GUINEA', 'PNG', 'Kina', 'PGK', '598', '2', )
-        self._currencies[CountryRegistry.PARAGUAY] = \
+        self._currencies[cr.PARAGUAY] = \
             entries('PARAGUAY', 'PRY', 'Guarani', 'PYG', '600', '0', )
-        self._currencies[CountryRegistry.PERU] = \
+        self._currencies[cr.PERU] = \
             entries('PERU', 'PER', 'Sol', 'PEN', '604', '2', )
-        self._currencies[CountryRegistry.PHILIPPINES] = \
+        self._currencies[cr.PHILIPPINES] = \
             entries('PHILIPPINES', 'PHL', 'Philippine Peso', 'PHP', '608',
                     '2', )
-        self._currencies[CountryRegistry.PITCAIRN] = \
+        self._currencies[cr.PITCAIRN] = \
             entries('PITCAIRN', 'PCN', 'New Zealand Dollar', 'NZD', '554',
                     '2', )
-        self._currencies[CountryRegistry.POLAND] = \
+        self._currencies[cr.POLAND] = \
             entries('POLAND', 'POL', 'Zloty', 'PLN', '985', '2', )
-        self._currencies[CountryRegistry.PORTUGAL] = \
+        self._currencies[cr.PORTUGAL] = \
             entries('PORTUGAL', 'PRT', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.PUERTO_RICO] = \
+        self._currencies[cr.PUERTO_RICO] = \
             entries('PUERTO RICO', 'PRI', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.QATAR] = \
+        self._currencies[cr.QATAR] = \
             entries('QATAR', 'QAT', 'Qatari Rial', 'QAR', '634', '2', )
-        self._currencies[CountryRegistry.REUNION] = \
+        self._currencies[cr.REUNION] = \
             entries('REUNION', 'REU', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.ROMANIA] = \
+        self._currencies[cr.ROMANIA] = \
             entries('ROMANIA', 'ROU', 'Romanian Leu', 'RON', '946', '2', )
-        self._currencies[CountryRegistry.THE_RUSSIAN_FEDERATION] = \
+        self._currencies[cr.THE_RUSSIAN_FEDERATION] = \
             entries('THE RUSSIAN FEDERATION', 'RUS', 'Russian Ruble', 'RUB',
                     '643', '2', )
-        self._currencies[CountryRegistry.RWANDA] = \
+        self._currencies[cr.RWANDA] = \
             entries('RWANDA', 'RWA', 'Rwanda Franc', 'RWF', '646', '0', )
-        self._currencies[CountryRegistry.SAINT_BARTHELEMY] = \
+        self._currencies[cr.SAINT_BARTHELEMY] = \
             entries('SAINT BARTHELEMY', 'BLM', 'Euro', 'EUR', '978', '2', )
         self._currencies[
-            CountryRegistry.SAINT_HELENA_ASCENSION_AND_TRISTAN_DA_CUNHA] = \
+            cr.SAINT_HELENA_ASCENSION_AND_TRISTAN_DA_CUNHA] = \
             entries('SAINT HELENA ASCENSION AND TRISTAN DA CUNHA', 'SHN',
                            'Saint Helena Pound', 'SHP', '654', '2', )
-        self._currencies[CountryRegistry.SAINT_KITTS_AND_NEVIS] = \
+        self._currencies[cr.SAINT_KITTS_AND_NEVIS] = \
             entries('SAINT KITTS AND NEVIS', 'KNA',
                            'East Caribbean Dollar', 'XCD', '951', '2', )
-        self._currencies[CountryRegistry.SAINT_LUCIA] = \
+        self._currencies[cr.SAINT_LUCIA] = \
             entries('SAINT LUCIA', 'LCA', 'East Caribbean Dollar', 'XCD',
                            '951', '2', )
-        self._currencies[CountryRegistry.SAINT_MARTIN_FRENCH_PART] = \
+        self._currencies[cr.SAINT_MARTIN_FRENCH_PART] = \
             entries('SAINT MARTIN FRENCH PART', 'MAF', 'Euro', 'EUR',
                            '978', '2', )
-        self._currencies[CountryRegistry.SAINT_PIERRE_AND_MIQUELON] = \
+        self._currencies[cr.SAINT_PIERRE_AND_MIQUELON] = \
             entries('SAINT PIERRE AND MIQUELON', 'SPM', 'Euro', 'EUR',
                            '978', '2', )
-        self._currencies[CountryRegistry.SAINT_VINCENT_AND_THE_GRENADINES] = \
+        self._currencies[cr.SAINT_VINCENT_AND_THE_GRENADINES] = \
             entries('SAINT VINCENT AND THE GRENADINES', 'VCT',
                            'East Caribbean Dollar', 'XCD', '951', '2', )
-        self._currencies[CountryRegistry.SAMOA] = \
+        self._currencies[cr.SAMOA] = \
             entries('SAMOA', 'WSM', 'Tala', 'WST', '882', '2', )
-        self._currencies[CountryRegistry.SAN_MARINO] = \
+        self._currencies[cr.SAN_MARINO] = \
             entries('SAN MARINO', 'SMR', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.SAO_TOME_AND_PRINCIPE] = \
+        self._currencies[cr.SAO_TOME_AND_PRINCIPE] = \
             entries('SAO TOME AND PRINCIPE', 'STP', 'Dobra', 'STN', '930',
                     '2', )
-        self._currencies[CountryRegistry.SAUDI_ARABIA] = \
+        self._currencies[cr.SAUDI_ARABIA] = \
             entries('SAUDI ARABIA', 'SAU', 'Saudi Riyal', 'SAR', '682', '2', )
-        self._currencies[CountryRegistry.SENEGAL] = \
+        self._currencies[cr.SENEGAL] = \
             entries('SENEGAL', 'SEN', 'CFA Franc BCEAO', 'XOF', '952', '0', )
-        self._currencies[CountryRegistry.SERBIA] = \
+        self._currencies[cr.SERBIA] = \
             entries('SERBIA', 'SRB', 'Serbian Dinar', 'RSD', '941', '2', )
-        self._currencies[CountryRegistry.SEYCHELLES] = \
+        self._currencies[cr.SEYCHELLES] = \
             entries('SEYCHELLES', 'SYC', 'Seychelles Rupee', 'SCR', '690',
                     '2', )
-        self._currencies[CountryRegistry.SIERRA_LEONE] = \
+        self._currencies[cr.SIERRA_LEONE] = \
             entries('SIERRA LEONE', 'SLE', 'Leone', 'SLL', '694', '2', )
-        self._currencies[CountryRegistry.SINGAPORE] = \
+        self._currencies[cr.SINGAPORE] = \
             entries('SINGAPORE', 'SGP', 'Singapore Dollar', 'SGD', '702', '2', )
-        self._currencies[CountryRegistry.SINT_MAARTEN_DUTCH_PART] = \
+        self._currencies[cr.SINT_MAARTEN_DUTCH_PART] = \
             entries('SINT MAARTEN DUTCH PART', 'SXM',
                     'Netherlands Antillean Guilder', 'ANG', '532', '2', )
         self._currencies[
-            CountryRegistry.SISTEMA_UNITARIO_DE_COMPENSACION_REGIONAL_DE_PAGOS_SUCRE] = \
+            cr.SISTEMA_UNITARIO_DE_COMPENSACION_REGIONAL_DE_PAGOS_SUCRE] = \
             entries(
                 'SISTEMA UNITARIO DE COMPENSACION REGIONAL DE PAGOS SUCRE', '',
                 'Sucre', 'XSU', '994', 'N.A.', )
-        self._currencies[CountryRegistry.SLOVAKIA] = \
+        self._currencies[cr.SLOVAKIA] = \
             entries('SLOVAKIA', 'SVK', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.SLOVENIA] = \
+        self._currencies[cr.SLOVENIA] = \
             entries('SLOVENIA', 'SVN', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.SOLOMON_ISLANDS] = \
+        self._currencies[cr.SOLOMON_ISLANDS] = \
             entries('SOLOMON ISLANDS', 'SLB', 'Solomon Islands Dollar',
                     'SBD', '090', '2', )
-        self._currencies[CountryRegistry.SOMALIA] = \
+        self._currencies[cr.SOMALIA] = \
             entries('SOMALIA', 'SOM', 'Somali Shilling', 'SOS', '706', '2', )
-        self._currencies[CountryRegistry.SOUTH_AFRICA] = \
+        self._currencies[cr.SOUTH_AFRICA] = \
             entries('SOUTH AFRICA', 'ZAF', 'Rand', 'ZAR', '710', '2', )
         self._currencies[
-            CountryRegistry.SOUTH_GEORGIA_AND_THE_SOUTH_SANDWICH_ISLANDS] = \
+            cr.SOUTH_GEORGIA_AND_THE_SOUTH_SANDWICH_ISLANDS] = \
             entries('SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS',
                            'SGS', 'No universal currency', '', '', '', )
-        self._currencies[CountryRegistry.SOUTH_SUDAN] = \
+        self._currencies[cr.SOUTH_SUDAN] = \
             entries('SOUTH SUDAN', 'SSD', 'South Sudanese Pound', 'SSP',
                            '728', '2', )
-        self._currencies[CountryRegistry.SPAIN] = \
+        self._currencies[cr.SPAIN] = \
             entries('SPAIN', 'ESP', 'Euro', 'EUR', '978', '2', )
-        self._currencies[CountryRegistry.SRI_LANKA] = \
+        self._currencies[cr.SRI_LANKA] = \
             entries('SRI LANKA', 'LKA', 'Sri Lanka Rupee', 'LKR', '144', '2', )
-        self._currencies[CountryRegistry.SUDAN] = \
+        self._currencies[cr.SUDAN] = \
             entries('SUDAN', 'SDN', 'Sudanese Pound', 'SDG', '938', '2', )
-        self._currencies[CountryRegistry.SURINAME] = \
+        self._currencies[cr.SURINAME] = \
             entries('SURINAME', 'SUR', 'Surinam Dollar', 'SRD', '968', '2', )
-        self._currencies[CountryRegistry.SVALBARD_AND_JAN_MAYEN] = \
+        self._currencies[cr.SVALBARD_AND_JAN_MAYEN] = \
             entries('SVALBARD AND JAN MAYEN', 'SJM', 'Norwegian Krone',
                            'NOK', '578', '2', )
-        self._currencies[CountryRegistry.ESWATINI] = \
+        self._currencies[cr.ESWATINI] = \
             entries('ESWATINI', 'SWZ', 'Lilangeni', 'SZL', '748', '2', )
-        self._currencies[CountryRegistry.SWEDEN] = \
+        self._currencies[cr.SWEDEN] = \
             entries('SWEDEN', 'SWE', 'Swedish Krona', 'SEK', '752', '2', )
-        self._currencies[CountryRegistry.SWITZERLAND] = \
+        self._currencies[cr.SWITZERLAND] = \
             entries('SWITZERLAND', 'CHE', 'Swiss Franc', 'CHF', '756', '2', )
-        self._currencies[CountryRegistry.SWITZERLAND] = \
+        self._currencies[cr.SWITZERLAND] = \
             entries('SWITZERLAND', '', 'WIR Euro', 'CHE', '947', '2', )
-        self._currencies[CountryRegistry.SWITZERLAND] = \
+        self._currencies[cr.SWITZERLAND] = \
             entries('SWITZERLAND', '', 'WIR Franc', 'CHW', '948', '2', )
-        self._currencies[CountryRegistry.SYRIAN_ARAB_REPUBLIC] = \
+        self._currencies[cr.SYRIAN_ARAB_REPUBLIC] = \
             entries('SYRIAN ARAB REPUBLIC', 'SYR', 'Syrian Pound', 'SYP',
                            '760', '2', )
-        self._currencies[CountryRegistry.TAIWAN_PROVINCE_OF_CHINA] = \
+        self._currencies[cr.TAIWAN_PROVINCE_OF_CHINA] = \
             entries('TAIWAN PROVINCE OF CHINA', 'TWN',
                            'New Taiwan Dollar', 'TWD', '901', '2', )
-        self._currencies[CountryRegistry.TAJIKISTAN] = \
+        self._currencies[cr.TAJIKISTAN] = \
             entries('TAJIKISTAN', 'TJK', 'Somoni', 'TJS', '972', '2', )
-        self._currencies[CountryRegistry.UNITED_REPUBLIC_OF_TANZANIA] = \
+        self._currencies[cr.UNITED_REPUBLIC_OF_TANZANIA] = \
             entries('UNITED REPUBLIC OF TANZANIA', 'TZA',
                            'Tanzanian Shilling', 'TZS', '834', '2', )
-        self._currencies[CountryRegistry.THAILAND] = \
+        self._currencies[cr.THAILAND] = \
             entries('THAILAND', 'THA', 'Baht', 'THB', '764', '2', )
-        self._currencies[CountryRegistry.TIMOR_LESTE] = \
+        self._currencies[cr.TIMOR_LESTE] = \
             entries('TIMOR LESTE', 'TLS', 'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.TOGO] = \
+        self._currencies[cr.TOGO] = \
             entries('TOGO', 'TGO', 'CFA Franc BCEAO', 'XOF', '952', '0', )
-        self._currencies[CountryRegistry.TOKELAU] = \
+        self._currencies[cr.TOKELAU] = \
             entries('TOKELAU', 'TKL', 'New Zealand Dollar', 'NZD', '554', '2', )
-        self._currencies[CountryRegistry.TONGA] = \
+        self._currencies[cr.TONGA] = \
             entries('TONGA', 'TON', 'Pa’anga', 'TOP', '776', '2', )
-        self._currencies[CountryRegistry.TRINIDAD_AND_TOBAGO] = \
+        self._currencies[cr.TRINIDAD_AND_TOBAGO] = \
             entries('TRINIDAD AND TOBAGO', 'TTO',
                            'Trinidad and Tobago Dollar', 'TTD', '780', '2', )
-        self._currencies[CountryRegistry.TUNISIA] = \
+        self._currencies[cr.TUNISIA] = \
             entries('TUNISIA', 'TUN', 'Tunisian Dinar', 'TND', '788', '3', )
-        self._currencies[CountryRegistry.TURKEY] = \
+        self._currencies[cr.TURKEY] = \
             entries('TURKEY', 'TUR', 'Turkish Lira', 'TRY', '949', '2', )
-        self._currencies[CountryRegistry.TURKMENISTAN] = \
+        self._currencies[cr.TURKMENISTAN] = \
             entries('TURKMENISTAN', 'TKM', 'Turkmenistan New Manat',
                            'TMT', '934', '2', )
-        self._currencies[CountryRegistry.TURKS_AND_CAICOS_ISLANDS] = \
+        self._currencies[cr.TURKS_AND_CAICOS_ISLANDS] = \
             entries('TURKS AND CAICOS ISLANDS', 'TCA', 'US Dollar',
                            'USD', '840', '2', )
-        self._currencies[CountryRegistry.TUVALU] = \
+        self._currencies[cr.TUVALU] = \
             entries('TUVALU', 'TUV', 'Australian Dollar', 'AUD', '036', '2', )
-        self._currencies[CountryRegistry.UGANDA] = \
+        self._currencies[cr.UGANDA] = \
             entries('UGANDA', 'UGA', 'Uganda Shilling', 'UGX', '800', '0', )
-        self._currencies[CountryRegistry.UKRAINE] = \
+        self._currencies[cr.UKRAINE] = \
             entries('UKRAINE', 'UKR', 'Hryvnia', 'UAH', '980', '2', )
-        self._currencies[CountryRegistry.THE_UNITED_ARAB_EMIRATES] = \
+        self._currencies[cr.THE_UNITED_ARAB_EMIRATES] = \
             entries('THE UNITED ARAB EMIRATES', 'ARE', 'UAE Dirham', 'AED',
                     '784', '2', )
         self._currencies[
-            CountryRegistry.THE_UNITED_KINGDOM_OF_GREAT_BRITAIN_AND_NORTHERN_IRELAND] = \
+            cr.THE_UNITED_KINGDOM_OF_GREAT_BRITAIN_AND_NORTHERN_IRELAND] = \
             entries(
                 'THE UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND',
                 'GBR', 'Pound Sterling', 'GBP', '826', '2', )
         self._currencies[
-            CountryRegistry.THE_UNITED_STATES_MINOR_OUTLYING_ISLANDS] = \
+            cr.THE_UNITED_STATES_MINOR_OUTLYING_ISLANDS] = \
             entries('THE UNITED STATES MINOR OUTLYING ISLANDS', 'UMI',
                     'US Dollar', 'USD', '840', '2', )
-        self._currencies[CountryRegistry.THE_UNITED_STATES_OF_AMERICA] = \
+        self._currencies[cr.THE_UNITED_STATES_OF_AMERICA] = \
             entries('THE UNITED STATES OF AMERICA', 'USA', 'US Dollar',
                     'USD', '840', '2', )
-        self._currencies[CountryRegistry.THE_UNITED_STATES_OF_AMERICA] = \
+        self._currencies[cr.THE_UNITED_STATES_OF_AMERICA] = \
             entries('THE UNITED STATES OF AMERICA', '',
                     'US Dollar (Next day)', 'USN', '997', '2', )
-        self._currencies[CountryRegistry.URUGUAY] = \
+        self._currencies[cr.URUGUAY] = \
             entries('URUGUAY', 'URY', 'Peso Uruguayo', 'UYU', '858', '2', )
-        self._currencies[CountryRegistry.URUGUAY] = \
+        self._currencies[cr.URUGUAY] = \
             entries('URUGUAY', '', 'Uruguay Peso en Unidades Indexadas (UI)',
                     'UYI', '940', '0', )
-        self._currencies[CountryRegistry.URUGUAY] = \
+        self._currencies[cr.URUGUAY] = \
             entries('URUGUAY', '', 'Unidad Previsional', 'UYW', '927', '4', )
-        self._currencies[CountryRegistry.UZBEKISTAN] = \
+        self._currencies[cr.UZBEKISTAN] = \
             entries('UZBEKISTAN', 'UZB', 'Uzbekistan Sum', 'UZS', '860', '2', )
-        self._currencies[CountryRegistry.VANUATU] = \
+        self._currencies[cr.VANUATU] = \
             entries('VANUATU', 'VUT', 'Vatu', 'VUV', '548', '0', )
-        self._currencies[CountryRegistry.BOLIVARIAN_REPUBLIC_OF_VENEZUELA] = \
+        self._currencies[cr.BOLIVARIAN_REPUBLIC_OF_VENEZUELA] = \
             entries('BOLIVARIAN REPUBLIC OF VENEZUELA', 'VEN',
                            'Bolívar Soberano', 'VES', '928', '2', )
-        self._currencies[CountryRegistry.VIET_NAM] = \
+        self._currencies[cr.VIET_NAM] = \
             entries('VIET NAM', 'VNM', 'Dong', 'VND', '704', '0', )
-        self._currencies[CountryRegistry.VIRGIN_ISLANDS_BRITISH] = \
+        self._currencies[cr.VIRGIN_ISLANDS_BRITISH] = \
             entries('VIRGIN ISLANDS BRITISH', 'VGB', 'US Dollar', 'USD',
                     '840', '2', )
-        self._currencies[CountryRegistry.VIRGIN_ISLANDS_US] = \
+        self._currencies[cr.VIRGIN_ISLANDS_US] = \
             entries('VIRGIN ISLANDS US', 'VIR', 'US Dollar', 'USD', '840', '2',)
-        self._currencies[CountryRegistry.WALLIS_AND_FUTUNA] = \
+        self._currencies[cr.WALLIS_AND_FUTUNA] = \
             entries('WALLIS AND FUTUNA', 'WLF', 'CFP Franc', 'XPF', '953',
                     '0',)
-        self._currencies[CountryRegistry.WESTERN_SAHARA] = \
+        self._currencies[cr.WESTERN_SAHARA] = \
             entries('WESTERN SAHARA', 'ESH', 'Moroccan Dirham', 'MAD', '504',
                     '2',)
-        self._currencies[CountryRegistry.YEMEN] = \
+        self._currencies[cr.YEMEN] = \
             entries('YEMEN', 'YEM', 'Yemeni Rial', 'YER', '886', '2', )
-        self._currencies[CountryRegistry.ZAMBIA] = \
+        self._currencies[cr.ZAMBIA] = \
             entries('ZAMBIA', 'ZMB', 'Zambian Kwacha', 'ZMW', '967', '2', )
-        self._currencies[CountryRegistry.ZIMBABWE] = \
+        self._currencies[cr.ZIMBABWE] = \
             entries('ZIMBABWE', 'ZWE', 'Zimbabwe Dollar', 'ZWL', '932', '2', )
 
     def __iter__(self):
@@ -2588,4807 +2828,2749 @@ class CountryCurrencyRegistry:
         raise RuntimeError('Entries in the lookup cannot be altered')
 
 
-class Components:
-    # list the entire components for the UBL documents system
-    __slots__ = (
-        'ActivityDataLine',
-        'ActivityProperty',
-        'Address',
-        'AddressLine',
-        'AirTransport',
-        'AllowanceCharge',
-        'AppealTerms',
-        'Attachment',
-        'AuctionTerms',
-        'AwardingCriterion',
-        'AwardingCriterionResponse',
-        'AwardingTerms',
-        'BillingReference',
-        'BillingReferenceLine',
-        'Branch',
-        'BudgetAccount',
-        'BudgetAccountLine',
-        'Capability',
-        'CardAccount',
-        'CatalogueItemSpecificationUpdateLine',
-        'CatalogueLine',
-        'CataloguePricingUpdateLine',
-        'CatalogueReference',
-        'CatalogueRequestLine',
-        'Certificate',
-        'CertificateOfOriginApplication',
-        'ClassificationCategory',
-        'ClassificationScheme',
-        'Clause',
-        'CommodityClassification',
-        'Communication',
-        'CompletedTask',
-        'Condition',
-        'Consignment',
-        'Consumption',
-        'ConsumptionAverage',
-        'ConsumptionCorrection',
-        'ConsumptionHistory',
-        'ConsumptionLine',
-        'ConsumptionPoint',
-        'ConsumptionReport',
-        'ConsumptionReportReference',
-        'Contact',
-        'Contract',
-        'ContractExecutionRequirement',
-        'ContractExtension',
-        'ContractingActivity',
-        'ContractingParty',
-        'ContractingPartyType',
-        'CorporateRegistrationScheme',
-        'Country',
-        'CreditAccount',
-        'CreditNoteLine',
-        'CustomerParty',
-        'CustomsDeclaration',
-        'DebitNoteLine',
-        'Declaration',
-        'Delivery',
-        'DeliveryTerms',
-        'DeliveryUnit',
-        'DependentPriceReference',
-        'Despatch',
-        'DespatchLine',
-        'Dimension',
-        'DocumentDistribution',
-        'DocumentReference',
-        'DocumentResponse',
-        'Duty',
-        'EconomicOperatorRole',
-        'EconomicOperatorShortList',
-        'EmissionCalculationMethod',
-        'Endorsement',
-        'EndorserParty',
-        'EnergyTaxReport',
-        'EnergyWaterSupply',
-        'EnvironmentalEmission',
-        'EvaluationCriterion',
-        'Event',
-        'EventComment',
-        'EventLineItem',
-        'EventTactic',
-        'EventTacticEnumeration',
-        'Evidence',
-        'EvidenceSupplied',
-        'ExceptionCriteriaLine',
-        'ExceptionNotificationLine',
-        'ExchangeRate',
-        'ExternalReference',
-        'FinancialAccount',
-        'FinancialGuarantee',
-        'FinancialInstitution',
-        'ForecastException',
-        'ForecastExceptionCriterionLine',
-        'ForecastLine',
-        'ForecastRevisionLine',
-        'FrameworkAgreement',
-        'GoodsItem',
-        'GoodsItemContainer',
-        'HazardousGoodsTransit',
-        'HazardousItem',
-        'ImmobilizedSecurity',
-        'InstructionForReturnsLine',
-        'InventoryReportLine',
-        'InvoiceLine',
-        'Item',
-        'ItemComparison',
-        'ItemIdentification',
-        'ItemInformationRequestLine',
-        'ItemInstance',
-        'ItemLocationQuantity',
-        'ItemManagementProfile',
-        'ItemProperty',
-        'ItemPropertyGroup',
-        'ItemPropertyRange',
-        'Language',
-        'LineItem',
-        'LineReference',
-        'LineResponse',
-        'Location',
-        'LocationCoordinate',
-        'LotIdentification',
-        'MaritimeTransport',
-        'Meter',
-        'MeterProperty',
-        'MeterReading',
-        'MiscellaneousEvent',
-        'MonetaryTotal',
-        'NotificationRequirement',
-        'OnAccountPayment',
-        'OrderLine',
-        'OrderLineReference',
-        'OrderReference',
-        'OrderedShipment',
-        'Package',
-        'Party',
-        'PartyIdentification',
-        'PartyLegalEntity',
-        'PartyName',
-        'PartyTaxScheme',
-        'Payment',
-        'PaymentMandate',
-        'PaymentMeans',
-        'PaymentTerms',
-        'PerformanceDataLine',
-        'Period',
-        'Person',
-        'PhysicalAttribute',
-        'Pickup',
-        'PowerOfAttorney',
-        'Price',
-        'PriceExtension',
-        'PriceList',
-        'PricingReference',
-        'ProcessJustification',
-        'ProcurementProject',
-        'ProcurementProjectLot',
-        'ProjectReference',
-        'PromotionalEvent',
-        'PromotionalEventLineItem',
-        'PromotionalSpecification',
-        'QualificationResolution',
-        'QualifyingParty',
-        'QuotationLine',
-        'RailTransport',
-        'ReceiptLine',
-        'Regulation',
-        'RelatedItem',
-        'ReminderLine',
-        'RemittanceAdviceLine',
-        'Renewal',
-        'RequestForQuotationLine',
-        'RequestForTenderLine',
-        'RequestedTenderTotal',
-        'Response',
-        'ResultOfVerification',
-        'RetailPlannedImpact',
-        'RoadTransport',
-        'SalesItem',
-        'SecondaryHazard',
-        'ServiceFrequency',
-        'ServiceProviderParty',
-        'ShareholderParty',
-        'Shipment',
-        'ShipmentStage',
-        'Signature',
-        'StatementLine',
-        'Status',
-        'StockAvailabilityReportLine',
-        'Stowage',
-        'SubcontractTerms',
-        'SubscriberConsumption',
-        'SupplierConsumption',
-        'SupplierParty',
-        'TaxCategory',
-        'TaxScheme',
-        'TaxSubtotal',
-        'TaxTotal',
-        'TelecommunicationsService',
-        'TelecommunicationsSupply',
-        'TelecommunicationsSupplyLine',
-        'Temperature',
-        'TenderLine',
-        'TenderPreparation',
-        'TenderRequirement',
-        'TenderResult',
-        'TenderedProject',
-        'TendererPartyQualification',
-        'TendererQualificationRequest',
-        'TendererRequirement',
-        'TenderingProcess',
-        'TenderingTerms',
-        'TradeFinancing',
-        'TradingTerms',
-        'TransactionConditions',
-        'TransportEquipment',
-        'TransportEquipmentSeal',
-        'TransportEvent',
-        'TransportExecutionTerms',
-        'TransportHandlingUnit',
-        'TransportMeans',
-        'TransportSchedule',
-        'TransportationSegment',
-        'TransportationService',
-        'UnstructuredPrice',
-        'UtilityItem',
-        'WebSiteAccess',
-        'WinningParty',
-        'WorkPhaseReference',
-    )
+class UBLComponentRegistry:
+
+    __slots__ = 'registry', 'binary', 'code', 'asbie', 'datetime_', \
+                'measure', 'quantity', 'numeric', 'text', 'identifier', \
+                'indicator', 'name', 'amount', 'values'
 
     def __init__(self):
-        code = CodeType.mock()
-        asbie = AssociatedBusinessEntity.mock()
-        measure = MeasureType.mock()
-        quantity = QuantityType.mock()
-        datetime = DateTimeType.mock()
-        numeric = NumericType.mock()
-        text = TextType.mock()
-        identifier = IdentifierType.mock()
-        indicator = IndicatorType.mock()
-        amount = AmountType.mock()
-        binary = BinaryObjectType.mock()
-        name = NameType.mock()
+        self.binary = BinaryObjectType.mock()
+        self.code = CodeType.mock('SAMPLE', pattern=r'/(\w+)/', max_length=5)
+        self.asbie = AssociatedBusinessEntity.mock()
+        self.datetime_ = DateTimeType.mock()
+        self.measure = MeasureType.mock(0.0, kwargs={})
+        self.quantity = QuantityType.mock(0, kwargs={})
+        self.numeric = NumericType.mock(0.0, kwargs={})
+        self.text = TextType.mock('Sample', pattern=r'\w+', max_length=100)
+        self.identifier = IdentifierType.mock('sample', pattern=r'/w+/')
+        self.indicator = IndicatorType.mock()
+        self.name = NameType.mock('Sample Name', pattern=r'\w+', max_length=20)
+        self.amount = AmountType.mock(0.0, currency='NAIRA',
+                                      currency_code='NGN', version_id='2.1')
+        binary = self.binary
+        code = self.code
+        asbie = self.asbie
+        datetime_ = self.datetime_
+        measure = self.measure
+        quantity = self.quantity
+        numeric = self.numeric
+        text = self.text
+        identifier = self.identifier
+        indicator = self.indicator
+        name = self.name
+        amount = self.amount
 
-        self.ActivityDataLine = iter([
-            ('id', identifier),
-            ('supply_chain_activity_type_code', code),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('activity_period', asbie),
-            ('activity_origin_location', asbie),
-            ('activity_final_location', asbie),
-            ('sales_item', asbie),
-        ])
-        self.ActivityProperty = iter([
-            ('name', name),
-            ('value', text),
-        ])
-        self.Address = iter([
-            ('id', identifier),
-            ('address_type_code', code),
-            ('address_format_code', code),
-            ('postbox', text),
-            ('floor', text),
-            ('room', text),
-            ('street_name', name),
-            ('additional_street_name', name),
-            ('block_name', name),
-            ('building_name', name),
-            ('building_number', text),
-            ('inhouse_mail', text),
-            ('department', text),
-            ('mark_attention', text),
-            ('mark_care', text),
-            ('plot_identification', text),
-            ('city_subdivision_name', name),
-            ('city_name', name),
-            ('postal_zone', text),
-            ('country_sub_entity', text),
-            ('country_sub_entity_code', code),
-            ('region', text),
-            ('district', text),
-            ('timezone_offset', text),
-            ('address_line', asbie),
-            ('country', asbie),
-            ('location_coordinate', asbie),
-        ])
-        self.AddressLine = iter([('line', text)])
-        self.AirTransport = iter([('aircraft_identifier', identifier)])
-        self.AllowanceCharge = iter([
-            ('id', identifier),
-            ('charge_indicator', indicator),
-            ('allowance_charge_reason_code', code),
-            ('allowance_charge_reason', text),
-            ('multiplier_factor', numeric),
-            ('prepaid_indicator', indicator),
-            ('sequence', numeric),
-            ('amount', amount),
-            ('base_amount', amount),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('per_unit_amount', amount),
-            ('tax_category', asbie),
-            ('tax_total', asbie),
-            ('payment_means', asbie),
-        ])
-        self.AppealTerms = iter([
-            ('description', text),
-            ('presentation_period', asbie),
-            ('appeal_information_party', asbie),
-            ('appeal_receiver_party', asbie),
-            ('mediation_party', asbie),
-        ])
-        self.Attachment = iter([
-            ('embedded_document', binary),
-            ('external_reference', asbie),
-        ])
-        self.AuctionTerms = iter([
-            ('auction_constraint', indicator),
-            ('justification_description', text),
-            ('description', text),
-            ('process_description', text),
-            ('conditions_description', text),
-            ('electronic_device_description', text),
-            ('auction_uri', identifier),
-        ])
-        self.AwardingCriterion = iter([
-            ('id', identifier),
-            ('awarding_criterion_type_code', code),
-            ('description', text),
-            ('weight_numeric', numeric),
-            ('weight', text),
-            ('calculation_expression', text),
-            ('calculation_expression_code', code),
-            ('minimum_quantity', quantity),
-            ('maximum_quantity', quantity),
-            ('minimum_amount', amount),
-            ('maximum_amount', amount),
-            ('minimum_improvement_bid', text),
-            ('subordinate_awarding_criterion', asbie),
-        ])
-        self.AwardingCriterionResponse = iter([
-            ('id', identifier),
-            ('awarding_criterion_identifier', identifier),
-            ('awarding_criterion_description', text),
-            ('description', text),
-            ('quantity', quantity),
-            ('amount', amount),
-            ('subordinate_awarding_criterion_response', asbie),
-        ])
-        self.AwardingTerms = iter([
-            ('weighting_algorithm_code', code),
-            ('description', text),
-            ('technical_committee_description', text),
-            ('low_tenders_description', text),
-            ('prize_indicator', indicator),
-            ('prize_description', text),
-            ('payment_description', text),
-            ('followup_contract_indicator', indicator),
-            ('binding_on_buyer_indicator', indicator),
-            ('awarding_criterion', asbie),
-            ('technical_committee_person', asbie),
-        ])
-        self.BillingReference = iter([
-            ('invoice_document_reference', asbie),
-            ('self_billed_invoice_document_reference', asbie),
-            ('credit_note_document_reference', asbie),
-            ('self_billed_credit_note_document_reference', asbie),
-            ('debit_note_document_reference', asbie),
-            ('reminder_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('billing_reference_line', asbie),
-        ])
-        self.BillingReferenceLine = iter([
-            ('id', identifier),
-            ('amount', amount),
-            ('allowance_charge', asbie),
-        ])
-        self.Branch = iter([
-            ('id', identifier),
-            ('name', name),
-            ('financial_institution', asbie),
-            ('address', asbie),
-        ])
-        self.BudgetAccount = iter([
-            ('id', identifier),
-            ('budget_year', numeric),
-            ('required_classification_scheme', asbie),
-        ])
-        self.BudgetAccountLine = iter([
-            ('id', identifier),
-            ('total_amount', amount),
-            ('budget_account', asbie),
-        ])
-        self.Capability = iter([
-            ('capability_type_code', code),
-            ('description', text),
-            ('value', amount),
-            ('value_quantity', quantity),
-            ('evidence_supplied', asbie),
-            ('validity_period', asbie),
-        ])
-        self.CardAccount = iter([
-            ('primary_account_number', identifier),
-            ('network', identifier),
-            ('card_type_code', code),
-            ('validity_start_date', datetime),
-            ('expiry_date', datetime),
-            ('issuer', identifier),
-            ('issue_number', identifier),
-            ('cv2', identifier),
-            ('card_chip_code', code),
-            ('chip_application', identifier),
-            ('holder', name),
-        ])
-        self.CatalogueItemSpecificationUpdateLine = iter([
-            ('id', identifier),
-            ('contractor_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('item', asbie),
-        ])
-        self.CatalogueLine = iter([
-            ('id', identifier),
-            ('action_code', code),
-            ('life_cycle_status_code', code),
-            ('contract_subdivision', text),
-            ('note', text),
-            ('orderable_indicator', indicator),
-            ('orderable_unit', text),
-            ('content_unit', quantity),
-            ('order_quantity_increment', numeric),
-            ('minimum_order_quantity', quantity),
-            ('maximum_order_quantity', quantity),
-            ('warranty_information', text),
-            ('pack_level_code', code),
-            ('contractor_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('warranty_party', asbie),
-            ('warranty_validity_period', asbie),
-            ('line_validity_period', asbie),
-            ('item_comparison', asbie),
-            ('component_related_item', asbie),
-            ('accessory_related_item', asbie),
-            ('required_related_item', asbie),
-            ('replacement_related_item', asbie),
-            ('complementary_related_item', asbie),
-            ('replaced_related_item', asbie),
-            ('required_item_location_quantity', asbie),
-            ('document_reference', asbie),
-            ('item', asbie),
-            ('keyword_item_property', asbie),
-            ('call_for_tenders_line_reference', asbie),
-            ('call_for_tenders_document_reference', asbie),
-        ])
-        self.CataloguePricingUpdateLine = iter([
-            ('id', identifier),
-            ('contractor_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('required_item_location_quantity', asbie),
-        ])
-        self.CatalogueReference = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-            ('revision_date', datetime),
-            ('revision_time', datetime),
-            ('note', text),
-            ('description', text),
-            ('version', identifier),
-            ('previous_version', identifier),
-        ])
-        self.CatalogueRequestLine = iter([
-            ('id', identifier),
-            ('contract_subdivision', text),
-            ('note', text),
-            ('line_validity_period', asbie),
-            ('required_item_location_quantity', asbie),
-            ('item', asbie),
-        ])
-        self.Certificate = iter([
-            ('id', identifier),
-            ('certificate_type_code', code),
-            ('certificate_type', text),
-            ('remarks', text),
-            ('issuer_party', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-        ])
-        self.CertificateOfOriginApplication = iter([
-            ('reference', identifier),
-            ('certificate_type', text),
-            ('application_status_code', code),
-            ('original_job_identifier', identifier),
-            ('previous_job_identifier', identifier),
-            ('remarks', text),
-            ('shipment', asbie),
-            ('endorser_party', asbie),
-            ('preparation_party', asbie),
-            ('issuer_party', asbie),
-            ('exporter_party', asbie),
-            ('importer_party', asbie),
-            ('issuing_country', asbie),
-            ('document_distribution', asbie),
-            ('supporting_document_reference', asbie),
-            ('signature', asbie),
-        ])
-        self.ClassificationCategory = iter([
-            ('name', name),
-            ('code_value', text),
-            ('description', text),
-            ('categorizes_classification_category', asbie),
-        ])
-        self.ClassificationScheme = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('last_revision_date', datetime),
-            ('last_revision_time', datetime),
-            ('note', text),
-            ('name', name),
-            ('description', text),
-            ('agency_identifier', identifier),
-            ('agency_name', text),
-            ('version', identifier),
-            ('uri', identifier),
-            ('scheme_uri', identifier),
-            ('language', identifier),
-            ('classification_category', asbie),
-        ])
-        self.Clause = iter([
-            ('id', identifier),
-            ('content', text),
-        ])
-        self.CommodityClassification = iter([
-            ('nature_code', code),
-            ('cargo_type_code', code),
-            ('commodity_code', code),
-            ('item_classification_code', code),
-        ])
-        self.Communication = iter([
-            ('channel_code', code),
-            ('channel', text),
-            ('value', text),
-        ])
-        self.CompletedTask = iter([
-            ('annual_average', amount),
-            ('total_task', amount),
-            ('party_capacity', amount),
-            ('description', text),
-            ('evidence_supplied', asbie),
-            ('period', asbie),
-            ('recipient_customer_party', asbie),
-        ])
-        self.Condition = iter([
-            ('attribute_identifier', identifier),
-            ('measure', measure),
-            ('description', text),
-            ('minimum_measure', measure),
-            ('maximum_measure', measure),
-        ])
-        self.Consignment = iter([
-            ('id', identifier),
-            ('carrier_assigned_id', identifier),
-            ('consignee_assigned_id', identifier),
-            ('consignor_assigned_id', identifier),
-            ('freight_forwarder_assigned_id', identifier),
-            ('broker_assigned_id', identifier),
-            ('contracted_carrier_assigned_id', identifier),
-            ('performing_carrier_assigned_id', identifier),
-            ('summary_description', text),
-            ('total_invoice_amount', amount),
-            ('declared_customs_value', amount),
-            ('tariff_description', text),
-            ('tariff_code', code),
-            ('insurance_premium_amount', amount),
-            ('gross_weight', measure),
-            ('net_weight', measure),
-            ('net_net_weight', measure),
-            ('chargeable_weight', measure),
-            ('gross_volume', measure),
-            ('net_volume', measure),
-            ('loading_length', measure),
-            ('remarks', text),
-            ('hazardous_risk_indicator', indicator),
-            ('animal_food_indicator', indicator),
-            ('human_food_indicator', indicator),
-            ('livestock_indicator', indicator),
-            ('bulk_cargo_indicator', indicator),
-            ('containerized_indicator', indicator),
-            ('general_cargo_indicator', indicator),
-            ('special_security_indicator', indicator),
-            ('third_party_payer_indicator', indicator),
-            ('carrier_service_instructions', text),
-            ('customs_clearance_service_instructions', text),
-            ('forwarder_service_instructions', text),
-            ('special_service_instructions', text),
-            ('sequence_identifier', identifier),
-            ('shipping_priority_level_code', code),
-            ('handling_code', code),
-            ('handling_instructions', text),
-            ('information', text),
-            ('total_goods_item_quantity', quantity),
-            ('total_transport_handling_unit_quantity', quantity),
-            ('insurance_value', amount),
-            ('declared_for_carriage_value', amount),
-            ('declared_statistics_value', amount),
-            ('free_on_board_value', amount),
-            ('special_instructions', text),
-            ('split_consignment_indicator', indicator),
-            ('delivery_instructions', text),
-            ('consignment_quantity', quantity),
-            ('consolidatable_indicator', indicator),
-            ('haulage_instructions', text),
-            ('loading_sequence_identifier', identifier),
-            ('child_consignment_quantity', quantity),
-            ('total_packages_quantity', quantity),
-            ('consolidated_shipment', asbie),
-            ('customs_declaration', asbie),
-            ('requested_pickup_transport_event', asbie),
-            ('requested_delivery_transport_event', asbie),
-            ('planned_pickup_transport_event', asbie),
-            ('planned_delivery_transport_event', asbie),
-            ('status', asbie),
-            ('child_consignment', asbie),
-            ('consignee_party', asbie),
-            ('exporter_party', asbie),
-            ('consignor_party', asbie),
-            ('importer_party', asbie),
-            ('carrier_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('notify_party', asbie),
-            ('original_despatch_party', asbie),
-            ('final_delivery_party', asbie),
-            ('performing_carrier_party', asbie),
-            ('substitute_carrier_party', asbie),
-            ('logistics_operator_party', asbie),
-            ('transport_advisor_party', asbie),
-            ('hazardous_item_notification_party', asbie),
-            ('insurance_party', asbie),
-            ('mortgage_holder_party', asbie),
-            ('bill_of_lading_holder_party', asbie),
-            ('original_departure_country', asbie),
-            ('final_destination_country', asbie),
-            ('transit_country', asbie),
-            ('transport_contract', asbie),
-            ('transport_event', asbie),
-            ('original_despatch_transportation_service', asbie),
-            ('final_delivery_transportation_service', asbie),
-            ('delivery_terms', asbie),
-            ('payment_terms', asbie),
-            ('collect_payment_terms', asbie),
-            ('disbursement_payment_terms', asbie),
-            ('prepaid_payment_terms', asbie),
-            ('freight_allowance_charge', asbie),
-            ('extra_allowance_charge', asbie),
-            ('main_carriage_shipment_stage', asbie),
-            ('pre_carriage_shipment_stage', asbie),
-            ('on_carriage_shipment_stage', asbie),
-            ('transport_handling_unit', asbie),
-            ('first_arrival_port_location', asbie),
-            ('last_exit_port_location', asbie),
-        ])
-        self.Consumption = iter([
-            ('utility_statement_type_code', code),
-            ('main_period', asbie),
-            ('allowance_charge', asbie),
-            ('tax_total', asbie),
-            ('energy_water_supply', asbie),
-            ('telecommunications_supply', asbie),
-            ('legal_monetary_total', asbie),
-        ])
-        self.ConsumptionAverage = iter([
-            ('average_amount', amount),
-            ('description', text),
-        ])
-        self.ConsumptionCorrection = iter([
-            ('correction_type', text),
-            ('correction_type_code', code),
-            ('meter_number', text),
-            ('gas_pressure', quantity),
-            ('actual_temperature_reduction', quantity),
-            ('normal_temperature_reduction', quantity),
-            ('difference_temperature_reduction', quantity),
-            ('description', text),
-            ('correction_unit_amount', amount),
-            ('consumption_energy', quantity),
-            ('consumption_water', quantity),
-            ('correction_amount', amount),
-        ])
-        self.ConsumptionHistory = iter([
-            ('meter_number', text),
-            ('quantity', quantity),
-            ('amount', amount),
-            ('consumption_level_code', code),
-            ('consumption_level_text', text),
-            ('description', text),
-            ('period', asbie),
-        ])
-        self.ConsumptionLine = iter([
-            ('id', identifier),
-            ('parent_document_line_reference_identifier', identifier),
-            ('invoiced_quantity', quantity),
-            ('line_extension_amount', amount),
-            ('period', asbie),
-            ('delivery', asbie),
-            ('allowance_charge', asbie),
-            ('tax_total', asbie),
-            ('utility_item', asbie),
-            ('price', asbie),
-            ('unstructured_price', asbie),
-        ])
-        self.ConsumptionPoint = iter([
-            ('id', identifier),
-            ('description', text),
-            ('subscriber_identifier', identifier),
-            ('subscriber_type', text),
-            ('subscriber_type_code', code),
-            ('total_delivered_quantity', quantity),
-            ('address', asbie),
-            ('web_site_access', asbie),
-            ('utility_meter', asbie),
-        ])
-        self.ConsumptionReport = iter([
-            ('id', identifier),
-            ('consumption_type', text),
-            ('consumption_type_code', code),
-            ('description', text),
-            ('total_consumed_quantity', quantity),
-            ('basic_consumed_quantity', quantity),
-            ('resident_occupants_numeric', numeric),
-            ('consumers_energy_level_code', code),
-            ('consumers_energy_level', text),
-            ('residence_type', text),
-            ('residence_type_code', code),
-            ('heating_type', text),
-            ('heating_type_code', code),
-            ('period', asbie),
-            ('guidance_document_reference', asbie),
-            ('document_reference', asbie),
-            ('consumption_report_reference', asbie),
-            ('consumption_history', asbie),
-        ])
-        self.ConsumptionReportReference = iter([
-            ('consumption_report_identifier', identifier),
-            ('consumption_type', text),
-            ('consumption_type_code', code),
-            ('total_consumed_quantity', quantity),
-            ('period', asbie),
-        ])
-        self.Contact = iter([
-            ('id', identifier),
-            ('name', name),
-            ('telephone', text),
-            ('telefax', text),
-            ('electronic_mail', text),
-            ('note', text),
-            ('other_communication', asbie),
-        ])
-        self.Contract = iter([
-            ('id', identifier),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-            ('nomination_date', datetime),
-            ('nomination_time', datetime),
-            ('contract_type_code', code),
-            ('contract_type', text),
-            ('note', text),
-            ('version', identifier),
-            ('description', text),
-            ('validity_period', asbie),
-            ('contract_document_reference', asbie),
-            ('nomination_period', asbie),
-            ('contractual_delivery', asbie),
-        ])
-        self.ContractExecutionRequirement = iter([
-            ('name', name),
-            ('execution_requirement_code', code),
-            ('description', text),
-        ])
-        self.ContractExtension = iter([
-            ('options_description', text),
-            ('minimum_number', numeric),
-            ('maximum_number', numeric),
-            ('option_validity_period', asbie),
-            ('renewal', asbie),
-        ])
-        self.ContractingActivity = iter([
-            ('activity_type_code', code),
-            ('activity_type', text),
-        ])
-        self.ContractingParty = iter([
-            ('buyer_profile_uri', identifier),
-            ('contracting_party_type', asbie),
-            ('contracting_activity', asbie),
-            ('party', asbie),
-        ])
-        self.ContractingPartyType = iter([
-            ('party_type_code', code),
-            ('party_type', text),
-        ])
-        self.CorporateRegistrationScheme = iter([
-            ('id', identifier),
-            ('name', name),
-            ('corporate_registration_type_code', code),
-            ('jurisdiction_region_address', asbie),
-        ])
-        self.Country = iter([
-            ('identification_code', code),
-            ('name', name),
-        ])
-        self.CreditAccount = iter([('account_identifier', identifier)])
-        self.CreditNoteLine = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('credited_quantity', quantity),
-            ('line_extension_amount', amount),
-            ('tax_point_date', datetime),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('payment_purpose_code', code),
-            ('free_of_charge_indicator', indicator),
-            ('invoice_period', asbie),
-            ('order_line_reference', asbie),
-            ('discrepancy_response', asbie),
-            ('despatch_line_reference', asbie),
-            ('receipt_line_reference', asbie),
-            ('billing_reference', asbie),
-            ('document_reference', asbie),
-            ('pricing_reference', asbie),
-            ('originator_party', asbie),
-            ('delivery', asbie),
-            ('payment_terms', asbie),
-            ('tax_total', asbie),
-            ('allowance_charge', asbie),
-            ('item', asbie),
-            ('price', asbie),
-            ('delivery_terms', asbie),
-            ('sub_credit_note_line', asbie),
-            ('item_price_extension', asbie),
-        ])
-        self.CustomerParty = iter([
-            ('customer_assigned_account_identifier', identifier),
-            ('supplier_assigned_account_identifier', identifier),
-            ('additional_account_identifier', identifier),
-            ('party', asbie),
-            ('delivery_contact', asbie),
-            ('accounting_contact', asbie),
-            ('buyer_contact', asbie),
-        ])
-        self.CustomsDeclaration = iter([
-            ('id', identifier),
-            ('issuer_party', asbie),
-        ])
-        self.DebitNoteLine = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('debited_quantity', quantity),
-            ('line_extension_amount', amount),
-            ('tax_point_date', datetime),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('payment_purpose_code', code),
-            ('discrepancy_response', asbie),
-            ('despatch_line_reference', asbie),
-            ('receipt_line_reference', asbie),
-            ('billing_reference', asbie),
-            ('document_reference', asbie),
-            ('pricing_reference', asbie),
-            ('delivery', asbie),
-            ('tax_total', asbie),
-            ('allowance_charge', asbie),
-            ('item', asbie),
-            ('price', asbie),
-            ('sub_debit_note_line', asbie),
-        ])
-        self.Declaration = iter([
-            ('name', name),
-            ('declaration_type_code', code),
-            ('description', text),
-            ('evidence_supplied', asbie),
-        ])
-        self.Delivery = iter([
-            ('id', identifier),
-            ('quantity', quantity),
-            ('minimum_quantity', quantity),
-            ('maximum_quantity', quantity),
-            ('actual_delivery_date', datetime),
-            ('actual_delivery_time', datetime),
-            ('latest_delivery_date', datetime),
-            ('latest_delivery_time', datetime),
-            ('release', identifier),
-            ('tracking_identifier', identifier),
-            ('delivery_address', asbie),
-            ('delivery_location', asbie),
-            ('alternative_delivery_location', asbie),
-            ('requested_delivery_period', asbie),
-            ('promised_delivery_period', asbie),
-            ('estimated_delivery_period', asbie),
-            ('carrier_party', asbie),
-            ('delivery_party', asbie),
-            ('notify_party', asbie),
-            ('despatch', asbie),
-            ('delivery_terms', asbie),
-            ('minimum_delivery_unit', asbie),
-            ('maximum_delivery_unit', asbie),
-            ('shipment', asbie),
-        ])
-        self.DeliveryTerms = iter([
-            ('id', identifier),
-            ('special_terms', text),
-            ('loss_risk_responsibility_code', code),
-            ('loss_risk', text),
-            ('amount', amount),
-            ('delivery_location', asbie),
-            ('allowance_charge', asbie),
-        ])
-        self.DeliveryUnit = iter([
-            ('batch_quantity', quantity),
-            ('consumer_unit', quantity),
-            ('hazardous_risk_indicator', indicator),
-        ])
-        self.DependentPriceReference = iter([
-            ('percent', numeric),
-            ('location_address', asbie),
-            ('dependent_line_reference', asbie),
-        ])
-        self.Despatch = iter([
-            ('id', identifier),
-            ('requested_despatch_date', datetime),
-            ('requested_despatch_time', datetime),
-            ('estimated_despatch_date', datetime),
-            ('estimated_despatch_time', datetime),
-            ('actual_despatch_date', datetime),
-            ('actual_despatch_time', datetime),
-            ('guaranteed_despatch_date', datetime),
-            ('guaranteed_despatch_time', datetime),
-            ('release', identifier),
-            ('instructions', text),
-            ('despatch_address', asbie),
-            ('despatch_location', asbie),
-            ('despatch_party', asbie),
-            ('carrier_party', asbie),
-            ('notify_party', asbie),
-            ('contact', asbie),
-            ('estimated_despatch_period', asbie),
-            ('requested_despatch_period', asbie),
-        ])
-        self.DespatchLine = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('line_status_code', code),
-            ('delivered_quantity', quantity),
-            ('backorder_quantity', quantity),
-            ('backorder_reason', text),
-            ('outstanding_quantity', quantity),
-            ('outstanding_reason', text),
-            ('oversupply_quantity', quantity),
-            ('order_line_reference', asbie),
-            ('document_reference', asbie),
-            ('item', asbie),
-            ('shipment', asbie),
-        ])
-        self.Dimension = iter([
-            ('attribute_identifier', identifier),
-            ('measure', measure),
-            ('description', text),
-            ('minimum_measure', measure),
-            ('maximum_measure', measure),
-        ])
-        self.DocumentDistribution = iter([
-            ('print_qualifier', text),
-            ('maximum_copies', numeric),
-            ('party', asbie),
-        ])
-        self.DocumentReference = iter([
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-            ('document_type_code', code),
-            ('document_type', text),
-            ('xpath', text),
-            ('language', identifier),
-            ('locale_code', code),
-            ('version', identifier),
-            ('document_status_code', code),
-            ('document_description', text),
-            ('attachment', asbie),
-            ('validity_period', asbie),
-            ('issuer_party', asbie),
-            ('result_of_verification', asbie),
-        ])
-        self.DocumentResponse = iter([
-            ('response', asbie),
-            ('document_reference', asbie),
-            ('issuer_party', asbie),
-            ('recipient_party', asbie),
-            ('line_response', asbie),
-        ])
-        self.Duty = iter([
-            ('amount', amount),
-            ('duty', text),
-            ('duty_code', code),
-            ('tax_category', asbie),
-        ])
-        self.EconomicOperatorRole = iter([
-            ('role_code', code),
-            ('role_description', text),
-        ])
-        self.EconomicOperatorShortList = iter([
-            ('limitation_description', text),
-            ('expected_quantity', quantity),
-            ('maximum_quantity', quantity),
-            ('minimum_quantity', quantity),
-            ('pre_selected_party', asbie),
-        ])
-        self.EmissionCalculationMethod = iter([
-            ('calculation_method_code', code),
-            ('fullness_indication_code', code),
-            ('measurement_from_location', asbie),
-            ('measurement_to_location', asbie),
-        ])
-        self.Endorsement = iter([
-            ('document', identifier),
-            ('approval_status', text),
-            ('remarks', text),
-            ('endorser_party', asbie),
-            ('signature', asbie),
-        ])
-        self.EndorserParty = iter([
-            ('role_code', code),
-            ('sequence', numeric),
-            ('party', asbie),
-            ('signatory_contact', asbie),
-        ])
-        self.EnergyTaxReport = iter([
-            ('tax_energy_amount', amount),
-            ('tax_energy_on_account_amount', amount),
-            ('tax_energy_balance', amount),
-            ('tax_scheme', asbie),
-        ])
-        self.EnergyWaterSupply = iter([
-            ('consumption_report', asbie),
-            ('energy_tax_report', asbie),
-            ('consumption_average', asbie),
-            ('energy_water_consumption_correction', asbie),
-        ])
-        self.EnvironmentalEmission = iter([
-            ('environmental_emission_type_code', code),
-            ('value', measure),
-            ('description', text),
-            ('emission_calculation_method', asbie),
-        ])
-        self.EvaluationCriterion = iter([
-            ('evaluation_criterion_type_code', code),
-            ('description', text),
-            ('threshold_amount', amount),
-            ('threshold_quantity', quantity),
-            ('expression_code', code),
-            ('expression', text),
-            ('duration_period', asbie),
-            ('suggested_evidence', asbie),
-        ])
-        self.Event = iter([
-            ('identification', identifier),
-            ('occurrence_date', datetime),
-            ('occurrence_time', datetime),
-            ('type_code', code),
-            ('description', text),
-            ('completion_indicator', indicator),
-            ('current_status', asbie),
-            ('contact', asbie),
-            ('occurence_location', asbie),
-        ])
-        self.EventComment = iter([
-            ('comment', text),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-        ])
-        self.EventLineItem = iter([
-            ('line_number', numeric),
-            ('participating_locations_location', asbie),
-            ('retail_planned_impact', asbie),
-            ('supply_item', asbie),
-        ])
-        self.EventTactic = iter([
-            ('comment', text),
-            ('quantity', quantity),
-            ('event_tactic_enumeration', asbie),
-            ('period', asbie),
-        ])
-        self.EventTacticEnumeration = iter([
-            ('consumer_incentive_tactic_type_code', code),
-            ('display_tactic_type_code', code),
-            ('feature_tactic_type_code', code),
-            ('trade_item_packing_labeling_type_code', code),
-        ])
-        self.Evidence = iter([
-            ('id', identifier),
-            ('evidence_type_code', code),
-            ('description', text),
-            ('candidate_statement', text),
-            ('evidence_issuing_party', asbie),
-            ('document_reference', asbie),
-            ('language', asbie),
-        ])
-        self.EvidenceSupplied = iter([('id', identifier)])
-        self.ExceptionCriteriaLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('threshold_value_comparison_code', code),
-            ('threshold_quantity', quantity),
-            ('exception_status_code', code),
-            ('collaboration_priority_code', code),
-            ('exception_resolution_code', code),
-            ('supply_chain_activity_type_code', code),
-            ('performance_metric_type_code', code),
-            ('effective_period', asbie),
-            ('supply_item', asbie),
-            ('forecast_exception_criterion_line', asbie),
-        ])
-        self.ExceptionNotificationLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('description', text),
-            ('exception_status_code', code),
-            ('collaboration_priority_code', code),
-            ('resolution_code', code),
-            ('compared_value', measure),
-            ('source_value', measure),
-            ('variance', quantity),
-            ('supply_chain_activity_type_code', code),
-            ('performance_metric_type_code', code),
-            ('exception_observation_period', asbie),
-            ('document_reference', asbie),
-            ('forecast_exception', asbie),
-            ('supply_item', asbie),
-        ])
-        self.ExchangeRate = iter([
-            ('source_currency_code', code),
-            ('source_currency_base_rate', numeric),
-            ('target_currency_code', code),
-            ('target_currency_base_rate', numeric),
-            ('exchange_market_identifier', identifier),
-            ('calculation_rate', numeric),
-            ('mathematic_operator_code', code),
-            ('date', datetime),
-            ('foreign_exchange_contract', asbie),
-        ])
-        self.ExternalReference = iter([
-            ('uri', identifier),
-            ('document_hash', text),
-            ('hash_algorithm_method', text),
-            ('expiry_date', datetime),
-            ('expiry_time', datetime),
-            ('mime_code', code),
-            ('format_code', code),
-            ('encoding_code', code),
-            ('character_set_code', code),
-            ('file_name', name),
-            ('description', text),
-        ])
-        self.FinancialAccount = iter([
-            ('id', identifier),
-            ('name', name),
-            ('alias_name', name),
-            ('account_type_code', code),
-            ('account_format_code', code),
-            ('currency_code', code),
-            ('payment_note', text),
-            ('financial_institution_branch', asbie),
-            ('country', asbie),
-        ])
-        self.FinancialGuarantee = iter([
-            ('guarantee_type_code', code),
-            ('description', text),
-            ('liability', amount),
-            ('amount', numeric),
-            ('constitution_period', asbie),
-        ])
-        self.FinancialInstitution = iter([
-            ('id', identifier),
-            ('name', name),
-            ('address', asbie),
-        ])
-        self.ForecastException = iter([
-            ('forecast_purpose_code', code),
-            ('forecast_type_code', code),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-            ('data_source_code', code),
-            ('comparison_data_code', code),
-            ('comparison_forecast_issue_time', datetime),
-            ('comparison_forecast_issue_date', datetime),
-        ])
-        self.ForecastExceptionCriterionLine = iter([
-            ('forecast_purpose_code', code),
-            ('forecast_type_code', code),
-            ('comparison_data_source_code', code),
-            ('data_source_code', code),
-            ('time_delta_days_quantity', quantity),
-        ])
-        self.ForecastLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('frozen_document_indicator', indicator),
-            ('forecast_type_code', code),
-            ('forecast_period', asbie),
-            ('sales_item', asbie),
-        ])
-        self.ForecastRevisionLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('description', text),
-            ('revised_forecast_line_identifier', identifier),
-            ('source_forecast_issue_date', datetime),
-            ('source_forecast_issue_time', datetime),
-            ('adjustment_reason_code', code),
-            ('forecast_period', asbie),
-            ('sales_item', asbie),
-        ])
-        self.FrameworkAgreement = iter([
-            ('expected_operator', quantity),
-            ('maximum_operator', quantity),
-            ('justification', text),
-            ('frequency', text),
-            ('duration_period', asbie),
-            ('subsequent_process_tender_requirement', asbie),
-        ])
-        self.GoodsItem = iter([
-            ('id', identifier),
-            ('sequence_number', identifier),
-            ('description', text),
-            ('hazardous_risk_indicator', indicator),
-            ('declared_customs_value', amount),
-            ('declared_for_carriage_value', amount),
-            ('declared_statistics_value', amount),
-            ('free_on_board_value', amount),
-            ('insurance_value', amount),
-            ('value', amount),
-            ('gross_weight', measure),
-            ('net_weight', measure),
-            ('net_net_weight', measure),
-            ('chargeable_weight', measure),
-            ('gross_volume', measure),
-            ('net_volume', measure),
-            ('quantity', quantity),
-            ('preference_criterion_code', code),
-            ('required_customs_identifier', identifier),
-            ('customs_status_code', code),
-            ('customs_tariff_quantity', quantity),
-            ('customs_import_classified_indicator', indicator),
-            ('chargeable_quantity', quantity),
-            ('returnable_quantity', quantity),
-            ('trace_id', identifier),
-            ('item', asbie),
-            ('goods_item_container', asbie),
-            ('freight_allowance_charge', asbie),
-            ('invoice_line', asbie),
-            ('temperature', asbie),
-            ('contained_goods_item', asbie),
-            ('origin_address', asbie),
-            ('delivery', asbie),
-            ('pickup', asbie),
-            ('despatch', asbie),
-            ('measurement_dimension', asbie),
-            ('containing_package', asbie),
-            ('shipment_document_reference', asbie),
-            ('minimum_temperature', asbie),
-            ('maximum_temperature', asbie),
-        ])
-        self.GoodsItemContainer = iter([
-            ('id', identifier),
-            ('quantity', quantity),
-            ('transport_equipment', asbie),
-        ])
-        self.HazardousGoodsTransit = iter([
-            ('transport_emergency_card_code', code),
-            ('packing_criteria_code', code),
-            ('hazardous_regulation_code', code),
-            ('inhalation_toxicity_zone_code', code),
-            ('transport_authorization_code', code),
-            ('maximum_temperature', asbie),
-            ('minimum_temperature', asbie),
-        ])
-        self.HazardousItem = iter([
-            ('id', identifier),
-            ('placard_notation', text),
-            ('placard_endorsement', text),
-            ('additional_information', text),
-            ('undg_code', code),
-            ('emergency_procedures_code', code),
-            ('medical_first_aid_guide_code', code),
-            ('technical_name', name),
-            ('category', name),
-            ('hazardous_category_code', code),
-            ('upper_orange_hazard_placard_identifier', identifier),
-            ('lower_orange_hazard_placard_identifier', identifier),
-            ('marking_identifier', identifier),
-            ('hazard_class_identifier', identifier),
-            ('net_weight', measure),
-            ('net_volume', measure),
-            ('quantity', quantity),
-            ('contact_party', asbie),
-            ('secondary_hazard', asbie),
-            ('hazardous_goods_transit', asbie),
-            ('emergency_temperature', asbie),
-            ('flashpoint_temperature', asbie),
-            ('additional_temperature', asbie),
-        ])
-        self.ImmobilizedSecurity = iter([
-            ('immobilization_certificate_identifier', identifier),
-            ('security_identifier', identifier),
-            ('issue_date', datetime),
-            ('face_value', amount),
-            ('market_value', amount),
-            ('shares_number', quantity),
-            ('issuer_party', asbie),
-        ])
-        self.InstructionForReturnsLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('quantity', quantity),
-            ('manufacturer_party', asbie),
-            ('item', asbie),
-        ])
-        self.InventoryReportLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('quantity', quantity),
-            ('inventory_value', amount),
-            ('availability_date', datetime),
-            ('availability_status_code', code),
-            ('item', asbie),
-            ('inventory_location', asbie),
-        ])
-        self.InvoiceLine = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('invoiced_quantity', quantity),
-            ('line_extension_amount', amount),
-            ('tax_point_date', datetime),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('payment_purpose_code', code),
-            ('free_of_charge_indicator', indicator),
-            ('invoice_period', asbie),
-            ('order_line_reference', asbie),
-            ('despatch_line_reference', asbie),
-            ('receipt_line_reference', asbie),
-            ('billing_reference', asbie),
-            ('document_reference', asbie),
-            ('pricing_reference', asbie),
-            ('originator_party', asbie),
-            ('delivery', asbie),
-            ('payment_terms', asbie),
-            ('allowance_charge', asbie),
-            ('tax_total', asbie),
-            ('withholding_tax_total', asbie),
-            ('item', asbie),
-            ('price', asbie),
-            ('delivery_terms', asbie),
-            ('sub_invoice_line', asbie),
-            ('item_price_extension', asbie),
-        ])
-        self.Item = iter([
-            ('description', text),
-            ('pack_quantity', quantity),
-            ('pack_size', numeric),
-            ('catalogue_indicator', indicator),
-            ('name', name),
-            ('hazardous_risk_indicator', indicator),
-            ('additional_information', text),
-            ('keyword', text),
-            ('brand_name', name),
-            ('model_name', name),
-            ('buyers_item_identification', asbie),
-            ('sellers_item_identification', asbie),
-            ('manufacturers_item_identification', asbie),
-            ('standard_item_identification', asbie),
-            ('catalogue_item_identification', asbie),
-            ('additional_item_identification', asbie),
-            ('catalogue_document_reference', asbie),
-            ('item_specification_document_reference', asbie),
-            ('origin_country', asbie),
-            ('commodity_classification', asbie),
-            ('transaction_conditions', asbie),
-            ('hazardous_item', asbie),
-            ('classified_tax_category', asbie),
-            ('additional_item_property', asbie),
-            ('manufacturer_party', asbie),
-            ('information_content_provider_party', asbie),
-            ('origin_address', asbie),
-            ('item_instance', asbie),
-            ('certificate', asbie),
-            ('dimension', asbie),
-        ])
-        self.ItemComparison = iter([
-            ('price_amount', amount),
-            ('quantity', quantity),
-        ])
-        self.ItemIdentification = iter([
-            ('id', identifier),
-            ('extended_id', identifier),
-            ('barcode_symbology_identifier', identifier),
-            ('physical_attribute', asbie),
-            ('measurement_dimension', asbie),
-            ('issuer_party', asbie),
-        ])
-        self.ItemInformationRequestLine = iter([
-            ('time_frequency_code', code),
-            ('supply_chain_activity_type_code', code),
-            ('forecast_type_code', code),
-            ('performance_metric_type_code', code),
-            ('period', asbie),
-            ('sales_item', asbie),
-        ])
-        self.ItemInstance = iter([
-            ('product_trace_id', identifier),
-            ('manufacture_date', datetime),
-            ('manufacture_time', datetime),
-            ('best_before_date', datetime),
-            ('registration_identifier', identifier),
-            ('serial_identifier', identifier),
-            ('additional_item_property', asbie),
-            ('lot_identification', asbie),
-        ])
-        self.ItemLocationQuantity = iter([
-            ('lead_time', measure),
-            ('minimum_quantity', quantity),
-            ('maximum_quantity', quantity),
-            ('hazardous_risk_indicator', indicator),
-            ('trading_restrictions', text),
-            ('applicable_territory_address', asbie),
-            ('price', asbie),
-            ('delivery_unit', asbie),
-            ('applicable_tax_category', asbie),
-            ('package', asbie),
-            ('allowance_charge', asbie),
-            ('dependent_price_reference', asbie),
-        ])
-        self.ItemManagementProfile = iter([
-            ('frozen_period_days', numeric),
-            ('minimum_inventory_quantity', quantity),
-            ('multiple_order_quantity', quantity),
-            ('order_interval_days', numeric),
-            ('replenishment_owner_description', text),
-            ('target_service_percent', numeric),
-            ('target_inventory_quantity', quantity),
-            ('effective_period', asbie),
-            ('item', asbie),
-            ('item_location_quantity', asbie),
-        ])
-        self.ItemProperty = iter([
-            ('id', identifier),
-            ('name', name),
-            ('name_code', code),
-            ('test_method', text),
-            ('value', text),
-            ('value_quantity', quantity),
-            ('value_qualifier', text),
-            ('importance_code', code),
-            ('list_value', text),
-            ('usability_period', asbie),
-            ('item_property_group', asbie),
-            ('range_dimension', asbie),
-            ('item_property_range', asbie),
-        ])
-        self.ItemPropertyGroup = iter([
-            ('id', identifier),
-            ('name', name),
-            ('importance_code', code),
-        ])
-        self.ItemPropertyRange = iter([
-            ('minimum_value', text),
-            ('maximum_value', text),
-        ])
-        self.Language = iter([
-            ('id', identifier),
-            ('name', name),
-            ('locale_code', code),
-        ])
-        self.LineItem = iter([
-            ('id', identifier),
-            ('sales_order_identifier', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('line_status_code', code),
-            ('quantity', quantity),
-            ('line_extension_amount', amount),
-            ('total_tax_amount', amount),
-            ('minimum_quantity', quantity),
-            ('maximum_quantity', quantity),
-            ('minimum_backorder', quantity),
-            ('maximum_backorder', quantity),
-            ('inspection_method_code', code),
-            ('partial_delivery_indicator', indicator),
-            ('back_order_allowed_indicator', indicator),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('warranty_information', text),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('originator_party', asbie),
-            ('ordered_shipment', asbie),
-            ('pricing_reference', asbie),
-            ('allowance_charge', asbie),
-            ('price', asbie),
-            ('item', asbie),
-            ('sub_line_item', asbie),
-            ('warranty_validity_period', asbie),
-            ('warranty_party', asbie),
-            ('tax_total', asbie),
-            ('item_price_extension', asbie),
-            ('line_reference', asbie),
-        ])
-        self.LineReference = iter([
-            ('line_identifier', identifier),
-            ('uuid', identifier),
-            ('line_status_code', code),
-            ('document_reference', asbie),
-        ])
-        self.LineResponse = iter([
-            ('line_reference', asbie),
-            ('response', asbie),
-        ])
-        self.Location = iter([
-            ('id', identifier),
-            ('description', text),
-            ('conditions', text),
-            ('country_subentity', text),
-            ('country_subentity_code', code),
-            ('location_type_code', code),
-            ('information_uri', identifier),
-            ('name', name),
-            ('validity_period', asbie),
-            ('address', asbie),
-            ('subsidiary_location', asbie),
-            ('location_coordinate', asbie),
-        ])
-        self.LocationCoordinate = iter([
-            ('coordinate_system_code', code),
-            ('latitude_degrees', measure),
-            ('latitude_minutes', measure),
-            ('latitude_direction_code', code),
-            ('longitude_degrees', measure),
-            ('longitude_minutes', measure),
-            ('longitude_direction_code', code),
-            ('altitude', measure),
-        ])
-        self.LotIdentification = iter([
-            ('lot_number', identifier),
-            ('expiry_date', datetime),
-            ('additional_item_property', asbie),
-        ])
-        self.MaritimeTransport = iter([
-            ('vessel_identifier', identifier),
-            ('vessel_name', name),
-            ('radio_call_sign_identifier', identifier),
-            ('ships_requirements', text),
-            ('gross_tonnage', measure),
-            ('net_tonnage', measure),
-            ('registry_certificate_document_reference', asbie),
-            ('registry_port_location', asbie),
-        ])
-        self.Meter = iter([
-            ('meter_number', text),
-            ('meter_name', text),
-            ('meter_constant', text),
-            ('meter_constant_code', code),
-            ('total_delivered_quantity', quantity),
-            ('meter_reading', asbie),
-            ('meter_property', asbie),
-        ])
-        self.MeterProperty = iter([
-            ('name', name),
-            ('name_code', code),
-            ('value', text),
-            ('value_quantity', quantity),
-            ('value_qualifier', text),
-        ])
-        self.MeterReading = iter([
-            ('id', identifier),
-            ('meter_reading_type', text),
-            ('meter_reading_type_code', code),
-            ('previous_meter_reading_date', datetime),
-            ('previous_meter_quantity', quantity),
-            ('latest_meter_reading_date', datetime),
-            ('latest_meter_quantity', quantity),
-            ('previous_meter_reading_method', text),
-            ('previous_meter_reading_method_code', code),
-            ('latest_meter_reading_method', text),
-            ('latest_meter_reading_method_code', code),
-            ('meter_reading_comments', text),
-            ('delivered_quantity', quantity),
-        ])
-        self.MiscellaneousEvent = iter([
-            ('miscellaneous_event_type_code', code),
-            ('event_line_item', asbie),
-        ])
-        self.MonetaryTotal = iter([
-            ('line_extension_amount', amount),
-            ('tax_exclusive_amount', amount),
-            ('tax_inclusive_amount', amount),
-            ('allowance_total_amount', amount),
-            ('charge_total_amount', amount),
-            ('prepaid_amount', amount),
-            ('payable_rounding_amount', amount),
-            ('payable_amount', amount),
-            ('payable_alternative_amount', amount),
-        ])
-        self.NotificationRequirement = iter([
-            ('notification_type_code', code),
-            ('post_event_notification_duration', measure),
-            ('pre_event_notification_duration', measure),
-            ('notify_party', asbie),
-            ('notification_period', asbie),
-            ('notification_location', asbie),
-        ])
-        self.OnAccountPayment = iter([
-            ('estimated_consumed_quantity', quantity),
-            ('note', text),
-            ('payment_terms', asbie),
-        ])
-        self.OrderLine = iter([
-            ('substitution_status_code', code),
-            ('note', text),
-            ('line_item', asbie),
-            ('seller_proposed_substitute_line_item', asbie),
-            ('seller_substituted_line_item', asbie),
-            ('buyer_proposed_substitute_line_item', asbie),
-            ('catalogue_line_reference', asbie),
-            ('quotation_line_reference', asbie),
-            ('order_line_reference', asbie),
-            ('document_reference', asbie),
-        ])
-        self.OrderLineReference = iter([
-            ('line_identifier', identifier),
-            ('sales_order_line_identifier', identifier),
-            ('uuid', identifier),
-            ('line_status_code', code),
-            ('order_reference', asbie),
-        ])
-        self.OrderReference = iter([
-            ('id', identifier),
-            ('sales_order_identifier', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-            ('customer_reference', text),
-            ('order_type_code', code),
-            ('document_reference', asbie),
-        ])
-        self.OrderedShipment = iter([
-            ('shipment', asbie),
-            ('package', asbie),
-        ])
-        self.Package = iter([
-            ('id', identifier),
-            ('quantity', quantity),
-            ('returnable_material_indicator', indicator),
-            ('package_level_code', code),
-            ('packaging_type_code', code),
-            ('packing_material', text),
-            ('trace_id', identifier),
-            ('contained_package', asbie),
-            ('containing_transport_equipment', asbie),
-            ('goods_item', asbie),
-            ('measurement_dimension', asbie),
-            ('delivery_unit', asbie),
-            ('delivery', asbie),
-            ('pickup', asbie),
-            ('despatch', asbie),
-        ])
-        self.Party = iter([
-            ('mark_care_indicator', indicator),
-            ('mark_attention_indicator', indicator),
-            ('website_uri', identifier),
-            ('logo_reference', identifier),
-            ('endpoint_identifier', identifier),
-            ('industry_classification_code', code),
-            ('party_identification', asbie),
-            ('party_name', asbie),
-            ('language', asbie),
-            ('postal_address', asbie),
-            ('physical_location', asbie),
-            ('party_tax_scheme', asbie),
-            ('party_legal_entity', asbie),
-            ('contact', asbie),
-            ('person', asbie),
-            ('agent_party', asbie),
-            ('service_provider_party', asbie),
-            ('power_of_attorney', asbie),
-            ('financial_account', asbie),
-        ])
-        self.PartyIdentification = iter([('id', identifier)])
-        self.PartyLegalEntity = iter([
-            ('registration_name', name),
-            ('company_identifier', identifier),
-            ('registration_date', datetime),
-            ('registration_expiration_date', datetime),
-            ('company_legal_form_code', code),
-            ('company_legal_form', text),
-            ('sole_proprietorship_indicator', indicator),
-            ('company_liquidation_status_code', code),
-            ('corporate_stock_amount', amount),
-            ('fully_paid_shares_indicator', indicator),
-            ('registration_address', asbie),
-            ('corporate_registration_scheme', asbie),
-            ('head_office_party', asbie),
-            ('shareholder_party', asbie),
-        ])
-        self.PartyName = iter([('name', name)])
-        self.PartyTaxScheme = iter([
-            ('registration_name', name),
-            ('company_identifier', identifier),
-            ('tax_level_code', code),
-            ('exemption_reason_code', code),
-            ('exemption_reason', text),
-            ('registration_address', asbie),
-            ('tax_scheme', asbie),
-        ])
-        self.Payment = iter([
-            ('id', identifier),
-            ('paid_amount', amount),
-            ('received_date', datetime),
-            ('paid_date', datetime),
-            ('paid_time', datetime),
-            ('instruction_identifier', identifier),
-        ])
-        self.PaymentMandate = iter([
-            ('id', identifier),
-            ('mandate_type_code', code),
-            ('maximum_payment_instructions', numeric),
-            ('maximum_paid_amount', amount),
-            ('signature_identifier', identifier),
-            ('payer_party', asbie),
-            ('payer_financial_account', asbie),
-            ('validity_period', asbie),
-            ('payment_reversal_period', asbie),
-            ('clause', asbie),
-        ])
-        self.PaymentMeans = iter([
-            ('id', identifier),
-            ('payment_means_code', code),
-            ('payment_due_date', datetime),
-            ('payment_channel_code', code),
-            ('instruction_identifier', identifier),
-            ('instruction_note', text),
-            ('payment_identifier', identifier),
-            ('card_account', asbie),
-            ('payer_financial_account', asbie),
-            ('payee_financial_account', asbie),
-            ('credit_account', asbie),
-            ('payment_mandate', asbie),
-            ('trade_financing', asbie),
-        ])
-        self.PaymentTerms = iter([
-            ('id', identifier),
-            ('payment_means_identifier', identifier),
-            ('prepaid_payment_reference_identifier', identifier),
-            ('note', text),
-            ('reference_event_code', code),
-            ('settlement_discount_percent', numeric),
-            ('penalty_surcharge_percent', numeric),
-            ('payment_percent', numeric),
-            ('amount', amount),
-            ('settlement_discount_amount', amount),
-            ('penalty_amount', amount),
-            ('payment_terms_details_uri', identifier),
-            ('payment_due_date', datetime),
-            ('installment_due_date', datetime),
-            ('invoicing_party_reference', text),
-            ('settlement_period', asbie),
-            ('penalty_period', asbie),
-            ('exchange_rate', asbie),
-            ('validity_period', asbie),
-        ])
-        self.PerformanceDataLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('performance_value', quantity),
-            ('performance_metric_type_code', code),
-            ('period', asbie),
-            ('item', asbie),
-        ])
-        self.Period = iter([
-            ('start_date', datetime),
-            ('start_time', datetime),
-            ('end_date', datetime),
-            ('end_time', datetime),
-            ('duration', measure),
-            ('description_code', code),
-            ('description', text),
-        ])
-        self.Person = iter([
-            ('id', identifier),
-            ('first_name', name),
-            ('family_name', name),
-            ('title', text),
-            ('middle_name', name),
-            ('other_name', name),
-            ('name_suffix', text),
-            ('job_title', text),
-            ('nationality', identifier),
-            ('gender_code', code),
-            ('birth_date', datetime),
-            ('birthplace_name', text),
-            ('organization_department', text),
-            ('contact', asbie),
-            ('financial_account', asbie),
-            ('identity_document_reference', asbie),
-            ('residence_address', asbie),
-        ])
-        self.PhysicalAttribute = iter([
-            ('attribute_identifier', identifier),
-            ('position_code', code),
-            ('description_code', code),
-            ('description', text),
-        ])
-        self.Pickup = iter([
-            ('id', identifier),
-            ('actual_pickup_date', datetime),
-            ('actual_pickup_time', datetime),
-            ('earliest_pickup_date', datetime),
-            ('earliest_pickup_time', datetime),
-            ('latest_pickup_date', datetime),
-            ('latest_pickup_time', datetime),
-            ('pickup_location', asbie),
-            ('pickup_party', asbie),
-        ])
-        self.PowerOfAttorney = iter([
-            ('id', identifier),
-            ('issue_date', datetime),
-            ('issue_time', datetime),
-            ('description', text),
-            ('notary_party', asbie),
-            ('agent_party', asbie),
-            ('witness_party', asbie),
-            ('mandate_document_reference', asbie),
-        ])
-        self.Price = iter([
-            ('price_amount', amount),
-            ('base_quantity', quantity),
-            ('price_change_reason', text),
-            ('price_type_code', code),
-            ('price_type', text),
-            ('orderable_unit_factor', numeric),
-            ('validity_period', asbie),
-            ('price_list', asbie),
-            ('allowance_charge', asbie),
-            ('pricing_exchange_rate', asbie),
-        ])
-        self.PriceExtension = iter([
-            ('amount', amount),
-            ('tax_total', asbie),
-        ])
-        self.PriceList = iter([
-            ('id', identifier),
-            ('status_code', code),
-            ('validity_period', asbie),
-            ('previous_price_list', asbie),
-        ])
-        self.PricingReference = iter([
-            ('original_item_location_quantity', asbie),
-            ('alternative_condition_price', asbie),
-        ])
-        self.ProcessJustification = iter([
-            ('previous_cancellation_reason_code', code),
-            ('process_reason_code', code),
-            ('process_reason', text),
-            ('description', text),
-        ])
-        self.ProcurementProject = iter([
-            ('id', identifier),
-            ('name', name),
-            ('description', text),
-            ('procurement_type_code', code),
-            ('procurement_sub_type_code', code),
-            ('quality_control_code', code),
-            ('required_fee', amount),
-            ('fee_description', text),
-            ('requested_delivery_date', datetime),
-            ('estimated_overall_contract', quantity),
-            ('note', text),
-            ('requested_tender_total', asbie),
-            ('main_commodity_classification', asbie),
-            ('additional_commodity_classification', asbie),
-            ('realized_location', asbie),
-            ('planned_period', asbie),
-            ('contract_extension', asbie),
-            ('request_for_tender_line', asbie),
-        ])
-        self.ProcurementProjectLot = iter([
-            ('id', identifier),
-            ('tendering_terms', asbie),
-            ('procurement_project', asbie),
-        ])
-        self.ProjectReference = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime),
-            ('work_phase_reference', asbie),
-        ])
-        self.PromotionalEvent = iter([
-            ('promotional_event_type_code', code),
-            ('submission', datetime),
-            ('first_shipment_availibility_date', datetime),
-            ('latest_proposal_acceptance_date', datetime),
-            ('promotional_specification', asbie),
-        ])
-        self.PromotionalEventLineItem = iter([
-            ('amount', amount),
-            ('event_line_item', asbie),
-        ])
-        self.PromotionalSpecification = iter([
-            ('specification_identifier', identifier),
-            ('promotional_event_line_item', asbie),
-            ('event_tactic', asbie),
-        ])
-        self.QualificationResolution = iter([
-            ('admission_code', code),
-            ('exclusion_reason', text),
-            ('resolution', text),
-            ('resolution_date', datetime),
-            ('resolution_time', datetime),
-            ('procurement_project_lot', asbie),
-        ])
-        self.QualifyingParty = iter([
-            ('participation', numeric),
-            ('personal_situation', text),
-            ('operating_years', quantity),
-            ('employee', quantity),
-            ('business_classification_evidence', identifier),
-            ('business_identity_evidence', identifier),
-            ('tenderer_role_code', code),
-            ('business_classification_scheme', asbie),
-            ('technical_capability', asbie),
-            ('financial_capability', asbie),
-            ('completed_task', asbie),
-            ('declaration', asbie),
-            ('party', asbie),
-            ('economic_operator_role', asbie),
-        ])
-        self.QuotationLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('quantity', quantity),
-            ('line_extension_amount', amount),
-            ('total_tax_amount', amount),
-            ('request_for_quotation_line_identifier', identifier),
-            ('document_reference', asbie),
-            ('line_item', asbie),
-            ('seller_proposed_substitute_line_item', asbie),
-            ('alternative_line_item', asbie),
-            ('request_line_reference', asbie),
-        ])
-        self.RailTransport = iter([
-            ('train_identifier', identifier),
-            ('rail_car_identifier', identifier),
-        ])
-        self.ReceiptLine = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('received_quantity', quantity),
-            ('short_quantity', quantity),
-            ('shortage_action_code', code),
-            ('rejected_quantity', quantity),
-            ('reject_reason_code', code),
-            ('reject_reason', text),
-            ('reject_action_code', code),
-            ('quantity_discrepancy_code', code),
-            ('oversupply_quantity', quantity),
-            ('received_date', datetime),
-            ('timing_complaint_code', code),
-            ('timing_complaint', text),
-            ('order_line_reference', asbie),
-            ('despatch_line_reference', asbie),
-            ('document_reference', asbie),
-            ('item', asbie),
-            ('shipment', asbie),
-        ])
-        self.Regulation = iter([
-            ('name', name),
-            ('legal_reference', text),
-            ('ontology_uri', identifier),
-        ])
-        self.RelatedItem = iter([
-            ('id', identifier),
-            ('quantity', quantity),
-            ('description', text),
-        ])
-        self.ReminderLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('uuid', identifier),
-            ('balance_brought_forward_indicator', indicator),
-            ('debit_line_amount', amount),
-            ('credit_line_amount', amount),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('penalty_surcharge_percent', numeric),
-            ('amount', amount),
-            ('payment_purpose_code', code),
-            ('reminder_period', asbie),
-            ('billing_reference', asbie),
-            ('exchange_rate', asbie),
-        ])
-        self.RemittanceAdviceLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('uuid', identifier),
-            ('debit_line_amount', amount),
-            ('credit_line_amount', amount),
-            ('balance_amount', amount),
-            ('payment_purpose_code', code),
-            ('invoicing_party_reference', text),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-            ('payee_party', asbie),
-            ('invoice_period', asbie),
-            ('billing_reference', asbie),
-            ('document_reference', asbie),
-            ('exchange_rate', asbie),
-        ])
-        self.Renewal = iter([
-            ('amount', amount),
-            ('period', asbie),
-        ])
-        self.RequestForQuotationLine = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('optional_line_item_indicator', indicator),
-            ('privacy_code', code),
-            ('security_classification_code', code),
-            ('document_reference', asbie),
-            ('line_item', asbie),
-        ])
-        self.RequestForTenderLine = iter([
-            ('id', identifier),
-            ('uuid', identifier),
-            ('note', text),
-            ('quantity', quantity),
-            ('minimum_quantity', quantity),
-            ('maximum_quantity', quantity),
-            ('tax_included_indicator', indicator),
-            ('minimum_amount', amount),
-            ('maximum_amount', amount),
-            ('estimated_amount', amount),
-            ('document_reference', asbie),
-            ('delivery_period', asbie),
-            ('required_item_location_quantity', asbie),
-            ('warranty_validity_period', asbie),
-            ('item', asbie),
-            ('sub_request_for_tender_line', asbie),
-        ])
-        self.RequestedTenderTotal = iter([
-            ('estimated_overall_contract', amount),
-            ('total_amount', amount),
-            ('tax_included_indicator', indicator),
-            ('minimum_amount', amount),
-            ('maximum_amount', amount),
-            ('monetary_scope', text),
-            ('average_subsequent_contract', amount),
-            ('applicable_tax_category', asbie),
-        ])
-        self.Response = iter([
-            ('reference', identifier),
-            ('response_code', code),
-            ('description', text),
-            ('effective_date', datetime),
-            ('effective_time', datetime),
-            ('status', asbie),
-        ])
-        self.ResultOfVerification = iter([
-            ('validator', identifier),
-            ('validation_result_code', code),
-            ('validation_date', datetime),
-            ('validation_time', datetime),
-            ('validate_process', text),
-            ('validate_tool', text),
-            ('validate_tool_version', text),
-            ('signatory_party', asbie),
-        ])
-        self.RetailPlannedImpact = iter([
-            ('amount', amount),
-            ('forecast_purpose_code', code),
-            ('forecast_type_code', code),
-            ('period', asbie),
-        ])
-        self.RoadTransport = iter([
-            ('license_plate_identifier', identifier)
-        ])
-        self.SalesItem = iter([
-            ('quantity', quantity),
-            ('activity_property', asbie),
-            ('tax_exclusive_price', asbie),
-            ('tax_inclusive_price', asbie),
-            ('item', asbie),
-        ])
-        self.SecondaryHazard = iter([
-            ('id', identifier),
-            ('placard_notation', text),
-            ('placard_endorsement', text),
-            ('emergency_procedures_code', code),
-            ('extension', text),
-        ])
-        self.ServiceFrequency = iter([('week_day', code)])
-        self.ServiceProviderParty = iter([
-            ('id', identifier),
-            ('service_type_code', code),
-            ('service_type', text),
-            ('party', asbie),
-            ('seller_contact', asbie),
-        ])
-        self.ShareholderParty = iter([
-            ('partecipation', numeric),
-            ('party', asbie),
-        ])
-        self.Shipment = iter([
-            ('id', identifier),
-            ('shipping_priority_level_code', code),
-            ('handling_code', code),
-            ('handling_instructions', text),
-            ('information', text),
-            ('gross_weight', measure),
-            ('net_weight', measure),
-            ('net_net_weight', measure),
-            ('gross_volume', measure),
-            ('net_volume', measure),
-            ('total_goods_item_quantity', quantity),
-            ('total_transport_handling_unit_quantity', quantity),
-            ('insurance_value', amount),
-            ('declared_customs_value', amount),
-            ('declared_for_carriage_value', amount),
-            ('declared_statistics_value', amount),
-            ('free_on_board_value', amount),
-            ('special_instructions', text),
-            ('delivery_instructions', text),
-            ('split_consignment_indicator', indicator),
-            ('consignment_quantity', quantity),
-            ('consignment', asbie),
-            ('goods_item', asbie),
-            ('shipment_stage', asbie),
-            ('delivery', asbie),
-            ('transport_handling_unit', asbie),
-            ('return_address', asbie),
-            ('origin_address', asbie),
-            ('first_arrival_port_location', asbie),
-            ('last_exit_port_location', asbie),
-            ('export_country', asbie),
-            ('freight_allowance_charge', asbie),
-        ])
-        self.ShipmentStage = iter([
-            ('id', identifier),
-            ('transport_mode_code', code),
-            ('transport_means_type_code', code),
-            ('transit_direction_code', code),
-            ('pre_carriage_indicator', indicator),
-            ('on_carriage_indicator', indicator),
-            ('estimated_delivery_date', datetime),
-            ('estimated_delivery_time', datetime),
-            ('required_delivery_date', datetime),
-            ('required_delivery_time', datetime),
-            ('loading_sequence_identifier', identifier),
-            ('successive_sequence_identifier', identifier),
-            ('instructions', text),
-            ('demurrage_instructions', text),
-            ('crew_quantity', quantity),
-            ('passenger_quantity', quantity),
-            ('transit_period', asbie),
-            ('carrier_party', asbie),
-            ('transport_means', asbie),
-            ('loading_port_location', asbie),
-            ('unloading_port_location', asbie),
-            ('transship_port_location', asbie),
-            ('loading_transport_event', asbie),
-            ('examination_transport_event', asbie),
-            ('availability_transport_event', asbie),
-            ('exportation_transport_event', asbie),
-            ('discharge_transport_event', asbie),
-            ('warehousing_transport_event', asbie),
-            ('takeover_transport_event', asbie),
-            ('optional_takeover_transport_event', asbie),
-            ('dropoff_transport_event', asbie),
-            ('actual_pickup_transport_event', asbie),
-            ('delivery_transport_event', asbie),
-            ('receipt_transport_event', asbie),
-            ('storage_transport_event', asbie),
-            ('acceptance_transport_event', asbie),
-            ('terminal_operator_party', asbie),
-            ('customs_agent_party', asbie),
-            ('estimated_transit_period', asbie),
-            ('freight_allowance_charge', asbie),
-            ('freight_charge_location', asbie),
-            ('detention_transport_event', asbie),
-            ('requested_departure_transport_event', asbie),
-            ('requested_arrival_transport_event', asbie),
-            ('requested_waypoint_transport_event', asbie),
-            ('planned_departure_transport_event', asbie),
-            ('planned_arrival_transport_event', asbie),
-            ('planned_waypoint_transport_event', asbie),
-            ('actual_departure_transport_event', asbie),
-            ('actual_waypoint_transport_event', asbie),
-            ('actual_arrival_transport_event', asbie),
-            ('transport_event', asbie),
-            ('estimated_departure_transport_event', asbie),
-            ('estimated_arrival_transport_event', asbie),
-            ('passenger_person', asbie),
-            ('driver_person', asbie),
-            ('reporting_person', asbie),
-            ('crew_member_person', asbie),
-            ('security_officer_person', asbie),
-            ('master_person', asbie),
-            ('ships_surgeon_person', asbie),
-        ])
-        self.Signature = iter([
-            ('id', identifier),
-            ('note', text),
-            ('validation_date', datetime),
-            ('validation_time', datetime),
-            ('validator', identifier),
-            ('canonicalization_method', text),
-            ('signature_method', text),
-            ('signatory_party', asbie),
-            ('digital_signature_attachment', asbie),
-            ('original_document_reference', asbie),
-        ])
-        self.StatementLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('uuid', identifier),
-            ('balance_brought_forward_indicator', indicator),
-            ('debit_line_amount', amount),
-            ('credit_line_amount', amount),
-            ('balance_amount', amount),
-            ('payment_purpose_code', code),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('accounting_supplier_party', asbie),
-            ('payee_party', asbie),
-            ('invoice_period', asbie),
-            ('billing_reference', asbie),
-            ('document_reference', asbie),
-            ('exchange_rate', asbie),
-            ('allowance_charge', asbie),
-            ('collected_payment', asbie),
-        ])
-        self.Status = iter([
-            ('condition_code', code),
-            ('reference_date', datetime),
-            ('reference_time', datetime),
-            ('description', text),
-            ('status_reason_code', code),
-            ('status_reason', text),
-            ('sequence_identifier', identifier),
-            ('text', text),
-            ('indication_indicator', indicator),
-            ('percent', numeric),
-            ('reliability_percent', numeric),
-            ('condition', asbie),
-        ])
-        self.StockAvailabilityReportLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('quantity', quantity),
-            ('value', amount),
-            ('availability_date', datetime),
-            ('availability_status_code', code),
-            ('item', asbie),
-        ])
-        self.Stowage = iter([
-            ('location_identifier', identifier),
-            ('location', text),
-            ('measurement_dimension', asbie),
-        ])
-        self.SubcontractTerms = iter([
-            ('rate', numeric),
-            ('unknown_price', indicator),
-            ('description', text),
-            ('amount', amount),
-            ('subcontracting_conditions_code', code),
-            ('maximum_percent', numeric),
-            ('minimum_percent', numeric),
-        ])
-        self.SubscriberConsumption = iter([
-            ('consumption_identifier', identifier),
-            ('specification_type_code', code),
-            ('note', text),
-            ('total_metered_quantity', quantity),
-            ('subscriber_party', asbie),
-            ('utility_consumption_point', asbie),
-            ('on_account_payment', asbie),
-            ('consumption', asbie),
-            ('supplier_consumption', asbie),
-        ])
-        self.SupplierConsumption = iter([
-            ('description', text),
-            ('utility_supplier_party', asbie),
-            ('utility_customer_party', asbie),
-            ('consumption', asbie),
-            ('contract', asbie),
-            ('consumption_line', asbie),
-        ])
-        self.SupplierParty = iter([
-            ('customer_assigned_account_identifier', identifier),
-            ('additional_account_identifier', identifier),
-            ('data_sending_capability', text),
-            ('party', asbie),
-            ('despatch_contact', asbie),
-            ('accounting_contact', asbie),
-            ('seller_contact', asbie),
-        ])
-        self.TaxCategory = iter([
-            ('id', identifier),
-            ('name', name),
-            ('percent', numeric),
-            ('base_unit_measure', measure),
-            ('per_unit_amount', amount),
-            ('tax_exemption_reason_code', code),
-            ('tax_exemption_reason', text),
-            ('tier_range', text),
-            ('tier_rate', numeric),
-            ('tax_scheme', asbie),
-        ])
-        self.TaxScheme = iter([
-            ('id', identifier),
-            ('name', name),
-            ('tax_type_code', code),
-            ('currency_code', code),
-            ('jurisdiction_region_address', asbie),
-        ])
-        self.TaxSubtotal = iter([
-            ('taxable_amount', amount),
-            ('tax_amount', amount),
-            ('calculation_sequence', numeric),
-            ('transaction_currency_tax_amount', amount),
-            ('percent', numeric),
-            ('base_unit_measure', measure),
-            ('per_unit_amount', amount),
-            ('tier_range', text),
-            ('tier_rate', numeric),
-            ('tax_category', asbie),
-        ])
-        self.TaxTotal = iter([
-            ('tax_amount', amount),
-            ('rounding_amount', amount),
-            ('tax_evidence_indicator', indicator),
-            ('tax_included_indicator', indicator),
-            ('tax_subtotal', asbie),
-        ])
-        self.TelecommunicationsService = iter([
-            ('id', identifier),
-            ('call_date', datetime),
-            ('call_time', datetime),
-            ('service_number_called', text),
-            ('telecommunications_service_category', text),
-            ('telecommunications_service_category_code', code),
-            ('movie_title', text),
-            ('roaming_partner_name', name),
-            ('pay_per_view', text),
-            ('quantity', quantity),
-            ('telecommunications_service_call', text),
-            ('telecommunications_service_call_code', code),
-            ('call_base_amount', amount),
-            ('call_extension_amount', amount),
-            ('price', asbie),
-            ('country', asbie),
-            ('exchange_rate', asbie),
-            ('allowance_charge', asbie),
-            ('tax_total', asbie),
-            ('call_duty', asbie),
-            ('time_duty', asbie),
-        ])
-        self.TelecommunicationsSupply = iter([
-            ('telecommunications_supply_type', text),
-            ('telecommunications_supply_type_code', code),
-            ('privacy_code', code),
-            ('description', text),
-            ('total_amount', amount),
-            ('telecommunications_supply_line', asbie),
-        ])
-        self.TelecommunicationsSupplyLine = iter([
-            ('id', identifier),
-            ('phone_number', text),
-            ('description', text),
-            ('line_extension_amount', amount),
-            ('exchange_rate', asbie),
-            ('allowance_charge', asbie),
-            ('tax_total', asbie),
-            ('telecommunications_service', asbie),
-        ])
-        self.Temperature = iter([
-            ('attribute_identifier', identifier),
-            ('measure', measure),
-            ('description', text),
-        ])
-        self.TenderLine = iter([
-            ('id', identifier),
-            ('note', text),
-            ('quantity', quantity),
-            ('line_extension_amount', amount),
-            ('total_tax_amount', amount),
-            ('orderable_unit', text),
-            ('content_unit', quantity),
-            ('order_quantity_increment', numeric),
-            ('minimum_order_quantity', quantity),
-            ('maximum_order_quantity', quantity),
-            ('warranty_information', text),
-            ('pack_level_code', code),
-            ('document_reference', asbie),
-            ('item', asbie),
-            ('offered_item_location_quantity', asbie),
-            ('replacement_related_item', asbie),
-            ('warranty_party', asbie),
-            ('warranty_validity_period', asbie),
-            ('sub_tender_line', asbie),
-            ('call_for_tenders_line_reference', asbie),
-            ('call_for_tenders_document_reference', asbie),
-        ])
-        self.TenderPreparation = iter([
-            ('tender_envelope_identifier', identifier),
-            ('tender_envelope_type_code', code),
-            ('description', text),
-            ('open_tender_identifier', identifier),
-            ('procurement_project_lot', asbie),
-            ('document_tender_requirement', asbie),
-        ])
-        self.TenderRequirement = iter([
-            ('name', name),
-            ('description', text),
-            ('template_document_reference', asbie),
-        ])
-        self.TenderResult = iter([
-            ('tender_result_code', code),
-            ('description', text),
-            ('advertisement', amount),
-            ('award_date', datetime),
-            ('award_time', datetime),
-            ('received_tender', quantity),
-            ('lower_tender', amount),
-            ('higher_tender', amount),
-            ('start_date', datetime),
-            ('received_electronic_tender_quantity', quantity),
-            ('received_foreign_tender_quantity', quantity),
-            ('contract', asbie),
-            ('awarded_tendered_project', asbie),
-            ('contract_formalization_period', asbie),
-            ('subcontract_terms', asbie),
-            ('winning_party', asbie),
-        ])
-        self.TenderedProject = iter([
-            ('variant', identifier),
-            ('fee', amount),
-            ('fee_description', text),
-            ('tender_envelope_identifier', identifier),
-            ('tender_envelope_type_code', code),
-            ('procurement_project_lot', asbie),
-            ('evidence_document_reference', asbie),
-            ('tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('tender_line', asbie),
-            ('awarding_criterion_response', asbie),
-        ])
-        self.TendererPartyQualification = iter([
-            ('interested_procurement_project_lot', asbie),
-            ('main_qualifying_party', asbie),
-            ('additional_qualifying_party', asbie),
-        ])
-        self.TendererQualificationRequest = iter([
-            ('company_legal_form_code', code),
-            ('company_legal_form', text),
-            ('personal_situation', text),
-            ('operating_years', quantity),
-            ('employee', quantity),
-            ('description', text),
-            ('required_business_classification_scheme', asbie),
-            ('technical_evaluation_criterion', asbie),
-            ('financial_evaluation_criterion', asbie),
-            ('specific_tenderer_requirement', asbie),
-            ('economic_operator_role', asbie),
-        ])
-        self.TendererRequirement = iter([
-            ('name', name),
-            ('tenderer_requirement_type_code', code),
-            ('description', text),
-            ('legal_reference', text),
-            ('suggested_evidence', asbie),
-        ])
-        self.TenderingProcess = iter([
-            ('id', identifier),
-            ('original_contracting_system', identifier),
-            ('description', text),
-            ('negotiation_description', text),
-            ('procedure_code', code),
-            ('urgency_code', code),
-            ('expense_code', code),
-            ('part_presentation_code', code),
-            ('contracting_system_code', code),
-            ('submission_method_code', code),
-            ('candidate_reduction_constraint', indicator),
-            ('government_agreement_constraint', indicator),
-            ('document_availability_period', asbie),
-            ('tender_submission_deadline_period', asbie),
-            ('invitation_submission_period', asbie),
-            ('participation_request_reception_period', asbie),
-            ('notice_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('process_justification', asbie),
-            ('economic_operator_short_list', asbie),
-            ('open_tender_event', asbie),
-            ('auction_terms', asbie),
-            ('framework_agreement', asbie),
-        ])
-        self.TenderingTerms = iter([
-            ('awarding_method_type_code', code),
-            ('price_evaluation_code', code),
-            ('maximum_variant_quantity', quantity),
-            ('variant_constraint', indicator),
-            ('accepted_variants_description', text),
-            ('price_revision_formula_description', text),
-            ('funding_program_code', code),
-            ('funding_program', text),
-            ('maximum_advertisement', amount),
-            ('note', text),
-            ('payment_frequency_code', code),
-            ('economic_operator_registry_uri', identifier),
-            ('required_curricula', indicator),
-            ('other_conditions', indicator),
-            ('additional_conditions', text),
-            ('latest_security_clearance_date', datetime),
-            ('documentation_fee_amount', amount),
-            ('penalty_clause', asbie),
-            ('required_financial_guarantee', asbie),
-            ('procurement_legislation_document_reference', asbie),
-            ('fiscal_legislation_document_reference', asbie),
-            ('environmental_legislation_document_reference', asbie),
-            ('employment_legislation_document_reference', asbie),
-            ('contractual_document_reference', asbie),
-            ('call_for_tenders_document_reference', asbie),
-            ('warranty_validity_period', asbie),
-            ('payment_terms', asbie),
-            ('tenderer_qualification_request', asbie),
-            ('allowed_subcontract_terms', asbie),
-            ('tender_preparation', asbie),
-            ('contract_execution_requirement', asbie),
-            ('awarding_terms', asbie),
-            ('additional_information_party', asbie),
-            ('document_provider_party', asbie),
-            ('tender_recipient_party', asbie),
-            ('contract_responsible_party', asbie),
-            ('tender_evaluation_party', asbie),
-            ('tender_validity_period', asbie),
-            ('contract_acceptance_period', asbie),
-            ('appeal_terms', asbie),
-            ('language', asbie),
-            ('budget_account_line', asbie),
-            ('replaced_notice_document_reference', asbie),
-        ])
-        self.TradeFinancing = iter([
-            ('id', identifier),
-            ('financing_instrument_code', code),
-            ('contract_document_reference', asbie),
-            ('document_reference', asbie),
-            ('financing_party', asbie),
-            ('financing_financial_account', asbie),
-            ('clause', asbie),
-        ])
-        self.TradingTerms = iter([
-            ('information', text),
-            ('reference', text),
-            ('applicable_address', asbie),
-        ])
-        self.TransactionConditions = iter([
-            ('id', identifier),
-            ('action_code', code),
-            ('description', text),
-            ('document_reference', asbie),
-        ])
-        self.TransportEquipment = iter([
-            ('id', identifier),
-            ('referenced_consignment_identifier', identifier),
-            ('transport_equipment_type_code', code),
-            ('provider_type_code', code),
-            ('owner_type_code', code),
-            ('size_type_code', code),
-            ('disposition_code', code),
-            ('fullness_indication_code', code),
-            ('refrigeration_on_indicator', indicator),
-            ('information', text),
-            ('returnability_indicator', indicator),
-            ('legal_status_indicator', indicator),
-            ('air_flow_percent', numeric),
-            ('humidity_percent', numeric),
-            ('animal_food_approved_indicator', indicator),
-            ('human_food_approved_indicator', indicator),
-            ('dangerous_goods_approved_indicator', indicator),
-            ('refrigerated_indicator', indicator),
-            ('characteristics', text),
-            ('damage_remarks', text),
-            ('description', text),
-            ('special_transport_requirements', text),
-            ('gross_weight', measure),
-            ('gross_volume', measure),
-            ('tare_weight', measure),
-            ('tracking_device_code', code),
-            ('power', indicator),
-            ('trace_id', identifier),
-            ('measurement_dimension', asbie),
-            ('transport_equipment_seal', asbie),
-            ('minimum_temperature', asbie),
-            ('maximum_temperature', asbie),
-            ('provider_party', asbie),
-            ('loading_proof_party', asbie),
-            ('supplier_party', asbie),
-            ('owner_party', asbie),
-            ('operating_party', asbie),
-            ('loading_location', asbie),
-            ('unloading_location', asbie),
-            ('storage_location', asbie),
-            ('positioning_transport_event', asbie),
-            ('quarantine_transport_event', asbie),
-            ('delivery_transport_event', asbie),
-            ('pickup_transport_event', asbie),
-            ('handling_transport_event', asbie),
-            ('loading_transport_event', asbie),
-            ('transport_event', asbie),
-            ('applicable_transport_means', asbie),
-            ('haulage_trading_terms', asbie),
-            ('hazardous_goods_transit', asbie),
-            ('packaged_transport_handling_unit', asbie),
-            ('service_allowance_charge', asbie),
-            ('freight_allowance_charge', asbie),
-            ('attached_transport_equipment', asbie),
-            ('delivery', asbie),
-            ('pickup', asbie),
-            ('despatch', asbie),
-            ('shipment_document_reference', asbie),
-            ('contained_in_transport_equipment', asbie),
-            ('package', asbie),
-            ('goods_item', asbie),
-        ])
-        self.TransportEquipmentSeal = iter([
-            ('id', identifier),
-            ('seal_issuer_type_code', code),
-            ('condition', text),
-            ('seal_status_code', code),
-            ('sealing_party_type', text),
-        ])
-        self.TransportEvent = iter([
-            ('identification', identifier),
-            ('occurrence_date', datetime),
-            ('occurrence_time', datetime),
-            ('transport_event_type_code', code),
-            ('description', text),
-            ('completion_indicator', indicator),
-            ('reported_shipment', asbie),
-            ('current_status', asbie),
-            ('contact', asbie),
-            ('location', asbie),
-            ('signature', asbie),
-            ('period', asbie),
-        ])
-        self.TransportExecutionTerms = iter([
-            ('transport_user_special_terms', text),
-            ('transport_service_provider_special_terms', text),
-            ('change_conditions', text),
-            ('payment_terms', asbie),
-            ('delivery_terms', asbie),
-            ('bonus_payment_terms', asbie),
-            ('commission_payment_terms', asbie),
-            ('penalty_payment_terms', asbie),
-            ('environmental_emission', asbie),
-            ('notification_requirement', asbie),
-            ('service_charge_payment_terms', asbie),
-        ])
-        self.TransportHandlingUnit = iter([
-            ('id', identifier),
-            ('transport_handling_unit_type_code', code),
-            ('handling_code', code),
-            ('handling_instructions', text),
-            ('hazardous_risk_indicator', indicator),
-            ('total_goods_item_quantity', quantity),
-            ('total_package_quantity', quantity),
-            ('damage_remarks', text),
-            ('shipping_marks', text),
-            ('trace_id', identifier),
-            ('handling_unit_despatch_line', asbie),
-            ('actual_package', asbie),
-            ('received_handling_unit_receipt_line', asbie),
-            ('transport_equipment', asbie),
-            ('transport_means', asbie),
-            ('hazardous_goods_transit', asbie),
-            ('measurement_dimension', asbie),
-            ('minimum_temperature', asbie),
-            ('maximum_temperature', asbie),
-            ('goods_item', asbie),
-            ('floor_space_measurement_dimension', asbie),
-            ('pallet_space_measurement_dimension', asbie),
-            ('shipment_document_reference', asbie),
-            ('status', asbie),
-            ('customs_declaration', asbie),
-            ('referenced_shipment', asbie),
-            ('package', asbie),
-        ])
-        self.TransportMeans = iter([
-            ('journey_identifier', identifier),
-            ('registration_nationality_identifier', identifier),
-            ('registration_nationality', text),
-            ('direction_code', code),
-            ('transport_means_type_code', code),
-            ('trade_service_code', code),
-            ('stowage', asbie),
-            ('air_transport', asbie),
-            ('road_transport', asbie),
-            ('rail_transport', asbie),
-            ('maritime_transport', asbie),
-            ('owner_party', asbie),
-            ('measurement_dimension', asbie),
-        ])
-        self.TransportSchedule = iter([
-            ('sequence', numeric),
-            ('reference_date', datetime),
-            ('reference_time', datetime),
-            ('reliability_percent', numeric),
-            ('remarks', text),
-            ('status_location', asbie),
-            ('actual_arrival_transport_event', asbie),
-            ('actual_departure_transport_event', asbie),
-            ('estimated_departure_transport_event', asbie),
-            ('estimated_arrival_transport_event', asbie),
-            ('planned_departure_transport_event', asbie),
-            ('planned_arrival_transport_event', asbie),
-        ])
-        self.TransportationSegment = iter([
-            ('sequence', numeric),
-            ('transport_execution_plan_reference', identifier),
-            ('transportation_service', asbie),
-            ('transport_service_provider_party', asbie),
-            ('referenced_consignment', asbie),
-            ('shipment_stage', asbie),
-        ])
-        self.TransportationService = iter([
-            ('transport_service_code', code),
-            ('tariff_class_code', code),
-            ('priority', text),
-            ('freight_rate_class_code', code),
-            ('transportation_service_description', text),
-            ('transportation_service_details_uri', identifier),
-            ('nomination_date', datetime),
-            ('nomination_time', datetime),
-            ('name', name),
-            ('sequence', numeric),
-            ('transport_equipment', asbie),
-            ('supported_transport_equipment', asbie),
-            ('unsupported_transport_equipment', asbie),
-            ('commodity_classification', asbie),
-            ('supported_commodity_classification', asbie),
-            ('unsupported_commodity_classification', asbie),
-            ('total_capacity_dimension', asbie),
-            ('shipment_stage', asbie),
-            ('transport_event', asbie),
-            ('responsible_transport_service_provider_party', asbie),
-            ('environmental_emission', asbie),
-            ('estimated_duration_period', asbie),
-            ('scheduled_service_frequency', asbie),
-        ])
-        self.UnstructuredPrice = iter([
-            ('price_amount', amount),
-            ('time_amount', text),
-        ])
-        self.UtilityItem = iter([
-            ('id', identifier),
-            ('subscriber_identifier', identifier),
-            ('subscriber_type', text),
-            ('subscriber_type_code', code),
-            ('description', text),
-            ('pack_quantity', quantity),
-            ('pack_size', numeric),
-            ('consumption_type', text),
-            ('consumption_type_code', code),
-            ('current_charge_type', text),
-            ('current_charge_type_code', code),
-            ('one_time_charge_type', text),
-            ('one_time_charge_type_code', code),
-            ('tax_category', asbie),
-            ('contract', asbie),
-        ])
-        self.WebSiteAccess = iter([
-            ('uri', identifier),
-            ('password', text),
-            ('login', text),
-        ])
-        self.WinningParty = iter([('rank', text), ('party', asbie)])
-        self.WorkPhaseReference = iter([
-            ('id', identifier),
-            ('work_phase_code', code),
-            ('work_phase', text),
-            ('progress_percent', numeric),
-            ('start_date', datetime),
-            ('end_date', datetime),
-            ('work_order_document_reference', asbie),
-        ])
+        self.values = iter([
+            [
+                ('id', identifier),
+                ('supply_chain_activity_type_code', code),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('activity_period', asbie),
+                ('activity_origin_location', asbie),
+                ('activity_final_location', asbie),
+                ('sales_item', asbie),
+            ],
+            [
+                ('name', name),
+                ('value', text),
+            ],
+            [
+                ('id', identifier),
+                ('address_type_code', code),
+                ('address_format_code', code),
+                ('postbox', text),
+                ('floor', text),
+                ('room', text),
+                ('street_name', name),
+                ('additional_street_name', name),
+                ('block_name', name),
+                ('building_name', name),
+                ('building_number', text),
+                ('inhouse_mail', text),
+                ('department', text),
+                ('mark_attention', text),
+                ('mark_care', text),
+                ('plot_identification', text),
+                ('city_subdivision_name', name),
+                ('city_name', name),
+                ('postal_zone', text),
+                ('country_sub_entity', text),
+                ('country_sub_entity_code', code),
+                ('region', text),
+                ('district', text),
+                ('timezone_offset', text),
+                ('address_line', asbie),
+                ('country', asbie),
+                ('location_coordinate', asbie),
+            ],
+            [('line', text)],
+            [('aircraft_identifier', identifier)],
+            [
+                ('id', identifier),
+                ('charge_indicator', indicator),
+                ('allowance_charge_reason_code', code),
+                ('allowance_charge_reason', text),
+                ('multiplier_factor', numeric),
+                ('prepaid_indicator', indicator),
+                ('sequence', numeric),
+                ('amount', amount),
+                ('base_amount', amount),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('per_unit_amount', amount),
+                ('tax_category', asbie),
+                ('tax_total', asbie),
+                ('payment_means', asbie),
+            ],
+            [
+                ('description', text),
+                ('presentation_period', asbie),
+                ('appeal_information_party', asbie),
+                ('appeal_receiver_party', asbie),
+                ('mediation_party', asbie),
+            ],
+            [
+                ('embedded_document', binary),
+                ('external_reference', asbie),
+            ],
+            [
+                ('auction_constraint', indicator),
+                ('justification_description', text),
+                ('description', text),
+                ('process_description', text),
+                ('conditions_description', text),
+                ('electronic_device_description', text),
+                ('auction_uri', identifier),
+            ],
+            [
+                ('id', identifier),
+                ('awarding_criterion_type_code', code),
+                ('description', text),
+                ('weight_numeric', numeric),
+                ('weight', text),
+                ('calculation_expression', text),
+                ('calculation_expression_code', code),
+                ('minimum_quantity', quantity),
+                ('maximum_quantity', quantity),
+                ('minimum_amount', amount),
+                ('maximum_amount', amount),
+                ('minimum_improvement_bid', text),
+                ('subordinate_awarding_criterion', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('awarding_criterion_identifier', identifier),
+                ('awarding_criterion_description', text),
+                ('description', text),
+                ('quantity', quantity),
+                ('amount', amount),
+                ('subordinate_awarding_criterion_response', asbie),
+            ],
+            [
+                ('weighting_algorithm_code', code),
+                ('description', text),
+                ('technical_committee_description', text),
+                ('low_tenders_description', text),
+                ('prize_indicator', indicator),
+                ('prize_description', text),
+                ('payment_description', text),
+                ('followup_contract_indicator', indicator),
+                ('binding_on_buyer_indicator', indicator),
+                ('awarding_criterion', asbie),
+                ('technical_committee_person', asbie),
+            ],
+            [
+                ('invoice_document_reference', asbie),
+                ('self_billed_invoice_document_reference', asbie),
+                ('credit_note_document_reference', asbie),
+                ('self_billed_credit_note_document_reference', asbie),
+                ('debit_note_document_reference', asbie),
+                ('reminder_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('billing_reference_line', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('amount', amount),
+                ('allowance_charge', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('financial_institution', asbie),
+                ('address', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('budget_year', numeric),
+                ('required_classification_scheme', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('total_amount', amount),
+                ('budget_account', asbie),
+            ],
+            [
+                ('capability_type_code', code),
+                ('description', text),
+                ('value', amount),
+                ('value_quantity', quantity),
+                ('evidence_supplied', asbie),
+                ('validity_period', asbie),
+            ],
+            [
+                ('primary_account_number', identifier),
+                ('network', identifier),
+                ('card_type_code', code),
+                ('validity_start_date', datetime_),
+                ('expiry_date', datetime_),
+                ('issuer', identifier),
+                ('issue_number', identifier),
+                ('cv2', identifier),
+                ('card_chip_code', code),
+                ('chip_application', identifier),
+                ('holder', name),
+            ],
+            [
+                ('id', identifier),
+                ('contractor_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('item', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('action_code', code),
+                ('life_cycle_status_code', code),
+                ('contract_subdivision', text),
+                ('note', text),
+                ('orderable_indicator', indicator),
+                ('orderable_unit', text),
+                ('content_unit', quantity),
+                ('order_quantity_increment', numeric),
+                ('minimum_order_quantity', quantity),
+                ('maximum_order_quantity', quantity),
+                ('warranty_information', text),
+                ('pack_level_code', code),
+                ('contractor_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('warranty_party', asbie),
+                ('warranty_validity_period', asbie),
+                ('line_validity_period', asbie),
+                ('item_comparison', asbie),
+                ('component_related_item', asbie),
+                ('accessory_related_item', asbie),
+                ('required_related_item', asbie),
+                ('replacement_related_item', asbie),
+                ('complementary_related_item', asbie),
+                ('replaced_related_item', asbie),
+                ('required_item_location_quantity', asbie),
+                ('document_reference', asbie),
+                ('item', asbie),
+                ('keyword_item_property', asbie),
+                ('call_for_tenders_line_reference', asbie),
+                ('call_for_tenders_document_reference', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('contractor_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('required_item_location_quantity', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('revision_date', datetime_),
+                ('revision_time', datetime_),
+                ('note', text),
+                ('description', text),
+                ('version', identifier),
+                ('previous_version', identifier),
+            ],
+            [
+                ('id', identifier),
+                ('contract_subdivision', text),
+                ('note', text),
+                ('line_validity_period', asbie),
+                ('required_item_location_quantity', asbie),
+                ('item', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('certificate_type_code', code),
+                ('certificate_type', text),
+                ('remarks', text),
+                ('issuer_party', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+            ],
+            [
+                ('reference', identifier),
+                ('certificate_type', text),
+                ('application_status_code', code),
+                ('original_job_identifier', identifier),
+                ('previous_job_identifier', identifier),
+                ('remarks', text),
+                ('shipment', asbie),
+                ('endorser_party', asbie),
+                ('preparation_party', asbie),
+                ('issuer_party', asbie),
+                ('exporter_party', asbie),
+                ('importer_party', asbie),
+                ('issuing_country', asbie),
+                ('document_distribution', asbie),
+                ('supporting_document_reference', asbie),
+                ('signature', asbie),
+            ],
+            [
+                ('name', name),
+                ('code_value', text),
+                ('description', text),
+                ('categorizes_classification_category', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('last_revision_date', datetime_),
+                ('last_revision_time', datetime_),
+                ('note', text),
+                ('name', name),
+                ('description', text),
+                ('agency_identifier', identifier),
+                ('agency_name', text),
+                ('version', identifier),
+                ('uri', identifier),
+                ('scheme_uri', identifier),
+                ('language', identifier),
+                ('classification_category', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('content', text),
+            ],
+            [
+                ('nature_code', code),
+                ('cargo_type_code', code),
+                ('commodity_code', code),
+                ('item_classification_code', code),
+            ],
+            [
+                ('channel_code', code),
+                ('channel', text),
+                ('value', text),
+            ],
+            [
+                ('annual_average', amount),
+                ('total_task', amount),
+                ('party_capacity', amount),
+                ('description', text),
+                ('evidence_supplied', asbie),
+                ('period', asbie),
+                ('recipient_customer_party', asbie),
+            ],
+            [
+                ('attribute_identifier', identifier),
+                ('measure', measure),
+                ('description', text),
+                ('minimum_measure', measure),
+                ('maximum_measure', measure),
+            ],
+            [
+                ('id', identifier),
+                ('carrier_assigned_id', identifier),
+                ('consignee_assigned_id', identifier),
+                ('consignor_assigned_id', identifier),
+                ('freight_forwarder_assigned_id', identifier),
+                ('broker_assigned_id', identifier),
+                ('contracted_carrier_assigned_id', identifier),
+                ('performing_carrier_assigned_id', identifier),
+                ('summary_description', text),
+                ('total_invoice_amount', amount),
+                ('declared_customs_value', amount),
+                ('tariff_description', text),
+                ('tariff_code', code),
+                ('insurance_premium_amount', amount),
+                ('gross_weight', measure),
+                ('net_weight', measure),
+                ('net_net_weight', measure),
+                ('chargeable_weight', measure),
+                ('gross_volume', measure),
+                ('net_volume', measure),
+                ('loading_length', measure),
+                ('remarks', text),
+                ('hazardous_risk_indicator', indicator),
+                ('animal_food_indicator', indicator),
+                ('human_food_indicator', indicator),
+                ('livestock_indicator', indicator),
+                ('bulk_cargo_indicator', indicator),
+                ('containerized_indicator', indicator),
+                ('general_cargo_indicator', indicator),
+                ('special_security_indicator', indicator),
+                ('third_party_payer_indicator', indicator),
+                ('carrier_service_instructions', text),
+                ('customs_clearance_service_instructions', text),
+                ('forwarder_service_instructions', text),
+                ('special_service_instructions', text),
+                ('sequence_identifier', identifier),
+                ('shipping_priority_level_code', code),
+                ('handling_code', code),
+                ('handling_instructions', text),
+                ('information', text),
+                ('total_goods_item_quantity', quantity),
+                ('total_transport_handling_unit_quantity', quantity),
+                ('insurance_value', amount),
+                ('declared_for_carriage_value', amount),
+                ('declared_statistics_value', amount),
+                ('free_on_board_value', amount),
+                ('special_instructions', text),
+                ('split_consignment_indicator', indicator),
+                ('delivery_instructions', text),
+                ('consignment_quantity', quantity),
+                ('consolidatable_indicator', indicator),
+                ('haulage_instructions', text),
+                ('loading_sequence_identifier', identifier),
+                ('child_consignment_quantity', quantity),
+                ('total_packages_quantity', quantity),
+                ('consolidated_shipment', asbie),
+                ('customs_declaration', asbie),
+                ('requested_pickup_transport_event', asbie),
+                ('requested_delivery_transport_event', asbie),
+                ('planned_pickup_transport_event', asbie),
+                ('planned_delivery_transport_event', asbie),
+                ('status', asbie),
+                ('child_consignment', asbie),
+                ('consignee_party', asbie),
+                ('exporter_party', asbie),
+                ('consignor_party', asbie),
+                ('importer_party', asbie),
+                ('carrier_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('notify_party', asbie),
+                ('original_despatch_party', asbie),
+                ('final_delivery_party', asbie),
+                ('performing_carrier_party', asbie),
+                ('substitute_carrier_party', asbie),
+                ('logistics_operator_party', asbie),
+                ('transport_advisor_party', asbie),
+                ('hazardous_item_notification_party', asbie),
+                ('insurance_party', asbie),
+                ('mortgage_holder_party', asbie),
+                ('bill_of_lading_holder_party', asbie),
+                ('original_departure_country', asbie),
+                ('final_destination_country', asbie),
+                ('transit_country', asbie),
+                ('transport_contract', asbie),
+                ('transport_event', asbie),
+                ('original_despatch_transportation_service', asbie),
+                ('final_delivery_transportation_service', asbie),
+                ('delivery_terms', asbie),
+                ('payment_terms', asbie),
+                ('collect_payment_terms', asbie),
+                ('disbursement_payment_terms', asbie),
+                ('prepaid_payment_terms', asbie),
+                ('freight_allowance_charge', asbie),
+                ('extra_allowance_charge', asbie),
+                ('main_carriage_shipment_stage', asbie),
+                ('pre_carriage_shipment_stage', asbie),
+                ('on_carriage_shipment_stage', asbie),
+                ('transport_handling_unit', asbie),
+                ('first_arrival_port_location', asbie),
+                ('last_exit_port_location', asbie),
+            ],
+            [
+                ('utility_statement_type_code', code),
+                ('main_period', asbie),
+                ('allowance_charge', asbie),
+                ('tax_total', asbie),
+                ('energy_water_supply', asbie),
+                ('telecommunications_supply', asbie),
+                ('legal_monetary_total', asbie),
+            ],
+            [
+                ('average_amount', amount),
+                ('description', text),
+            ],
+            [
+                ('correction_type', text),
+                ('correction_type_code', code),
+                ('meter_number', text),
+                ('gas_pressure', quantity),
+                ('actual_temperature_reduction', quantity),
+                ('normal_temperature_reduction', quantity),
+                ('difference_temperature_reduction', quantity),
+                ('description', text),
+                ('correction_unit_amount', amount),
+                ('consumption_energy', quantity),
+                ('consumption_water', quantity),
+                ('correction_amount', amount),
+            ],
+            [
+                ('meter_number', text),
+                ('quantity', quantity),
+                ('amount', amount),
+                ('consumption_level_code', code),
+                ('consumption_level_text', text),
+                ('description', text),
+                ('period', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('parent_document_line_reference_identifier', identifier),
+                ('invoiced_quantity', quantity),
+                ('line_extension_amount', amount),
+                ('period', asbie),
+                ('delivery', asbie),
+                ('allowance_charge', asbie),
+                ('tax_total', asbie),
+                ('utility_item', asbie),
+                ('price', asbie),
+                ('unstructured_price', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('description', text),
+                ('subscriber_identifier', identifier),
+                ('subscriber_type', text),
+                ('subscriber_type_code', code),
+                ('total_delivered_quantity', quantity),
+                ('address', asbie),
+                ('web_site_access', asbie),
+                ('utility_meter', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('consumption_type', text),
+                ('consumption_type_code', code),
+                ('description', text),
+                ('total_consumed_quantity', quantity),
+                ('basic_consumed_quantity', quantity),
+                ('resident_occupants_numeric', numeric),
+                ('consumers_energy_level_code', code),
+                ('consumers_energy_level', text),
+                ('residence_type', text),
+                ('residence_type_code', code),
+                ('heating_type', text),
+                ('heating_type_code', code),
+                ('period', asbie),
+                ('guidance_document_reference', asbie),
+                ('document_reference', asbie),
+                ('consumption_report_reference', asbie),
+                ('consumption_history', asbie),
+            ],
+            [
+                ('consumption_report_identifier', identifier),
+                ('consumption_type', text),
+                ('consumption_type_code', code),
+                ('total_consumed_quantity', quantity),
+                ('period', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('telephone', text),
+                ('telefax', text),
+                ('electronic_mail', text),
+                ('note', text),
+                ('other_communication', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('nomination_date', datetime_),
+                ('nomination_time', datetime_),
+                ('contract_type_code', code),
+                ('contract_type', text),
+                ('note', text),
+                ('version', identifier),
+                ('description', text),
+                ('validity_period', asbie),
+                ('contract_document_reference', asbie),
+                ('nomination_period', asbie),
+                ('contractual_delivery', asbie),
+            ],
+            [
+                ('name', name),
+                ('execution_requirement_code', code),
+                ('description', text),
+            ],
+            [
+                ('options_description', text),
+                ('minimum_number', numeric),
+                ('maximum_number', numeric),
+                ('option_validity_period', asbie),
+                ('renewal', asbie),
+            ],
+            [
+                ('activity_type_code', code),
+                ('activity_type', text),
+            ],
+            [
+                ('buyer_profile_uri', identifier),
+                ('contracting_party_type', asbie),
+                ('contracting_activity', asbie),
+                ('party', asbie),
+            ],
+            [
+                ('party_type_code', code),
+                ('party_type', text),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('corporate_registration_type_code', code),
+                ('jurisdiction_region_address', asbie),
+            ],
+            [
+                ('identification_code', code),
+                ('name', name),
+            ],
+            [('account_identifier', identifier)],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('credited_quantity', quantity),
+                ('line_extension_amount', amount),
+                ('tax_point_date', datetime_),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('payment_purpose_code', code),
+                ('free_of_charge_indicator', indicator),
+                ('invoice_period', asbie),
+                ('order_line_reference', asbie),
+                ('discrepancy_response', asbie),
+                ('despatch_line_reference', asbie),
+                ('receipt_line_reference', asbie),
+                ('billing_reference', asbie),
+                ('document_reference', asbie),
+                ('pricing_reference', asbie),
+                ('originator_party', asbie),
+                ('delivery', asbie),
+                ('payment_terms', asbie),
+                ('tax_total', asbie),
+                ('allowance_charge', asbie),
+                ('item', asbie),
+                ('price', asbie),
+                ('delivery_terms', asbie),
+                ('sub_credit_note_line', asbie),
+                ('item_price_extension', asbie),
+            ],
+            [
+                ('customer_assigned_account_identifier', identifier),
+                ('supplier_assigned_account_identifier', identifier),
+                ('additional_account_identifier', identifier),
+                ('party', asbie),
+                ('delivery_contact', asbie),
+                ('accounting_contact', asbie),
+                ('buyer_contact', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('issuer_party', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('debited_quantity', quantity),
+                ('line_extension_amount', amount),
+                ('tax_point_date', datetime_),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('payment_purpose_code', code),
+                ('discrepancy_response', asbie),
+                ('despatch_line_reference', asbie),
+                ('receipt_line_reference', asbie),
+                ('billing_reference', asbie),
+                ('document_reference', asbie),
+                ('pricing_reference', asbie),
+                ('delivery', asbie),
+                ('tax_total', asbie),
+                ('allowance_charge', asbie),
+                ('item', asbie),
+                ('price', asbie),
+                ('sub_debit_note_line', asbie),
+            ],
+            [
+                ('name', name),
+                ('declaration_type_code', code),
+                ('description', text),
+                ('evidence_supplied', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('quantity', quantity),
+                ('minimum_quantity', quantity),
+                ('maximum_quantity', quantity),
+                ('actual_delivery_date', datetime_),
+                ('actual_delivery_time', datetime_),
+                ('latest_delivery_date', datetime_),
+                ('latest_delivery_time', datetime_),
+                ('release', identifier),
+                ('tracking_identifier', identifier),
+                ('delivery_address', asbie),
+                ('delivery_location', asbie),
+                ('alternative_delivery_location', asbie),
+                ('requested_delivery_period', asbie),
+                ('promised_delivery_period', asbie),
+                ('estimated_delivery_period', asbie),
+                ('carrier_party', asbie),
+                ('delivery_party', asbie),
+                ('notify_party', asbie),
+                ('despatch', asbie),
+                ('delivery_terms', asbie),
+                ('minimum_delivery_unit', asbie),
+                ('maximum_delivery_unit', asbie),
+                ('shipment', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('special_terms', text),
+                ('loss_risk_responsibility_code', code),
+                ('loss_risk', text),
+                ('amount', amount),
+                ('delivery_location', asbie),
+                ('allowance_charge', asbie),
+            ],
+            [
+                ('batch_quantity', quantity),
+                ('consumer_unit', quantity),
+                ('hazardous_risk_indicator', indicator),
+            ],
+            [
+                ('percent', numeric),
+                ('location_address', asbie),
+                ('dependent_line_reference', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('requested_despatch_date', datetime_),
+                ('requested_despatch_time', datetime_),
+                ('estimated_despatch_date', datetime_),
+                ('estimated_despatch_time', datetime_),
+                ('actual_despatch_date', datetime_),
+                ('actual_despatch_time', datetime_),
+                ('guaranteed_despatch_date', datetime_),
+                ('guaranteed_despatch_time', datetime_),
+                ('release', identifier),
+                ('instructions', text),
+                ('despatch_address', asbie),
+                ('despatch_location', asbie),
+                ('despatch_party', asbie),
+                ('carrier_party', asbie),
+                ('notify_party', asbie),
+                ('contact', asbie),
+                ('estimated_despatch_period', asbie),
+                ('requested_despatch_period', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('line_status_code', code),
+                ('delivered_quantity', quantity),
+                ('backorder_quantity', quantity),
+                ('backorder_reason', text),
+                ('outstanding_quantity', quantity),
+                ('outstanding_reason', text),
+                ('oversupply_quantity', quantity),
+                ('order_line_reference', asbie),
+                ('document_reference', asbie),
+                ('item', asbie),
+                ('shipment', asbie),
+            ],
+            [
+                ('attribute_identifier', identifier),
+                ('measure', measure),
+                ('description', text),
+                ('minimum_measure', measure),
+                ('maximum_measure', measure),
+            ],
+            [
+                ('print_qualifier', text),
+                ('maximum_copies', numeric),
+                ('party', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('document_type_code', code),
+                ('document_type', text),
+                ('xpath', text),
+                ('language', identifier),
+                ('locale_code', code),
+                ('version', identifier),
+                ('document_status_code', code),
+                ('document_description', text),
+                ('attachment', asbie),
+                ('validity_period', asbie),
+                ('issuer_party', asbie),
+                ('result_of_verification', asbie),
+            ],
+            [
+                ('response', asbie),
+                ('document_reference', asbie),
+                ('issuer_party', asbie),
+                ('recipient_party', asbie),
+                ('line_response', asbie),
+            ],
+            [
+                ('amount', amount),
+                ('duty', text),
+                ('duty_code', code),
+                ('tax_category', asbie),
+            ],
+            [
+                ('role_code', code),
+                ('role_description', text),
+            ],
+            [
+                ('limitation_description', text),
+                ('expected_quantity', quantity),
+                ('maximum_quantity', quantity),
+                ('minimum_quantity', quantity),
+                ('pre_selected_party', asbie),
+            ],
+            [
+                ('calculation_method_code', code),
+                ('fullness_indication_code', code),
+                ('measurement_from_location', asbie),
+                ('measurement_to_location', asbie),
+            ],
+            [
+                ('document', identifier),
+                ('approval_status', text),
+                ('remarks', text),
+                ('endorser_party', asbie),
+                ('signature', asbie),
+            ],
+            [
+                ('role_code', code),
+                ('sequence', numeric),
+                ('party', asbie),
+                ('signatory_contact', asbie),
+            ],
+            [
+                ('tax_energy_amount', amount),
+                ('tax_energy_on_account_amount', amount),
+                ('tax_energy_balance', amount),
+                ('tax_scheme', asbie),
+            ],
+            [
+                ('consumption_report', asbie),
+                ('energy_tax_report', asbie),
+                ('consumption_average', asbie),
+                ('energy_water_consumption_correction', asbie),
+            ],
+            [
+                ('environmental_emission_type_code', code),
+                ('value', measure),
+                ('description', text),
+                ('emission_calculation_method', asbie),
+            ],
+            [
+                ('evaluation_criterion_type_code', code),
+                ('description', text),
+                ('threshold_amount', amount),
+                ('threshold_quantity', quantity),
+                ('expression_code', code),
+                ('expression', text),
+                ('duration_period', asbie),
+                ('suggested_evidence', asbie),
+            ],
+            [
+                ('identification', identifier),
+                ('occurrence_date', datetime_),
+                ('occurrence_time', datetime_),
+                ('type_code', code),
+                ('description', text),
+                ('completion_indicator', indicator),
+                ('current_status', asbie),
+                ('contact', asbie),
+                ('occurence_location', asbie),
+            ],
+            [
+                ('comment', text),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+            ],
+            [
+                ('line_number', numeric),
+                ('participating_locations_location', asbie),
+                ('retail_planned_impact', asbie),
+                ('supply_item', asbie),
+            ],
+            [
+                ('comment', text),
+                ('quantity', quantity),
+                ('event_tactic_enumeration', asbie),
+                ('period', asbie),
+            ],
+            [
+                ('consumer_incentive_tactic_type_code', code),
+                ('display_tactic_type_code', code),
+                ('feature_tactic_type_code', code),
+                ('trade_item_packing_labeling_type_code', code),
+            ],
+            [
+                ('id', identifier),
+                ('evidence_type_code', code),
+                ('description', text),
+                ('candidate_statement', text),
+                ('evidence_issuing_party', asbie),
+                ('document_reference', asbie),
+                ('language', asbie),
+            ],
+            [('id', identifier)],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('threshold_value_comparison_code', code),
+                ('threshold_quantity', quantity),
+                ('exception_status_code', code),
+                ('collaboration_priority_code', code),
+                ('exception_resolution_code', code),
+                ('supply_chain_activity_type_code', code),
+                ('performance_metric_type_code', code),
+                ('effective_period', asbie),
+                ('supply_item', asbie),
+                ('forecast_exception_criterion_line', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('description', text),
+                ('exception_status_code', code),
+                ('collaboration_priority_code', code),
+                ('resolution_code', code),
+                ('compared_value', measure),
+                ('source_value', measure),
+                ('variance', quantity),
+                ('supply_chain_activity_type_code', code),
+                ('performance_metric_type_code', code),
+                ('exception_observation_period', asbie),
+                ('document_reference', asbie),
+                ('forecast_exception', asbie),
+                ('supply_item', asbie),
+            ],
+            [
+                ('source_currency_code', code),
+                ('source_currency_base_rate', numeric),
+                ('target_currency_code', code),
+                ('target_currency_base_rate', numeric),
+                ('exchange_market_identifier', identifier),
+                ('calculation_rate', numeric),
+                ('mathematic_operator_code', code),
+                ('date', datetime_),
+                ('foreign_exchange_contract', asbie),
+            ],
+            [
+                ('uri', identifier),
+                ('document_hash', text),
+                ('hash_algorithm_method', text),
+                ('expiry_date', datetime_),
+                ('expiry_time', datetime_),
+                ('mime_code', code),
+                ('format_code', code),
+                ('encoding_code', code),
+                ('character_set_code', code),
+                ('file_name', name),
+                ('description', text),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('alias_name', name),
+                ('account_type_code', code),
+                ('account_format_code', code),
+                ('currency_code', code),
+                ('payment_note', text),
+                ('financial_institution_branch', asbie),
+                ('country', asbie),
+            ],
+            [
+                ('guarantee_type_code', code),
+                ('description', text),
+                ('liability', amount),
+                ('amount', numeric),
+                ('constitution_period', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('address', asbie),
+            ],
+            [
+                ('forecast_purpose_code', code),
+                ('forecast_type_code', code),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('data_source_code', code),
+                ('comparison_data_code', code),
+                ('comparison_forecast_issue_time', datetime_),
+                ('comparison_forecast_issue_date', datetime_),
+            ],
+            [
+                ('forecast_purpose_code', code),
+                ('forecast_type_code', code),
+                ('comparison_data_source_code', code),
+                ('data_source_code', code),
+                ('time_delta_days_quantity', quantity),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('frozen_document_indicator', indicator),
+                ('forecast_type_code', code),
+                ('forecast_period', asbie),
+                ('sales_item', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('description', text),
+                ('revised_forecast_line_identifier', identifier),
+                ('source_forecast_issue_date', datetime_),
+                ('source_forecast_issue_time', datetime_),
+                ('adjustment_reason_code', code),
+                ('forecast_period', asbie),
+                ('sales_item', asbie),
+            ],
+            [
+                ('expected_operator', quantity),
+                ('maximum_operator', quantity),
+                ('justification', text),
+                ('frequency', text),
+                ('duration_period', asbie),
+                ('subsequent_process_tender_requirement', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('sequence_number', identifier),
+                ('description', text),
+                ('hazardous_risk_indicator', indicator),
+                ('declared_customs_value', amount),
+                ('declared_for_carriage_value', amount),
+                ('declared_statistics_value', amount),
+                ('free_on_board_value', amount),
+                ('insurance_value', amount),
+                ('value', amount),
+                ('gross_weight', measure),
+                ('net_weight', measure),
+                ('net_net_weight', measure),
+                ('chargeable_weight', measure),
+                ('gross_volume', measure),
+                ('net_volume', measure),
+                ('quantity', quantity),
+                ('preference_criterion_code', code),
+                ('required_customs_identifier', identifier),
+                ('customs_status_code', code),
+                ('customs_tariff_quantity', quantity),
+                ('customs_import_classified_indicator', indicator),
+                ('chargeable_quantity', quantity),
+                ('returnable_quantity', quantity),
+                ('trace_id', identifier),
+                ('item', asbie),
+                ('goods_item_container', asbie),
+                ('freight_allowance_charge', asbie),
+                ('invoice_line', asbie),
+                ('temperature', asbie),
+                ('contained_goods_item', asbie),
+                ('origin_address', asbie),
+                ('delivery', asbie),
+                ('pickup', asbie),
+                ('despatch', asbie),
+                ('measurement_dimension', asbie),
+                ('containing_package', asbie),
+                ('shipment_document_reference', asbie),
+                ('minimum_temperature', asbie),
+                ('maximum_temperature', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('quantity', quantity),
+                ('transport_equipment', asbie),
+            ],
+            [
+                ('transport_emergency_card_code', code),
+                ('packing_criteria_code', code),
+                ('hazardous_regulation_code', code),
+                ('inhalation_toxicity_zone_code', code),
+                ('transport_authorization_code', code),
+                ('maximum_temperature', asbie),
+                ('minimum_temperature', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('placard_notation', text),
+                ('placard_endorsement', text),
+                ('additional_information', text),
+                ('undg_code', code),
+                ('emergency_procedures_code', code),
+                ('medical_first_aid_guide_code', code),
+                ('technical_name', name),
+                ('category', name),
+                ('hazardous_category_code', code),
+                ('upper_orange_hazard_placard_identifier', identifier),
+                ('lower_orange_hazard_placard_identifier', identifier),
+                ('marking_identifier', identifier),
+                ('hazard_class_identifier', identifier),
+                ('net_weight', measure),
+                ('net_volume', measure),
+                ('quantity', quantity),
+                ('contact_party', asbie),
+                ('secondary_hazard', asbie),
+                ('hazardous_goods_transit', asbie),
+                ('emergency_temperature', asbie),
+                ('flashpoint_temperature', asbie),
+                ('additional_temperature', asbie),
+            ],
+            [
+                ('immobilization_certificate_identifier', identifier),
+                ('security_identifier', identifier),
+                ('issue_date', datetime_),
+                ('face_value', amount),
+                ('market_value', amount),
+                ('shares_number', quantity),
+                ('issuer_party', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('quantity', quantity),
+                ('manufacturer_party', asbie),
+                ('item', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('quantity', quantity),
+                ('inventory_value', amount),
+                ('availability_date', datetime_),
+                ('availability_status_code', code),
+                ('item', asbie),
+                ('inventory_location', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('invoiced_quantity', quantity),
+                ('line_extension_amount', amount),
+                ('tax_point_date', datetime_),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('payment_purpose_code', code),
+                ('free_of_charge_indicator', indicator),
+                ('invoice_period', asbie),
+                ('order_line_reference', asbie),
+                ('despatch_line_reference', asbie),
+                ('receipt_line_reference', asbie),
+                ('billing_reference', asbie),
+                ('document_reference', asbie),
+                ('pricing_reference', asbie),
+                ('originator_party', asbie),
+                ('delivery', asbie),
+                ('payment_terms', asbie),
+                ('allowance_charge', asbie),
+                ('tax_total', asbie),
+                ('withholding_tax_total', asbie),
+                ('item', asbie),
+                ('price', asbie),
+                ('delivery_terms', asbie),
+                ('sub_invoice_line', asbie),
+                ('item_price_extension', asbie),
+            ],
+            [
+                ('description', text),
+                ('pack_quantity', quantity),
+                ('pack_size', numeric),
+                ('catalogue_indicator', indicator),
+                ('name', name),
+                ('hazardous_risk_indicator', indicator),
+                ('additional_information', text),
+                ('keyword', text),
+                ('brand_name', name),
+                ('model_name', name),
+                ('buyers_item_identification', asbie),
+                ('sellers_item_identification', asbie),
+                ('manufacturers_item_identification', asbie),
+                ('standard_item_identification', asbie),
+                ('catalogue_item_identification', asbie),
+                ('additional_item_identification', asbie),
+                ('catalogue_document_reference', asbie),
+                ('item_specification_document_reference', asbie),
+                ('origin_country', asbie),
+                ('commodity_classification', asbie),
+                ('transaction_conditions', asbie),
+                ('hazardous_item', asbie),
+                ('classified_tax_category', asbie),
+                ('additional_item_property', asbie),
+                ('manufacturer_party', asbie),
+                ('information_content_provider_party', asbie),
+                ('origin_address', asbie),
+                ('item_instance', asbie),
+                ('certificate', asbie),
+                ('dimension', asbie),
+            ],
+            [
+                ('price_amount', amount),
+                ('quantity', quantity),
+            ],
+            [
+                ('id', identifier),
+                ('extended_id', identifier),
+                ('barcode_symbology_identifier', identifier),
+                ('physical_attribute', asbie),
+                ('measurement_dimension', asbie),
+                ('issuer_party', asbie),
+            ],
+            [
+                ('time_frequency_code', code),
+                ('supply_chain_activity_type_code', code),
+                ('forecast_type_code', code),
+                ('performance_metric_type_code', code),
+                ('period', asbie),
+                ('sales_item', asbie),
+            ],
+            [
+                ('product_trace_id', identifier),
+                ('manufacture_date', datetime_),
+                ('manufacture_time', datetime_),
+                ('best_before_date', datetime_),
+                ('registration_identifier', identifier),
+                ('serial_identifier', identifier),
+                ('additional_item_property', asbie),
+                ('lot_identification', asbie),
+            ],
+            [
+                ('lead_time', measure),
+                ('minimum_quantity', quantity),
+                ('maximum_quantity', quantity),
+                ('hazardous_risk_indicator', indicator),
+                ('trading_restrictions', text),
+                ('applicable_territory_address', asbie),
+                ('price', asbie),
+                ('delivery_unit', asbie),
+                ('applicable_tax_category', asbie),
+                ('package', asbie),
+                ('allowance_charge', asbie),
+                ('dependent_price_reference', asbie),
+            ],
+            [
+                ('frozen_period_days', numeric),
+                ('minimum_inventory_quantity', quantity),
+                ('multiple_order_quantity', quantity),
+                ('order_interval_days', numeric),
+                ('replenishment_owner_description', text),
+                ('target_service_percent', numeric),
+                ('target_inventory_quantity', quantity),
+                ('effective_period', asbie),
+                ('item', asbie),
+                ('item_location_quantity', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('name_code', code),
+                ('test_method', text),
+                ('value', text),
+                ('value_quantity', quantity),
+                ('value_qualifier', text),
+                ('importance_code', code),
+                ('list_value', text),
+                ('usability_period', asbie),
+                ('item_property_group', asbie),
+                ('range_dimension', asbie),
+                ('item_property_range', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('importance_code', code),
+            ],
+            [
+                ('minimum_value', text),
+                ('maximum_value', text),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('locale_code', code),
+            ],
+            [
+                ('id', identifier),
+                ('sales_order_identifier', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('line_status_code', code),
+                ('quantity', quantity),
+                ('line_extension_amount', amount),
+                ('total_tax_amount', amount),
+                ('minimum_quantity', quantity),
+                ('maximum_quantity', quantity),
+                ('minimum_backorder', quantity),
+                ('maximum_backorder', quantity),
+                ('inspection_method_code', code),
+                ('partial_delivery_indicator', indicator),
+                ('back_order_allowed_indicator', indicator),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('warranty_information', text),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('originator_party', asbie),
+                ('ordered_shipment', asbie),
+                ('pricing_reference', asbie),
+                ('allowance_charge', asbie),
+                ('price', asbie),
+                ('item', asbie),
+                ('sub_line_item', asbie),
+                ('warranty_validity_period', asbie),
+                ('warranty_party', asbie),
+                ('tax_total', asbie),
+                ('item_price_extension', asbie),
+                ('line_reference', asbie),
+            ],
+            [
+                ('line_identifier', identifier),
+                ('uuid', identifier),
+                ('line_status_code', code),
+                ('document_reference', asbie),
+            ],
+            [
+                ('line_reference', asbie),
+                ('response', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('description', text),
+                ('conditions', text),
+                ('country_subentity', text),
+                ('country_subentity_code', code),
+                ('location_type_code', code),
+                ('information_uri', identifier),
+                ('name', name),
+                ('validity_period', asbie),
+                ('address', asbie),
+                ('subsidiary_location', asbie),
+                ('location_coordinate', asbie),
+            ],
+            [
+                ('coordinate_system_code', code),
+                ('latitude_degrees', measure),
+                ('latitude_minutes', measure),
+                ('latitude_direction_code', code),
+                ('longitude_degrees', measure),
+                ('longitude_minutes', measure),
+                ('longitude_direction_code', code),
+                ('altitude', measure),
+            ],
+            [
+                ('lot_number', identifier),
+                ('expiry_date', datetime_),
+                ('additional_item_property', asbie),
+            ],
+            [
+                ('vessel_identifier', identifier),
+                ('vessel_name', name),
+                ('radio_call_sign_identifier', identifier),
+                ('ships_requirements', text),
+                ('gross_tonnage', measure),
+                ('net_tonnage', measure),
+                ('registry_certificate_document_reference', asbie),
+                ('registry_port_location', asbie),
+            ],
+            [
+                ('meter_number', text),
+                ('meter_name', text),
+                ('meter_constant', text),
+                ('meter_constant_code', code),
+                ('total_delivered_quantity', quantity),
+                ('meter_reading', asbie),
+                ('meter_property', asbie),
+            ],
+            [
+                ('name', name),
+                ('name_code', code),
+                ('value', text),
+                ('value_quantity', quantity),
+                ('value_qualifier', text),
+            ],
+            [
+                ('id', identifier),
+                ('meter_reading_type', text),
+                ('meter_reading_type_code', code),
+                ('previous_meter_reading_date', datetime_),
+                ('previous_meter_quantity', quantity),
+                ('latest_meter_reading_date', datetime_),
+                ('latest_meter_quantity', quantity),
+                ('previous_meter_reading_method', text),
+                ('previous_meter_reading_method_code', code),
+                ('latest_meter_reading_method', text),
+                ('latest_meter_reading_method_code', code),
+                ('meter_reading_comments', text),
+                ('delivered_quantity', quantity),
+            ],
+            [
+                ('miscellaneous_event_type_code', code),
+                ('event_line_item', asbie),
+            ],
+            [
+                ('line_extension_amount', amount),
+                ('tax_exclusive_amount', amount),
+                ('tax_inclusive_amount', amount),
+                ('allowance_total_amount', amount),
+                ('charge_total_amount', amount),
+                ('prepaid_amount', amount),
+                ('payable_rounding_amount', amount),
+                ('payable_amount', amount),
+                ('payable_alternative_amount', amount),
+            ],
+            [
+                ('notification_type_code', code),
+                ('post_event_notification_duration', measure),
+                ('pre_event_notification_duration', measure),
+                ('notify_party', asbie),
+                ('notification_period', asbie),
+                ('notification_location', asbie),
+            ],
+            [
+                ('estimated_consumed_quantity', quantity),
+                ('note', text),
+                ('payment_terms', asbie),
+            ],
+            [
+                ('substitution_status_code', code),
+                ('note', text),
+                ('line_item', asbie),
+                ('seller_proposed_substitute_line_item', asbie),
+                ('seller_substituted_line_item', asbie),
+                ('buyer_proposed_substitute_line_item', asbie),
+                ('catalogue_line_reference', asbie),
+                ('quotation_line_reference', asbie),
+                ('order_line_reference', asbie),
+                ('document_reference', asbie),
+            ],
+            [
+                ('line_identifier', identifier),
+                ('sales_order_line_identifier', identifier),
+                ('uuid', identifier),
+                ('line_status_code', code),
+                ('order_reference', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('sales_order_identifier', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('customer_reference', text),
+                ('order_type_code', code),
+                ('document_reference', asbie),
+            ],
+            [
+                ('shipment', asbie),
+                ('package', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('quantity', quantity),
+                ('returnable_material_indicator', indicator),
+                ('package_level_code', code),
+                ('packaging_type_code', code),
+                ('packing_material', text),
+                ('trace_id', identifier),
+                ('contained_package', asbie),
+                ('containing_transport_equipment', asbie),
+                ('goods_item', asbie),
+                ('measurement_dimension', asbie),
+                ('delivery_unit', asbie),
+                ('delivery', asbie),
+                ('pickup', asbie),
+                ('despatch', asbie),
+            ],
+            [
+                ('mark_care_indicator', indicator),
+                ('mark_attention_indicator', indicator),
+                ('website_uri', identifier),
+                ('logo_reference', identifier),
+                ('endpoint_identifier', identifier),
+                ('industry_classification_code', code),
+                ('party_identification', asbie),
+                ('party_name', asbie),
+                ('language', asbie),
+                ('postal_address', asbie),
+                ('physical_location', asbie),
+                ('party_tax_scheme', asbie),
+                ('party_legal_entity', asbie),
+                ('contact', asbie),
+                ('person', asbie),
+                ('agent_party', asbie),
+                ('service_provider_party', asbie),
+                ('power_of_attorney', asbie),
+                ('financial_account', asbie),
+            ],
+            [('id', identifier)],
+            [
+                ('registration_name', name),
+                ('company_identifier', identifier),
+                ('registration_date', datetime_),
+                ('registration_expiration_date', datetime_),
+                ('company_legal_form_code', code),
+                ('company_legal_form', text),
+                ('sole_proprietorship_indicator', indicator),
+                ('company_liquidation_status_code', code),
+                ('corporate_stock_amount', amount),
+                ('fully_paid_shares_indicator', indicator),
+                ('registration_address', asbie),
+                ('corporate_registration_scheme', asbie),
+                ('head_office_party', asbie),
+                ('shareholder_party', asbie),
+            ],
+            [('name', name)],
+            [
+                ('registration_name', name),
+                ('company_identifier', identifier),
+                ('tax_level_code', code),
+                ('exemption_reason_code', code),
+                ('exemption_reason', text),
+                ('registration_address', asbie),
+                ('tax_scheme', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('paid_amount', amount),
+                ('received_date', datetime_),
+                ('paid_date', datetime_),
+                ('paid_time', datetime_),
+                ('instruction_identifier', identifier),
+            ],
+            [
+                ('id', identifier),
+                ('mandate_type_code', code),
+                ('maximum_payment_instructions', numeric),
+                ('maximum_paid_amount', amount),
+                ('signature_identifier', identifier),
+                ('payer_party', asbie),
+                ('payer_financial_account', asbie),
+                ('validity_period', asbie),
+                ('payment_reversal_period', asbie),
+                ('clause', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('payment_means_code', code),
+                ('payment_due_date', datetime_),
+                ('payment_channel_code', code),
+                ('instruction_identifier', identifier),
+                ('instruction_note', text),
+                ('payment_identifier', identifier),
+                ('card_account', asbie),
+                ('payer_financial_account', asbie),
+                ('payee_financial_account', asbie),
+                ('credit_account', asbie),
+                ('payment_mandate', asbie),
+                ('trade_financing', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('payment_means_identifier', identifier),
+                ('prepaid_payment_reference_identifier', identifier),
+                ('note', text),
+                ('reference_event_code', code),
+                ('settlement_discount_percent', numeric),
+                ('penalty_surcharge_percent', numeric),
+                ('payment_percent', numeric),
+                ('amount', amount),
+                ('settlement_discount_amount', amount),
+                ('penalty_amount', amount),
+                ('payment_terms_details_uri', identifier),
+                ('payment_due_date', datetime_),
+                ('installment_due_date', datetime_),
+                ('invoicing_party_reference', text),
+                ('settlement_period', asbie),
+                ('penalty_period', asbie),
+                ('exchange_rate', asbie),
+                ('validity_period', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('performance_value', quantity),
+                ('performance_metric_type_code', code),
+                ('period', asbie),
+                ('item', asbie),
+            ],
+            [
+                ('start_date', datetime_),
+                ('start_time', datetime_),
+                ('end_date', datetime_),
+                ('end_time', datetime_),
+                ('duration', measure),
+                ('description_code', code),
+                ('description', text),
+            ],
+            [
+                ('id', identifier),
+                ('first_name', name),
+                ('family_name', name),
+                ('title', text),
+                ('middle_name', name),
+                ('other_name', name),
+                ('name_suffix', text),
+                ('job_title', text),
+                ('nationality', identifier),
+                ('gender_code', code),
+                ('birth_date', datetime_),
+                ('birthplace_name', text),
+                ('organization_department', text),
+                ('contact', asbie),
+                ('financial_account', asbie),
+                ('identity_document_reference', asbie),
+                ('residence_address', asbie),
+            ],
+            [
+                ('attribute_identifier', identifier),
+                ('position_code', code),
+                ('description_code', code),
+                ('description', text),
+            ],
+            [
+                ('id', identifier),
+                ('actual_pickup_date', datetime_),
+                ('actual_pickup_time', datetime_),
+                ('earliest_pickup_date', datetime_),
+                ('earliest_pickup_time', datetime_),
+                ('latest_pickup_date', datetime_),
+                ('latest_pickup_time', datetime_),
+                ('pickup_location', asbie),
+                ('pickup_party', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('description', text),
+                ('notary_party', asbie),
+                ('agent_party', asbie),
+                ('witness_party', asbie),
+                ('mandate_document_reference', asbie),
+            ],
+            [
+                ('price_amount', amount),
+                ('base_quantity', quantity),
+                ('price_change_reason', text),
+                ('price_type_code', code),
+                ('price_type', text),
+                ('orderable_unit_factor', numeric),
+                ('validity_period', asbie),
+                ('price_list', asbie),
+                ('allowance_charge', asbie),
+                ('pricing_exchange_rate', asbie),
+            ],
+            [
+                ('amount', amount),
+                ('tax_total', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('status_code', code),
+                ('validity_period', asbie),
+                ('previous_price_list', asbie),
+            ],
+            [
+                ('original_item_location_quantity', asbie),
+                ('alternative_condition_price', asbie),
+            ],
+            [
+                ('previous_cancellation_reason_code', code),
+                ('process_reason_code', code),
+                ('process_reason', text),
+                ('description', text),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('description', text),
+                ('procurement_type_code', code),
+                ('procurement_sub_type_code', code),
+                ('quality_control_code', code),
+                ('required_fee', amount),
+                ('fee_description', text),
+                ('requested_delivery_date', datetime_),
+                ('estimated_overall_contract', quantity),
+                ('note', text),
+                ('requested_tender_total', asbie),
+                ('main_commodity_classification', asbie),
+                ('additional_commodity_classification', asbie),
+                ('realized_location', asbie),
+                ('planned_period', asbie),
+                ('contract_extension', asbie),
+                ('request_for_tender_line', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('tendering_terms', asbie),
+                ('procurement_project', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('work_phase_reference', asbie),
+            ],
+            [
+                ('promotional_event_type_code', code),
+                ('submission', datetime_),
+                ('first_shipment_availibility_date', datetime_),
+                ('latest_proposal_acceptance_date', datetime_),
+                ('promotional_specification', asbie),
+            ],
+            [
+                ('amount', amount),
+                ('event_line_item', asbie),
+            ],
+            [
+                ('specification_identifier', identifier),
+                ('promotional_event_line_item', asbie),
+                ('event_tactic', asbie),
+            ],
+            [
+                ('admission_code', code),
+                ('exclusion_reason', text),
+                ('resolution', text),
+                ('resolution_date', datetime_),
+                ('resolution_time', datetime_),
+                ('procurement_project_lot', asbie),
+            ],
+            [
+                ('participation', numeric),
+                ('personal_situation', text),
+                ('operating_years', quantity),
+                ('employee', quantity),
+                ('business_classification_evidence', identifier),
+                ('business_identity_evidence', identifier),
+                ('tenderer_role_code', code),
+                ('business_classification_scheme', asbie),
+                ('technical_capability', asbie),
+                ('financial_capability', asbie),
+                ('completed_task', asbie),
+                ('declaration', asbie),
+                ('party', asbie),
+                ('economic_operator_role', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('quantity', quantity),
+                ('line_extension_amount', amount),
+                ('total_tax_amount', amount),
+                ('request_for_quotation_line_identifier', identifier),
+                ('document_reference', asbie),
+                ('line_item', asbie),
+                ('seller_proposed_substitute_line_item', asbie),
+                ('alternative_line_item', asbie),
+                ('request_line_reference', asbie),
+            ],
+            [
+                ('train_identifier', identifier),
+                ('rail_car_identifier', identifier),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('received_quantity', quantity),
+                ('short_quantity', quantity),
+                ('shortage_action_code', code),
+                ('rejected_quantity', quantity),
+                ('reject_reason_code', code),
+                ('reject_reason', text),
+                ('reject_action_code', code),
+                ('quantity_discrepancy_code', code),
+                ('oversupply_quantity', quantity),
+                ('received_date', datetime_),
+                ('timing_complaint_code', code),
+                ('timing_complaint', text),
+                ('order_line_reference', asbie),
+                ('despatch_line_reference', asbie),
+                ('document_reference', asbie),
+                ('item', asbie),
+                ('shipment', asbie),
+            ],
+            [
+                ('name', name),
+                ('legal_reference', text),
+                ('ontology_uri', identifier),
+            ],
+            [
+                ('id', identifier),
+                ('quantity', quantity),
+                ('description', text),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('uuid', identifier),
+                ('balance_brought_forward_indicator', indicator),
+                ('debit_line_amount', amount),
+                ('credit_line_amount', amount),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('penalty_surcharge_percent', numeric),
+                ('amount', amount),
+                ('payment_purpose_code', code),
+                ('reminder_period', asbie),
+                ('billing_reference', asbie),
+                ('exchange_rate', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('uuid', identifier),
+                ('debit_line_amount', amount),
+                ('credit_line_amount', amount),
+                ('balance_amount', amount),
+                ('payment_purpose_code', code),
+                ('invoicing_party_reference', text),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+                ('payee_party', asbie),
+                ('invoice_period', asbie),
+                ('billing_reference', asbie),
+                ('document_reference', asbie),
+                ('exchange_rate', asbie),
+            ],
+            [
+                ('amount', amount),
+                ('period', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('optional_line_item_indicator', indicator),
+                ('privacy_code', code),
+                ('security_classification_code', code),
+                ('document_reference', asbie),
+                ('line_item', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('uuid', identifier),
+                ('note', text),
+                ('quantity', quantity),
+                ('minimum_quantity', quantity),
+                ('maximum_quantity', quantity),
+                ('tax_included_indicator', indicator),
+                ('minimum_amount', amount),
+                ('maximum_amount', amount),
+                ('estimated_amount', amount),
+                ('document_reference', asbie),
+                ('delivery_period', asbie),
+                ('required_item_location_quantity', asbie),
+                ('warranty_validity_period', asbie),
+                ('item', asbie),
+                ('sub_request_for_tender_line', asbie),
+            ],
+            [
+                ('estimated_overall_contract', amount),
+                ('total_amount', amount),
+                ('tax_included_indicator', indicator),
+                ('minimum_amount', amount),
+                ('maximum_amount', amount),
+                ('monetary_scope', text),
+                ('average_subsequent_contract', amount),
+                ('applicable_tax_category', asbie),
+            ],
+            [
+                ('reference', identifier),
+                ('response_code', code),
+                ('description', text),
+                ('effective_date', datetime_),
+                ('effective_time', datetime_),
+                ('status', asbie),
+            ],
+            [
+                ('validator', identifier),
+                ('validation_result_code', code),
+                ('validation_date', datetime_),
+                ('validation_time', datetime_),
+                ('validate_process', text),
+                ('validate_tool', text),
+                ('validate_tool_version', text),
+                ('signatory_party', asbie),
+            ],
+            [
+                ('amount', amount),
+                ('forecast_purpose_code', code),
+                ('forecast_type_code', code),
+                ('period', asbie),
+            ],
+            [
+                ('license_plate_identifier', identifier)
+            ],
+            [
+                ('quantity', quantity),
+                ('activity_property', asbie),
+                ('tax_exclusive_price', asbie),
+                ('tax_inclusive_price', asbie),
+                ('item', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('placard_notation', text),
+                ('placard_endorsement', text),
+                ('emergency_procedures_code', code),
+                ('extension', text),
+            ],
+            [('week_day', code)],
+            [
+                ('id', identifier),
+                ('service_type_code', code),
+                ('service_type', text),
+                ('party', asbie),
+                ('seller_contact', asbie),
+            ],
+            [
+                ('partecipation', numeric),
+                ('party', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('shipping_priority_level_code', code),
+                ('handling_code', code),
+                ('handling_instructions', text),
+                ('information', text),
+                ('gross_weight', measure),
+                ('net_weight', measure),
+                ('net_net_weight', measure),
+                ('gross_volume', measure),
+                ('net_volume', measure),
+                ('total_goods_item_quantity', quantity),
+                ('total_transport_handling_unit_quantity', quantity),
+                ('insurance_value', amount),
+                ('declared_customs_value', amount),
+                ('declared_for_carriage_value', amount),
+                ('declared_statistics_value', amount),
+                ('free_on_board_value', amount),
+                ('special_instructions', text),
+                ('delivery_instructions', text),
+                ('split_consignment_indicator', indicator),
+                ('consignment_quantity', quantity),
+                ('consignment', asbie),
+                ('goods_item', asbie),
+                ('shipment_stage', asbie),
+                ('delivery', asbie),
+                ('transport_handling_unit', asbie),
+                ('return_address', asbie),
+                ('origin_address', asbie),
+                ('first_arrival_port_location', asbie),
+                ('last_exit_port_location', asbie),
+                ('export_country', asbie),
+                ('freight_allowance_charge', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('transport_mode_code', code),
+                ('transport_means_type_code', code),
+                ('transit_direction_code', code),
+                ('pre_carriage_indicator', indicator),
+                ('on_carriage_indicator', indicator),
+                ('estimated_delivery_date', datetime_),
+                ('estimated_delivery_time', datetime_),
+                ('required_delivery_date', datetime_),
+                ('required_delivery_time', datetime_),
+                ('loading_sequence_identifier', identifier),
+                ('successive_sequence_identifier', identifier),
+                ('instructions', text),
+                ('demurrage_instructions', text),
+                ('crew_quantity', quantity),
+                ('passenger_quantity', quantity),
+                ('transit_period', asbie),
+                ('carrier_party', asbie),
+                ('transport_means', asbie),
+                ('loading_port_location', asbie),
+                ('unloading_port_location', asbie),
+                ('transship_port_location', asbie),
+                ('loading_transport_event', asbie),
+                ('examination_transport_event', asbie),
+                ('availability_transport_event', asbie),
+                ('exportation_transport_event', asbie),
+                ('discharge_transport_event', asbie),
+                ('warehousing_transport_event', asbie),
+                ('takeover_transport_event', asbie),
+                ('optional_takeover_transport_event', asbie),
+                ('dropoff_transport_event', asbie),
+                ('actual_pickup_transport_event', asbie),
+                ('delivery_transport_event', asbie),
+                ('receipt_transport_event', asbie),
+                ('storage_transport_event', asbie),
+                ('acceptance_transport_event', asbie),
+                ('terminal_operator_party', asbie),
+                ('customs_agent_party', asbie),
+                ('estimated_transit_period', asbie),
+                ('freight_allowance_charge', asbie),
+                ('freight_charge_location', asbie),
+                ('detention_transport_event', asbie),
+                ('requested_departure_transport_event', asbie),
+                ('requested_arrival_transport_event', asbie),
+                ('requested_waypoint_transport_event', asbie),
+                ('planned_departure_transport_event', asbie),
+                ('planned_arrival_transport_event', asbie),
+                ('planned_waypoint_transport_event', asbie),
+                ('actual_departure_transport_event', asbie),
+                ('actual_waypoint_transport_event', asbie),
+                ('actual_arrival_transport_event', asbie),
+                ('transport_event', asbie),
+                ('estimated_departure_transport_event', asbie),
+                ('estimated_arrival_transport_event', asbie),
+                ('passenger_person', asbie),
+                ('driver_person', asbie),
+                ('reporting_person', asbie),
+                ('crew_member_person', asbie),
+                ('security_officer_person', asbie),
+                ('master_person', asbie),
+                ('ships_surgeon_person', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('validation_date', datetime_),
+                ('validation_time', datetime_),
+                ('validator', identifier),
+                ('canonicalization_method', text),
+                ('signature_method', text),
+                ('signatory_party', asbie),
+                ('digital_signature_attachment', asbie),
+                ('original_document_reference', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('uuid', identifier),
+                ('balance_brought_forward_indicator', indicator),
+                ('debit_line_amount', amount),
+                ('credit_line_amount', amount),
+                ('balance_amount', amount),
+                ('payment_purpose_code', code),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('accounting_supplier_party', asbie),
+                ('payee_party', asbie),
+                ('invoice_period', asbie),
+                ('billing_reference', asbie),
+                ('document_reference', asbie),
+                ('exchange_rate', asbie),
+                ('allowance_charge', asbie),
+                ('collected_payment', asbie),
+            ],
+            [
+                ('condition_code', code),
+                ('reference_date', datetime_),
+                ('reference_time', datetime_),
+                ('description', text),
+                ('status_reason_code', code),
+                ('status_reason', text),
+                ('sequence_identifier', identifier),
+                ('text', text),
+                ('indication_indicator', indicator),
+                ('percent', numeric),
+                ('reliability_percent', numeric),
+                ('condition', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('quantity', quantity),
+                ('value', amount),
+                ('availability_date', datetime_),
+                ('availability_status_code', code),
+                ('item', asbie),
+            ],
+            [
+                ('location_identifier', identifier),
+                ('location', text),
+                ('measurement_dimension', asbie),
+            ],
+            [
+                ('rate', numeric),
+                ('unknown_price', indicator),
+                ('description', text),
+                ('amount', amount),
+                ('subcontracting_conditions_code', code),
+                ('maximum_percent', numeric),
+                ('minimum_percent', numeric),
+            ],
+            [
+                ('consumption_identifier', identifier),
+                ('specification_type_code', code),
+                ('note', text),
+                ('total_metered_quantity', quantity),
+                ('subscriber_party', asbie),
+                ('utility_consumption_point', asbie),
+                ('on_account_payment', asbie),
+                ('consumption', asbie),
+                ('supplier_consumption', asbie),
+            ],
+            [
+                ('description', text),
+                ('utility_supplier_party', asbie),
+                ('utility_customer_party', asbie),
+                ('consumption', asbie),
+                ('contract', asbie),
+                ('consumption_line', asbie),
+            ],
+            [
+                ('customer_assigned_account_identifier', identifier),
+                ('additional_account_identifier', identifier),
+                ('data_sending_capability', text),
+                ('party', asbie),
+                ('despatch_contact', asbie),
+                ('accounting_contact', asbie),
+                ('seller_contact', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('percent', numeric),
+                ('base_unit_measure', measure),
+                ('per_unit_amount', amount),
+                ('tax_exemption_reason_code', code),
+                ('tax_exemption_reason', text),
+                ('tier_range', text),
+                ('tier_rate', numeric),
+                ('tax_scheme', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('name', name),
+                ('tax_type_code', code),
+                ('currency_code', code),
+                ('jurisdiction_region_address', asbie),
+            ],
+            [
+                ('taxable_amount', amount),
+                ('tax_amount', amount),
+                ('calculation_sequence', numeric),
+                ('transaction_currency_tax_amount', amount),
+                ('percent', numeric),
+                ('base_unit_measure', measure),
+                ('per_unit_amount', amount),
+                ('tier_range', text),
+                ('tier_rate', numeric),
+                ('tax_category', asbie),
+            ],
+            [
+                ('tax_amount', amount),
+                ('rounding_amount', amount),
+                ('tax_evidence_indicator', indicator),
+                ('tax_included_indicator', indicator),
+                ('tax_subtotal', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('call_date', datetime_),
+                ('call_time', datetime_),
+                ('service_number_called', text),
+                ('telecommunications_service_category', text),
+                ('telecommunications_service_category_code', code),
+                ('movie_title', text),
+                ('roaming_partner_name', name),
+                ('pay_per_view', text),
+                ('quantity', quantity),
+                ('telecommunications_service_call', text),
+                ('telecommunications_service_call_code', code),
+                ('call_base_amount', amount),
+                ('call_extension_amount', amount),
+                ('price', asbie),
+                ('country', asbie),
+                ('exchange_rate', asbie),
+                ('allowance_charge', asbie),
+                ('tax_total', asbie),
+                ('call_duty', asbie),
+                ('time_duty', asbie),
+            ],
+            [
+                ('telecommunications_supply_type', text),
+                ('telecommunications_supply_type_code', code),
+                ('privacy_code', code),
+                ('description', text),
+                ('total_amount', amount),
+                ('telecommunications_supply_line', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('phone_number', text),
+                ('description', text),
+                ('line_extension_amount', amount),
+                ('exchange_rate', asbie),
+                ('allowance_charge', asbie),
+                ('tax_total', asbie),
+                ('telecommunications_service', asbie),
+            ],
+            [
+                ('attribute_identifier', identifier),
+                ('measure', measure),
+                ('description', text),
+            ],
+            [
+                ('id', identifier),
+                ('note', text),
+                ('quantity', quantity),
+                ('line_extension_amount', amount),
+                ('total_tax_amount', amount),
+                ('orderable_unit', text),
+                ('content_unit', quantity),
+                ('order_quantity_increment', numeric),
+                ('minimum_order_quantity', quantity),
+                ('maximum_order_quantity', quantity),
+                ('warranty_information', text),
+                ('pack_level_code', code),
+                ('document_reference', asbie),
+                ('item', asbie),
+                ('offered_item_location_quantity', asbie),
+                ('replacement_related_item', asbie),
+                ('warranty_party', asbie),
+                ('warranty_validity_period', asbie),
+                ('sub_tender_line', asbie),
+                ('call_for_tenders_line_reference', asbie),
+                ('call_for_tenders_document_reference', asbie),
+            ],
+            [
+                ('tender_envelope_identifier', identifier),
+                ('tender_envelope_type_code', code),
+                ('description', text),
+                ('open_tender_identifier', identifier),
+                ('procurement_project_lot', asbie),
+                ('document_tender_requirement', asbie),
+            ],
+            [
+                ('name', name),
+                ('description', text),
+                ('template_document_reference', asbie),
+            ],
+            [
+                ('tender_result_code', code),
+                ('description', text),
+                ('advertisement', amount),
+                ('award_date', datetime_),
+                ('award_time', datetime_),
+                ('received_tender', quantity),
+                ('lower_tender', amount),
+                ('higher_tender', amount),
+                ('start_date', datetime_),
+                ('received_electronic_tender_quantity', quantity),
+                ('received_foreign_tender_quantity', quantity),
+                ('contract', asbie),
+                ('awarded_tendered_project', asbie),
+                ('contract_formalization_period', asbie),
+                ('subcontract_terms', asbie),
+                ('winning_party', asbie),
+            ],
+            [
+                ('variant', identifier),
+                ('fee', amount),
+                ('fee_description', text),
+                ('tender_envelope_identifier', identifier),
+                ('tender_envelope_type_code', code),
+                ('procurement_project_lot', asbie),
+                ('evidence_document_reference', asbie),
+                ('tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('tender_line', asbie),
+                ('awarding_criterion_response', asbie),
+            ],
+            [
+                ('interested_procurement_project_lot', asbie),
+                ('main_qualifying_party', asbie),
+                ('additional_qualifying_party', asbie),
+            ],
+            [
+                ('company_legal_form_code', code),
+                ('company_legal_form', text),
+                ('personal_situation', text),
+                ('operating_years', quantity),
+                ('employee', quantity),
+                ('description', text),
+                ('required_business_classification_scheme', asbie),
+                ('technical_evaluation_criterion', asbie),
+                ('financial_evaluation_criterion', asbie),
+                ('specific_tenderer_requirement', asbie),
+                ('economic_operator_role', asbie),
+            ],
+            [
+                ('name', name),
+                ('tenderer_requirement_type_code', code),
+                ('description', text),
+                ('legal_reference', text),
+                ('suggested_evidence', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('original_contracting_system', identifier),
+                ('description', text),
+                ('negotiation_description', text),
+                ('procedure_code', code),
+                ('urgency_code', code),
+                ('expense_code', code),
+                ('part_presentation_code', code),
+                ('contracting_system_code', code),
+                ('submission_method_code', code),
+                ('candidate_reduction_constraint', indicator),
+                ('government_agreement_constraint', indicator),
+                ('document_availability_period', asbie),
+                ('tender_submission_deadline_period', asbie),
+                ('invitation_submission_period', asbie),
+                ('participation_request_reception_period', asbie),
+                ('notice_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('process_justification', asbie),
+                ('economic_operator_short_list', asbie),
+                ('open_tender_event', asbie),
+                ('auction_terms', asbie),
+                ('framework_agreement', asbie),
+            ],
+            [
+                ('awarding_method_type_code', code),
+                ('price_evaluation_code', code),
+                ('maximum_variant_quantity', quantity),
+                ('variant_constraint', indicator),
+                ('accepted_variants_description', text),
+                ('price_revision_formula_description', text),
+                ('funding_program_code', code),
+                ('funding_program', text),
+                ('maximum_advertisement', amount),
+                ('note', text),
+                ('payment_frequency_code', code),
+                ('economic_operator_registry_uri', identifier),
+                ('required_curricula', indicator),
+                ('other_conditions', indicator),
+                ('additional_conditions', text),
+                ('latest_security_clearance_date', datetime_),
+                ('documentation_fee_amount', amount),
+                ('penalty_clause', asbie),
+                ('required_financial_guarantee', asbie),
+                ('procurement_legislation_document_reference', asbie),
+                ('fiscal_legislation_document_reference', asbie),
+                ('environmental_legislation_document_reference', asbie),
+                ('employment_legislation_document_reference', asbie),
+                ('contractual_document_reference', asbie),
+                ('call_for_tenders_document_reference', asbie),
+                ('warranty_validity_period', asbie),
+                ('payment_terms', asbie),
+                ('tenderer_qualification_request', asbie),
+                ('allowed_subcontract_terms', asbie),
+                ('tender_preparation', asbie),
+                ('contract_execution_requirement', asbie),
+                ('awarding_terms', asbie),
+                ('additional_information_party', asbie),
+                ('document_provider_party', asbie),
+                ('tender_recipient_party', asbie),
+                ('contract_responsible_party', asbie),
+                ('tender_evaluation_party', asbie),
+                ('tender_validity_period', asbie),
+                ('contract_acceptance_period', asbie),
+                ('appeal_terms', asbie),
+                ('language', asbie),
+                ('budget_account_line', asbie),
+                ('replaced_notice_document_reference', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('financing_instrument_code', code),
+                ('contract_document_reference', asbie),
+                ('document_reference', asbie),
+                ('financing_party', asbie),
+                ('financing_financial_account', asbie),
+                ('clause', asbie),
+            ],
+            [
+                ('information', text),
+                ('reference', text),
+                ('applicable_address', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('action_code', code),
+                ('description', text),
+                ('document_reference', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('referenced_consignment_identifier', identifier),
+                ('transport_equipment_type_code', code),
+                ('provider_type_code', code),
+                ('owner_type_code', code),
+                ('size_type_code', code),
+                ('disposition_code', code),
+                ('fullness_indication_code', code),
+                ('refrigeration_on_indicator', indicator),
+                ('information', text),
+                ('returnability_indicator', indicator),
+                ('legal_status_indicator', indicator),
+                ('air_flow_percent', numeric),
+                ('humidity_percent', numeric),
+                ('animal_food_approved_indicator', indicator),
+                ('human_food_approved_indicator', indicator),
+                ('dangerous_goods_approved_indicator', indicator),
+                ('refrigerated_indicator', indicator),
+                ('characteristics', text),
+                ('damage_remarks', text),
+                ('description', text),
+                ('special_transport_requirements', text),
+                ('gross_weight', measure),
+                ('gross_volume', measure),
+                ('tare_weight', measure),
+                ('tracking_device_code', code),
+                ('power', indicator),
+                ('trace_id', identifier),
+                ('measurement_dimension', asbie),
+                ('transport_equipment_seal', asbie),
+                ('minimum_temperature', asbie),
+                ('maximum_temperature', asbie),
+                ('provider_party', asbie),
+                ('loading_proof_party', asbie),
+                ('supplier_party', asbie),
+                ('owner_party', asbie),
+                ('operating_party', asbie),
+                ('loading_location', asbie),
+                ('unloading_location', asbie),
+                ('storage_location', asbie),
+                ('positioning_transport_event', asbie),
+                ('quarantine_transport_event', asbie),
+                ('delivery_transport_event', asbie),
+                ('pickup_transport_event', asbie),
+                ('handling_transport_event', asbie),
+                ('loading_transport_event', asbie),
+                ('transport_event', asbie),
+                ('applicable_transport_means', asbie),
+                ('haulage_trading_terms', asbie),
+                ('hazardous_goods_transit', asbie),
+                ('packaged_transport_handling_unit', asbie),
+                ('service_allowance_charge', asbie),
+                ('freight_allowance_charge', asbie),
+                ('attached_transport_equipment', asbie),
+                ('delivery', asbie),
+                ('pickup', asbie),
+                ('despatch', asbie),
+                ('shipment_document_reference', asbie),
+                ('contained_in_transport_equipment', asbie),
+                ('package', asbie),
+                ('goods_item', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('seal_issuer_type_code', code),
+                ('condition', text),
+                ('seal_status_code', code),
+                ('sealing_party_type', text),
+            ],
+            [
+                ('identification', identifier),
+                ('occurrence_date', datetime_),
+                ('occurrence_time', datetime_),
+                ('transport_event_type_code', code),
+                ('description', text),
+                ('completion_indicator', indicator),
+                ('reported_shipment', asbie),
+                ('current_status', asbie),
+                ('contact', asbie),
+                ('location', asbie),
+                ('signature', asbie),
+                ('period', asbie),
+            ],
+            [
+                ('transport_user_special_terms', text),
+                ('transport_service_provider_special_terms', text),
+                ('change_conditions', text),
+                ('payment_terms', asbie),
+                ('delivery_terms', asbie),
+                ('bonus_payment_terms', asbie),
+                ('commission_payment_terms', asbie),
+                ('penalty_payment_terms', asbie),
+                ('environmental_emission', asbie),
+                ('notification_requirement', asbie),
+                ('service_charge_payment_terms', asbie),
+            ],
+            [
+                ('id', identifier),
+                ('transport_handling_unit_type_code', code),
+                ('handling_code', code),
+                ('handling_instructions', text),
+                ('hazardous_risk_indicator', indicator),
+                ('total_goods_item_quantity', quantity),
+                ('total_package_quantity', quantity),
+                ('damage_remarks', text),
+                ('shipping_marks', text),
+                ('trace_id', identifier),
+                ('handling_unit_despatch_line', asbie),
+                ('actual_package', asbie),
+                ('received_handling_unit_receipt_line', asbie),
+                ('transport_equipment', asbie),
+                ('transport_means', asbie),
+                ('hazardous_goods_transit', asbie),
+                ('measurement_dimension', asbie),
+                ('minimum_temperature', asbie),
+                ('maximum_temperature', asbie),
+                ('goods_item', asbie),
+                ('floor_space_measurement_dimension', asbie),
+                ('pallet_space_measurement_dimension', asbie),
+                ('shipment_document_reference', asbie),
+                ('status', asbie),
+                ('customs_declaration', asbie),
+                ('referenced_shipment', asbie),
+                ('package', asbie),
+            ],
+            [
+                ('journey_identifier', identifier),
+                ('registration_nationality_identifier', identifier),
+                ('registration_nationality', text),
+                ('direction_code', code),
+                ('transport_means_type_code', code),
+                ('trade_service_code', code),
+                ('stowage', asbie),
+                ('air_transport', asbie),
+                ('road_transport', asbie),
+                ('rail_transport', asbie),
+                ('maritime_transport', asbie),
+                ('owner_party', asbie),
+                ('measurement_dimension', asbie),
+            ],
+            [
+                ('sequence', numeric),
+                ('reference_date', datetime_),
+                ('reference_time', datetime_),
+                ('reliability_percent', numeric),
+                ('remarks', text),
+                ('status_location', asbie),
+                ('actual_arrival_transport_event', asbie),
+                ('actual_departure_transport_event', asbie),
+                ('estimated_departure_transport_event', asbie),
+                ('estimated_arrival_transport_event', asbie),
+                ('planned_departure_transport_event', asbie),
+                ('planned_arrival_transport_event', asbie),
+            ],
+            [
+                ('sequence', numeric),
+                ('transport_execution_plan_reference', identifier),
+                ('transportation_service', asbie),
+                ('transport_service_provider_party', asbie),
+                ('referenced_consignment', asbie),
+                ('shipment_stage', asbie),
+            ],
+            [
+                ('transport_service_code', code),
+                ('tariff_class_code', code),
+                ('priority', text),
+                ('freight_rate_class_code', code),
+                ('transportation_service_description', text),
+                ('transportation_service_details_uri', identifier),
+                ('nomination_date', datetime_),
+                ('nomination_time', datetime_),
+                ('name', name),
+                ('sequence', numeric),
+                ('transport_equipment', asbie),
+                ('supported_transport_equipment', asbie),
+                ('unsupported_transport_equipment', asbie),
+                ('commodity_classification', asbie),
+                ('supported_commodity_classification', asbie),
+                ('unsupported_commodity_classification', asbie),
+                ('total_capacity_dimension', asbie),
+                ('shipment_stage', asbie),
+                ('transport_event', asbie),
+                ('responsible_transport_service_provider_party', asbie),
+                ('environmental_emission', asbie),
+                ('estimated_duration_period', asbie),
+                ('scheduled_service_frequency', asbie),
+            ],
+            [
+                ('price_amount', amount),
+                ('time_amount', text),
+            ],
+            [
+                ('id', identifier),
+                ('subscriber_identifier', identifier),
+                ('subscriber_type', text),
+                ('subscriber_type_code', code),
+                ('description', text),
+                ('pack_quantity', quantity),
+                ('pack_size', numeric),
+                ('consumption_type', text),
+                ('consumption_type_code', code),
+                ('current_charge_type', text),
+                ('current_charge_type_code', code),
+                ('one_time_charge_type', text),
+                ('one_time_charge_type_code', code),
+                ('tax_category', asbie),
+                ('contract', asbie),
+            ],
+            [
+                ('uri', identifier),
+                ('password', text),
+                ('login', text),
+            ],
+            [('rank', text), ('party', asbie)],
+            [
+                ('id', identifier),
+                ('work_phase_code', code),
+                ('work_phase', text),
+                ('progress_percent', numeric),
+                ('start_date', datetime_),
+                ('end_date', datetime_),
+                ('work_order_document_reference', asbie),
+            ],
+        ])
+        self.registry = dict(zip(ComponentRegistry, self.values))
 
-    def __iter__(self):
-        # yield each definition following a counter or iterate __slots__
-        # equivalent to iterating through the keys
-        for definition in self.__slots__:
-            yield definition
+
+class UBLDocumentRegistry:
+    __slots__ = 'registry', 'binary', 'code', 'asbie', 'datetime_', \
+                'measure', 'quantity', 'numeric', 'text', 'identifier', \
+                'indicator', 'name', 'amount', 'values'
+
+    def __init__(self):
+        self.binary = BinaryObjectType.mock()
+        self.code = CodeType.mock('SAMPLE', pattern=r'/(\w+)/', max_length=5)
+        self.asbie = AssociatedBusinessEntity.mock()
+        self.datetime_ = DateTimeType.mock()
+        self.measure = MeasureType.mock(0.0, kwargs={})
+        self.quantity = QuantityType.mock(0, kwargs={})
+        self.numeric = NumericType.mock(0.0, kwargs={})
+        self.text = TextType.mock('Sample', pattern=r'\w+', max_length=100)
+        self.identifier = IdentifierType.mock('sample', pattern=r'/w+/')
+        self.indicator = IndicatorType.mock()
+        self.name = NameType.mock('Sample Name', pattern=r'\w+', max_length=20)
+        self.amount = AmountType.mock(0.0, currency='NAIRA',
+                                      currency_code='NGN', version_id='2.1')
+        binary = self.binary
+        code = self.code
+        asbie = self.asbie
+        datetime_ = self.datetime_
+        measure = self.measure
+        quantity = self.quantity
+        numeric = self.numeric
+        text = self.text
+        identifier = self.identifier
+        indicator = self.indicator
+        name = self.name
+        amount = self.amount
+
+        self.values = iter([
+
+        ])
+        self.registry = dict(zip(BusinessDocumentRegistry, self.values))
+
+
+class ComponentIterator(Iterable):
+
+    def __init__(self):
+        self.registry = UBLComponentRegistry().registry
 
     def __getitem__(self, item):
-        # compare item as string or enum or enum alias
-        key = key_gen(
-                item,
-                registry=self.__slots__,
-                flags=(ABIERegistry, BIERegistry, BusinessDocumentRegistry,
-                       ProcessRegistry)
-            )
-        if key in self.__slots__:
-            return getattr(self, key)
-        else:
-            raise IndexError('Component not defined in library')
-
-    def __getattr__(self, item):
-        attr = key_gen(
-            item,
-            registry=self.__slots__,
-            flags=(ABIERegistry, BIERegistry, BusinessDocumentRegistry,
-                   ProcessRegistry)
-        )
-        if attr in self.__slots__:
-            return getattr(self, attr)
-        else:
-            raise AttributeError('Named component property not defined')
-
-    def __setitem__(self, key, value):
-        raise RuntimeError('Component definitions cannot be modified')
-
-    def __setattr__(self, key, value):
-        raise RuntimeError('Component definitions cannot be modified')
-
-    def __delattr__(self, item):
-        raise RuntimeError('Attribute cannot be deleted')
+        return self.registry.get(item)
 
     def __contains__(self, item):
-        return key_gen(item, registry=self.__slots__) is True
+        return item in self.registry
 
-    def field_definition(self, component, field):
+    def __setitem__(self, key, value):
+        alias = self.__class__.__name__
+        raise RuntimeError('%s definitions, key: %s and value: %s cannot be '
+                           'modified' % alias, key, value)
+
+    def __delattr__(self, item):
+        alias = self.__class__.__name__
+        raise RuntimeError('%s attribute, %s cannot be deleted' % alias, item)
+
+    def __iter__(self):
+        for component in self.registry:
+            yield component
+
+
+class Descriptor:
+
+    def __get__(self, instance, owner):
+        if instance or owner:
+            return self.registry
+
+    def __set__(self, instance, value):
+        alias = instance.__class__.__name__
+        raise RuntimeError('%s definitions cannot be modified' % alias)
+
+    def __delete__(self, instance):
+        alias = instance.__class__.__name__
+        raise RuntimeError('%s definitions cannot be modified' % alias)
+
+
+class ComponentDescriptor(Descriptor):
+
+    def __init__(self):
+        self.registry = UBLComponentRegistry().registry
+        super(ComponentDescriptor, self).__init__()
+
+
+class DocumentDescriptor:
+    def __init__(self):
+        self.registry = UBLDocumentRegistry().registry
+        super(DocumentDescriptor, self).__init__()
+
+
+
+class SchemaDescriptor:
+    pass
+
+
+class Components(ComponentIterator, RegistryMixin):
+    __registry__ = Descriptor()
+
+    def __init__(self):
+        super(Components, self).__init__()
+
+    @classmethod
+    def field_definition(cls, component, field):
         data = None
-        if component in self.__slots__:
-            object_ = getattr(self, component)
-            check = itertools.filterfalse(lambda x, y: x != field, object_)
+        entries = cls()[component]
+        if entries:
+            check = itertools.filterfalse(lambda x, y: x != field, entries)
             if check:
                 _, data = check.pop()
         return type(data)
 
 
-class Documents:
+class Documents(RegistryMixin):
 
-    __slots__ = (
-        'ApplicationResponse',
-        'AttachedDocument',
-        'AwardedNotification',
-        'UnawardedNotification',
-        'BillOfLading',
-        'CallForTenders',
-        'Catalogue',
-        'CatalogueDeletion',
-        'CatalogueItemSpecificationUpdate',
-        'CataloguePricingUpdate',
-        'CatalogueRequest',
-        'CertificateOfOrigin',
-        'ContractAwardNotice',
-        'ContractNotice',
-        'CreditNote',
-        'DebitNote',
-        'DespatchAdvice',
-        'DocumentStatus',
-        'DocumentStatusRequest',
-        'ExceptionCriteria',
-        'ExceptionNotification',
-        'Forecast',
-        'ForecastRevision',
-        'ForwardingInstructions',
-        'FreightInvoice',
-        'FulfilmentCancellation',
-        'GoodsItemItinerary',
-        'GuaranteeCertificate',
-        'InstructionForReturns',
-        'InventoryReport',
-        'Invoice',
-        'ItemInformationRequest',
-        'Order',
-        'OrderCancellation',
-        'OrderChange',
-        'OrderResponse',
-        'OrderResponseSimple',
-        'PackingList',
-        'PriorInformationNotice',
-        'ProductActivity',
-        'Quotation',
-        'ReceiptAdvice',
-        'Reminder',
-        'RemittanceAdvice',
-        'RequestForQuotation',
-        'RetailEvent',
-        'SelfBilledCreditNote',
-        'SelfBilledInvoice',
-        'Statement',
-        'StockAvailabilityReport',
-        'Tender',
-        'TendererQualification',
-        'TendererQualificationResponse',
-        'TenderReceipt',
-        'TradeItemLocationProfile',
-        'TransportationStatus',
-        'TransportationStatusRequest',
-        'TransportExecutionPlan',
-        'TransportExecutionPlanRequest',
-        'TransportProgressStatus',
-        'TransportProgressStatusRequest',
-        'TransportServiceDescription',
-        'TransportServiceDescriptionRequest',
-        'UtilityStatement',
-        'Waybill',
-    )
-
-    def __init__(self):
-        code = CodeType.mock('SAMPLE', pattern=r'/(\w+)/', max_length=5)
-        asbie = AssociatedBusinessEntity.mock()
-        measure = MeasureType.mock(0.0, kwargs={})
-        quantity = QuantityType.mock(0, kwargs={})
-        datetime_ = DateTimeType.mock()
-        numeric = NumericType.mock(0.0, kwargs={})
-        text = TextType.mock('Sample', pattern=r'\w+', max_length=100)
-        identifier = IdentifierType.mock('sample', pattern=r'/w+/')
-        indicator = IndicatorType.mock()
-        name = NameType.mock('Sample Name', pattern=r'\w+', max_length=20)
-        amount = AmountType.mock(0.0, currency='NAIRA', currency_code='NGN',
-                                 version_id='2.1')
-
-        # define the various definition of the registered documents
-        self.ApplicationResponse = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('response_date', datetime_),
-            ('response_time', datetime_),
-            ('note', text),
-            ('version_id', identifier),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('document_response', asbie),
-        ])
-        self.AttachedDocument = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('document_type_code', code),
-            ('document_type', text),
-            ('parent_document_id', identifier),
-            ('parent_document_type_code', code),
-            ('parent_document_version_id', identifier),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('attachment', asbie),
-            ('parent_document_line_reference', asbie),
-        ])
-        self.AwardedNotification = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', indicator),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('contract_name', name),
-            ('note', text),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('minutes_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('tender_result', asbie),
-            ('final_financial_guarantee', asbie),
-            ('signature', asbie),
-        ])
-        self.BillOfLading = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('carrier_assigned_id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('name', name),
-            ('description', text),
-            ('note', text),
-            ('document_status_code', code),
-            ('shipping_order_id', identifier),
-            ('to_order_indicator', indicator),
-            ('ad_valorem_indicator', indicator),
-            ('declared_carriage_value_amount', numeric),
-            ('other_instruction', text),
-            ('consignor_party', asbie),
-            ('carrier_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('shipment', asbie),
-            ('document_reference', asbie),
-            ('exchange_rate', asbie),
-            ('document_distribution', asbie),
-            ('signature', asbie),
-        ])
-        self.CallForTenders = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('approval_date', datetime_),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('version_id', identifier),
-            ('previous_version_id', identifier),
-            ('legal_document_reference', asbie),
-            ('technical_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('contracting_party', asbie),
-            ('originator_customer_party', asbie),
-            ('receiver_party', asbie),
-            ('tendering_terms', asbie),
-            ('tendering_process', asbie),
-            ('procurement_project', asbie),
-            ('procurement_project_lot', asbie),
-        ])
-        self.Catalogue = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('action_code', code),
-            ('name', name),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('revision_date', datetime_),
-            ('revision_time', datetime_),
-            ('note', text),
-            ('description', text),
-            ('version_id', identifier),
-            ('previous_version_id', identifier),
-            ('line_count_numeric', quantity),
-            ('validity_period', asbie),
-            ('referenced_contract', asbie),
-            ('source_catalogue_reference', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('provider_party', asbie),
-            ('receiver_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('contractor_customer_party', asbie),
-            ('trading_terms', asbie),
-            ('catalogue_line', asbie),
-        ])
-        self.CatalogueDeletion = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('name', name),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('effective_date', datetime_),
-            ('effective_time', datetime_),
-            ('note', text),
-            ('version_id', identifier),
-            ('description', text),
-            ('validity_period', asbie),
-            ('deleted_catalogue_reference', asbie),
-            ('referenced_contract', asbie),
-            ('signature', asbie),
-            ('receiver_party', asbie),
-            ('provider_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('contractor_customer_party', asbie),
-        ])
-        self.CatalogueItemSpecificationUpdate = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('name', name),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('revision_date', datetime_),
-            ('revision_time', datetime_),
-            ('note', text),
-            ('description', text),
-            ('version_id', identifier),
-            ('line_count_numeric', quantity),
-            ('validity_period', asbie),
-            ('related_catalogue_reference', asbie),
-            ('referenced_contract', asbie),
-            ('signature', asbie),
-            ('provider_party', asbie),
-            ('receiver_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('contractor_customer_party', asbie),
-            ('trading_terms', asbie),
-            ('default_language', asbie),
-            ('catalogue_item_specification_update_line', asbie),
-        ])
-        self.CataloguePricingUpdate = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('name', name),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('revision_date', datetime_),
-            ('revision_time', datetime_),
-            ('note', text),
-            ('description', text),
-            ('version_id', identifier),
-            ('line_count_numeric', quantity),
-            ('validity_period', asbie),
-            ('related_catalogue_reference', asbie),
-            ('referenced_contract', asbie),
-            ('signature', asbie),
-            ('provider_party', asbie),
-            ('receiver_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('contractor_customer_party', asbie),
-            ('trading_terms', asbie),
-            ('default_language', asbie),
-            ('catalogue_pricing_update_line', asbie),
-        ])
-        self.CatalogueRequest = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('name', name),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('description', text),
-            ('pricing_update_request_indicator', indicator),
-            ('item_update_request_indicator', indicator),
-            ('line_count_numeric', quantity),
-            ('validity_period', asbie),
-            ('signature', asbie),
-            ('receiver_party', asbie),
-            ('provider_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('contractor_customer_party', asbie),
-            ('requested_catalogue_reference', asbie),
-            ('referenced_contract', asbie),
-            ('trading_terms', asbie),
-            ('document_reference', asbie),
-            ('applicable_territory_address', asbie),
-            ('requested_language', asbie),
-            ('requested_classification_scheme', asbie),
-            ('catalogue_request_line', asbie),
-        ])
-        self.CertificateOfOrigin = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('description', text),
-            ('note', text),
-            ('version_id', identifier),
-            ('signature', asbie),
-            ('exporter_party', asbie),
-            ('importer_party', asbie),
-            ('endorser_party', asbie),
-            ('certificate_of_origin_application', asbie),
-            ('issuer_endorsement', asbie),
-            ('embassy_endorsement', asbie),
-            ('insurance_endorsement', asbie),
-        ])
-        self.ContractAwardNotice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('regulatory_domain', text),
-            ('publish_award_indicator', indicator),
-            ('previous_document_reference', asbie),
-            ('minutes_document_reference', asbie),
-            ('signature', asbie),
-            ('contracting_party', asbie),
-            ('originator_customer_party', asbie),
-            ('receiver_party', asbie),
-            ('tendering_terms', asbie),
-            ('tendering_process', asbie),
-            ('procurement_project', asbie),
-            ('procurement_project_lot', asbie),
-            ('tender_result', asbie),
-        ])
-        self.ContractNotice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('requested_publication_date', datetime_),
-            ('regulatory_domain', text),
-            ('frequency_period', asbie),
-            ('signature', asbie),
-            ('contracting_party', asbie),
-            ('originator_customer_party', asbie),
-            ('receiver_party', asbie),
-            ('tendering_terms', asbie),
-            ('tendering_process', asbie),
-            ('procurement_project', asbie),
-            ('procurement_project_lot', asbie),
-        ])
-        self.CreditNote = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('tax_point_date', datetime_),
-            ('credit_note_type_code', code),
-            ('note', text),
-            ('document_currency_code', code),
-            ('tax_currency_code', code),
-            ('pricing_currency_code', code),
-            ('payment_currency_code', code),
-            ('payment_alternative_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', numeric),
-            ('line_count_numeric', numeric),
-            ('buyer_reference', text),
-            ('invoice_period', asbie),
-            ('discrepancy_response', asbie),
-            ('order_reference', asbie),
-            ('billing_reference', asbie),
-            ('despatch_document_reference', asbie),
-            ('receipt_document_reference', asbie),
-            ('contract_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('statement_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('payee_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('tax_representative_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('payment_alternative_exchange_rate', asbie),
-            ('allowance_charge', asbie),
-            ('tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('credit_note_line', asbie),
-        ])
-        self.DebitNote = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('tax_point_date', datetime_),
-            ('document_currency_code', code),
-            ('tax_currency_code', code),
-            ('pricing_currency_code', code),
-            ('payment_currency_code', code),
-            ('payment_alternative_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', numeric),
-            ('line_count_numeric', numeric),
-            ('invoice_period', asbie),
-            ('discrepancy_response', asbie),
-            ('order_reference', asbie),
-            ('billing_reference', asbie),
-            ('despatch_document_reference', asbie),
-            ('receipt_document_reference', asbie),
-            ('statement_document_reference', asbie),
-            ('contract_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('payee_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('tax_representative_party', asbie),
-            ('prepaid_payment', asbie),
-            ('allowance_charge', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('payment_alternative_exchange_rate', asbie),
-            ('tax_total', asbie),
-            ('requested_monetary_total', asbie),
-            ('debit_note_line', asbie),
-        ])
-        self.DespatchAdvice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('document_status_code', code),
-            ('despatch_advice_type_code', code),
-            ('note', text),
-            ('line_count_numeric', numeric),
-            ('order_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('despatch_supplier_party', asbie),
-            ('delivery_customer_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-            ('shipment', asbie),
-            ('despatch_line', asbie),
-        ])
-        self.DocumentStatus = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('u_u_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('document_response', asbie),
-            ('additional_document_response', asbie),
-        ])
-        self.DocumentStatusRequest = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('u_u_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('tracking_id', identifier),
-            ('requested_document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-        ])
-        self.ExceptionCriteria = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('u_u_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('version_id', identifier),
-            ('validity_period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('exception_criteria_line', asbie),
-        ])
-        self.ExceptionNotification = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('exception_observation_period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('exception_notification_line', asbie),
-        ])
-        self.Forecast = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('version_id', identifier),
-            ('based_on_consensus_indicator', indicator),
-            ('forecast_purpose_code', code),
-            ('forecast_period', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('forecast_line', asbie),
-        ])
-        self.ForecastRevision = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('u_u_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('sequence_number_id', identifier),
-            ('revision_status_code', code),
-            ('purpose_code', code),
-            ('forecast_period', asbie),
-            ('original_document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('forecast_revision_line', asbie),
-        ])
-        self.ForwardingInstructions = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('carrier_assigned_id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('name', name),
-            ('description', text),
-            ('note', text),
-            ('document_status_code', code),
-            ('shipping_order_id', identifier),
-            ('to_order_indicator', indicator),
-            ('ad_valorem_indicator', indicator),
-            ('declared_carriage_value_amount', amount),
-            ('other_instruction', text),
-            ('consignor_party', asbie),
-            ('carrier_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('shipment', asbie),
-            ('document_reference', asbie),
-            ('exchange_rate', asbie),
-            ('signature', asbie),
-        ])
-        self.FreightInvoice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('invoice_type_code', code),
-            ('note', text),
-            ('tax_point_date', datetime_),
-            ('document_currency_code', code),
-            ('tax_currency_code', code),
-            ('pricing_currency_code', code),
-            ('payment_currency_code', code),
-            ('payment_alternative_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('invoice_period', asbie),
-            ('shipment', asbie),
-            ('order_reference', asbie),
-            ('billing_reference', asbie),
-            ('despatch_document_reference', asbie),
-            ('receipt_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('contract_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('payee_party', asbie),
-            ('tax_representative_party', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('prepaid_payment', asbie),
-            ('allowance_charge', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('payment_alternative_exchange_rate', asbie),
-            ('tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('invoice_line', asbie),
-        ])
-        self.FulfilmentCancellation = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('cancellation_note', text),
-            ('despatch_document_reference', asbie),
-            ('receipt_document_reference', asbie),
-            ('order_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('contract', asbie),
-            ('signature', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('delivery_customer_party', asbie),
-            ('despatch_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-        ])
-        self.GoodsItemItinerary = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('version_id', identifier),
-            ('transport_execution_plan_reference_id', identifier),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('referenced_consignment', asbie),
-            ('referenced_transport_equipment', asbie),
-            ('referenced_package', asbie),
-            ('referenced_goods_item', asbie),
-            ('transportation_segment', asbie),
-        ])
-        self.GuaranteeCertificate = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('guarantee_type_code', code),
-            ('purpose', text),
-            ('liability_amount', amount),
-            ('constitution_code', code),
-            ('note', text),
-            ('applicable_period', asbie),
-            ('applicable_regulation', asbie),
-            ('guarantee_document_reference', asbie),
-            ('immobilized_security', asbie),
-            ('signature', asbie),
-            ('guarantor_party', asbie),
-            ('interested_party', asbie),
-            ('beneficiary_party', asbie),
-        ])
-        self.InstructionForReturns = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('u_u_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('seller_supplier_party', asbie),
-            ('retailer_customer_party', asbie),
-            ('manufacturer_party', asbie),
-            ('shipment', asbie),
-            ('instruction_for_returns_line', asbie),
-        ])
-        self.InventoryReport = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('document_currency_code', code),
-            ('inventory_period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('retailer_customer_party', asbie),
-            ('inventory_reporting_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('inventory_report_line', asbie),
-        ])
-        self.Invoice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('due_date', datetime_),
-            ('invoice_type_code', code),
-            ('note', text),
-            ('tax_point_date', datetime_),
-            ('document_currency_code', code),
-            ('tax_currency_code', code),
-            ('pricing_currency_code', code),
-            ('payment_currency_code', code),
-            ('payment_alternative_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('buyer_reference', text),
-            ('invoice_period', asbie),
-            ('order_reference', asbie),
-            ('billing_reference', asbie),
-            ('despatch_document_reference', asbie),
-            ('receipt_document_reference', asbie),
-            ('statement_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('contract_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('project_reference', asbie),
-            ('signature', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('payee_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('tax_representative_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('prepaid_payment', asbie),
-            ('allowance_charge', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('payment_alternative_exchange_rate', asbie),
-            ('tax_total', asbie),
-            ('withholding_tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('invoice_line', asbie),
-        ])
-        self.ItemInformationRequest = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('item_information_request_line', asbie),
-        ])
-        self.Order = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('sales_order_id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('order_type_code', code),
-            ('note', text),
-            ('requested_invoice_currency_code', code),
-            ('document_currency_code', code),
-            ('pricing_currency_code', code),
-            ('tax_currency_code', code),
-            ('customer_reference', text),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('validity_period', asbie),
-            ('quotation_document_reference', asbie),
-            ('order_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('catalogue_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('contract', asbie),
-            ('project_reference', asbie),
-            ('signature', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('transaction_conditions', asbie),
-            ('allowance_charge', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('destination_country', asbie),
-            ('tax_total', asbie),
-            ('anticipated_monetary_total', asbie),
-            ('order_line', asbie),
-        ])
-        self.OrderCancellation = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('cancellation_note', text),
-            ('order_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('contract', asbie),
-            ('signature', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-        ])
-        self.OrderChange = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('sales_order_id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('sequence_number_id', identifier),
-            ('note', text),
-            ('requested_invoice_currency_code', code),
-            ('document_currency_code', code),
-            ('pricing_currency_code', code),
-            ('tax_currency_code', code),
-            ('customer_reference', text),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('validity_period', asbie),
-            ('order_reference', asbie),
-            ('quotation_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('contract', asbie),
-            ('signature', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('accounting_supplier_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('transaction_conditions', asbie),
-            ('allowance_charge', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('destination_country', asbie),
-            ('tax_total', asbie),
-            ('anticipated_monetary_total', asbie),
-            ('order_line', asbie),
-        ])
-        self.OrderResponse = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('sales_order_id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('order_response_code', code),
-            ('note', text),
-            ('document_currency_code', code),
-            ('pricing_currency_code', code),
-            ('tax_currency_code', code),
-            ('total_packages_quantity', quantity),
-            ('gross_weight_measure', measure),
-            ('net_weight_measure', measure),
-            ('net_net_weight_measure', measure),
-            ('gross_volume_measure', measure),
-            ('net_volume_measure', measure),
-            ('customer_reference', text),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('validity_period', asbie),
-            ('order_reference', asbie),
-            ('order_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('contract', asbie),
-            ('signature', asbie),
-            ('seller_supplier_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('originator_customer_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('allowance_charge', asbie),
-            ('transaction_conditions', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('destination_country', asbie),
-            ('tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('order_line', asbie),
-        ])
-        self.OrderResponseSimple = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('accepted_indicator', indicator),
-            ('rejection_note', text),
-            ('customer_reference', text),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('order_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('seller_supplier_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('originator_customer_party', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-        ])
-        self.PackingList = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('name', name),
-            ('description', text),
-            ('note', text),
-            ('version_id', identifier),
-            ('other_instruction', text),
-            ('consignor_party', asbie),
-            ('carrier_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('shipment', asbie),
-            ('document_reference', asbie),
-            ('document_distribution', asbie),
-            ('signature', asbie),
-        ])
-        self.PriorInformationNotice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('planned_date', datetime_),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('contracting_party', asbie),
-            ('originator_customer_party', asbie),
-            ('receiver_party', asbie),
-            ('tendering_terms', asbie),
-            ('tendering_process', asbie),
-            ('procurement_project', asbie),
-            ('procurement_project_lot', asbie),
-        ])
-        self.ProductActivity = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('document_currency_code', code),
-            ('activity_period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('supply_chain_activity_data_line', asbie),
-        ])
-        self.Quotation = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('u_u_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('pricing_currency_code', code),
-            ('line_count_numeric', numeric),
-            ('validity_period', asbie),
-            ('request_for_quotation_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('contract', asbie),
-            ('signature', asbie),
-            ('seller_supplier_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('originator_customer_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('transaction_conditions', asbie),
-            ('allowance_charge', asbie),
-            ('destination_country', asbie),
-            ('tax_total', asbie),
-            ('quoted_monetary_total', asbie),
-            ('quotation_line', asbie),
-        ])
-        self.ReceiptAdvice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('u_u_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('document_status_code', code),
-            ('receipt_advice_type_code', code),
-            ('note', text),
-            ('line_count_numeric', numeric),
-            ('order_reference', asbie),
-            ('despatch_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('delivery_customer_party', asbie),
-            ('despatch_supplier_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('shipment', asbie),
-            ('receipt_line', asbie),
-        ])
-        self.Reminder = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('reminder_type_code', code),
-            ('reminder_sequence_numeric', numeric),
-            ('note', text),
-            ('tax_point_date', datetime_),
-            ('document_currency_code', code),
-            ('tax_currency_code', code),
-            ('pricing_currency_code', code),
-            ('payment_currency_code', code),
-            ('payment_alternative_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('reminder_period', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('payee_party', asbie),
-            ('tax_representative_party', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('prepaid_payment', asbie),
-            ('allowance_charge', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('payment_alternative_exchange_rate', asbie),
-            ('tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('reminder_line', asbie),
-        ])
-        self.RemittanceAdvice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('document_currency_code', code),
-            ('total_debit_amount', amount),
-            ('total_credit_amount', amount),
-            ('total_payment_amount', amount),
-            ('payment_order_reference', text),
-            ('payer_reference', text),
-            ('invoicing_party_reference', text),
-            ('line_count_numeric', numeric),
-            ('invoice_period', asbie),
-            ('billing_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_customer_party', asbie),
-            ('accounting_supplier_party', asbie),
-            ('payee_party', asbie),
-            ('payment_means', asbie),
-            ('tax_total', asbie),
-            ('remittance_advice_line', asbie),
-        ])
-        self.RequestForQuotation = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('submission_due_date', datetime_),
-            ('note', text),
-            ('pricing_currency_code', code),
-            ('line_count_numeric', numeric),
-            ('requested_validity_period', asbie),
-            ('catalogue_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('originator_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('destination_country', asbie),
-            ('contract', asbie),
-            ('request_for_quotation_line', asbie),
-        ])
-        self.RetailEvent = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('retail_event_name', name),
-            ('retail_event_status_code', code),
-            ('seller_event_id', identifier),
-            ('buyer_event_id', identifier),
-            ('description', text),
-            ('period', asbie),
-            ('original_document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('event_comment', asbie),
-            ('promotional_event', asbie),
-            ('miscellaneous_event', asbie),
-        ])
-        self.SelfBilledCreditNote = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('tax_point_date', datetime_),
-            ('note', text),
-            ('document_currency_code', code),
-            ('tax_currency_code', code),
-            ('pricing_currency_code', code),
-            ('payment_currency_code', code),
-            ('payment_alternative_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('invoice_period', asbie),
-            ('discrepancy_response', asbie),
-            ('order_reference', asbie),
-            ('billing_reference', asbie),
-            ('despatch_document_reference', asbie),
-            ('receipt_document_reference', asbie),
-            ('contract_document_reference', asbie),
-            ('statement_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_customer_party', asbie),
-            ('accounting_supplier_party', asbie),
-            ('payee_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('tax_representative_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('allowance_charge', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('payment_alternative_exchange_rate', asbie),
-            ('tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('credit_note_line', asbie),
-        ])
-        self.SelfBilledInvoice = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('tax_point_date', datetime_),
-            ('invoice_type_code', code),
-            ('note', text),
-            ('document_currency_code', code),
-            ('tax_currency_code', code),
-            ('pricing_currency_code', code),
-            ('payment_currency_code', code),
-            ('payment_alternative_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('line_count_numeric', numeric),
-            ('invoice_period', asbie),
-            ('order_reference', asbie),
-            ('billing_reference', asbie),
-            ('contract_document_reference', asbie),
-            ('despatch_document_reference', asbie),
-            ('receipt_document_reference', asbie),
-            ('statement_document_reference', asbie),
-            ('originator_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_customer_party', asbie),
-            ('accounting_supplier_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('payee_party', asbie),
-            ('tax_representative_party', asbie),
-            ('delivery', asbie),
-            ('delivery_terms', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('prepaid_payment', asbie),
-            ('allowance_charge', asbie),
-            ('tax_exchange_rate', asbie),
-            ('pricing_exchange_rate', asbie),
-            ('payment_exchange_rate', asbie),
-            ('payment_alternative_exchange_rate', asbie),
-            ('tax_total', asbie),
-            ('legal_monetary_total', asbie),
-            ('invoice_line', asbie),
-        ])
-        self.Statement = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('document_currency_code', code),
-            ('total_debit_amount', amount),
-            ('total_credit_amount', amount),
-            ('total_balance_amount', amount),
-            ('line_count_numeric', numeric),
-            ('statement_type_code', code),
-            ('statement_period', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('accounting_supplier_party', asbie),
-            ('accounting_customer_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('originator_customer_party', asbie),
-            ('payee_party', asbie),
-            ('payment_means', asbie),
-            ('payment_terms', asbie),
-            ('allowance_charge', asbie),
-            ('tax_total', asbie),
-            ('statement_line', asbie),
-        ])
-        self.StockAvailabilityReport = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('document_currency_code', code),
-            ('inventory_period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('seller_supplier_party', asbie),
-            ('retailer_customer_party', asbie),
-            ('inventory_reporting_party', asbie),
-            ('stock_availability_report_line', asbie),
-        ])
-        self.Tender = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('tender_type_code', code),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('contract_name', name),
-            ('note', text),
-            ('validity_period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('tenderer_party', asbie),
-            ('tenderer_qualification_document_reference', asbie),
-            ('subcontractor_party', asbie),
-            ('contracting_party', asbie),
-            ('originator_customer_party', asbie),
-            ('tendered_project', asbie),
-        ])
-        self.TendererQualification = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('version_id', identifier),
-            ('previous_version_id', identifier),
-            ('signature', asbie),
-            ('tenderer_party_qualification', asbie),
-            ('contracting_party', asbie),
-            ('evidence', asbie),
-            ('additional_document_reference', asbie),
-        ])
-        self.TendererQualificationResponse = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('contract_name', name),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('resolution_document_reference', asbie),
-            ('qualification_resolution', asbie),
-            ('appeal_terms', asbie),
-            ('signature', asbie),
-        ])
-        self.TenderReceipt = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('contract_name', name),
-            ('note', text),
-            ('registered_date', datetime_),
-            ('registered_time', datetime_),
-            ('tender_document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-        ])
-        self.TradeItemLocationProfile = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('profile_status_code', code),
-            ('period', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('buyer_customer_party', asbie),
-            ('seller_supplier_party', asbie),
-            ('item_management_profile', asbie),
-        ])
-        self.TransportationStatus = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('carrier_assigned_id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('name', name),
-            ('description', text),
-            ('note', text),
-            ('shipping_order_id', identifier),
-            ('other_instruction', text),
-            ('transportation_status_type_code', code),
-            ('transport_execution_status_code', code),
-            ('consignment', asbie),
-            ('transport_event', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('transportation_status_request_document_reference', asbie),
-            ('transport_execution_plan_document_reference', asbie),
-            ('updated_pickup_transport_event', asbie),
-            ('updated_delivery_transport_event', asbie),
-            ('status_location', asbie),
-            ('status_period', asbie),
-        ])
-        self.TransportationStatusRequest = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('carrier_assigned_id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('name', name),
-            ('description', text),
-            ('note', text),
-            ('shipping_order_id', identifier),
-            ('other_instruction', text),
-            ('transportation_status_type_code', code),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('transport_execution_plan_document_reference', asbie),
-            ('consignment', asbie),
-            ('document_reference', asbie),
-            ('signature', asbie),
-            ('requested_status_location', asbie),
-            ('requested_status_period', asbie),
-        ])
-        self.TransportExecutionPlan = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('version_id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('document_status_code', code),
-            ('document_status_reason_code', code),
-            ('document_status_reason_description', text),
-            ('note', text),
-            ('transport_user_remarks', text),
-            ('transport_service_provider_remarks', text),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('transport_user_party', asbie),
-            ('transport_service_provider_party', asbie),
-            ('bill_to_party', asbie),
-            ('signature', asbie),
-            ('transport_execution_plan_request_document_reference', asbie),
-            ('transport_execution_plan_document_reference', asbie),
-            ('transport_service_description_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('transport_contract', asbie),
-            ('transport_service_provider_response_required_period', asbie),
-            ('transport_user_response_required_period', asbie),
-            ('validity_period', asbie),
-            ('main_transportation_service', asbie),
-            ('additional_transportation_service', asbie),
-            ('service_start_time_period', asbie),
-            ('service_end_time_period', asbie),
-            ('from_location', asbie),
-            ('to_location', asbie),
-            ('at_location', asbie),
-            ('transport_execution_terms', asbie),
-            ('consignment', asbie),
-        ])
-        self.TransportExecutionPlanRequest = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('version_id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('document_status_code', code),
-            ('document_status_reason_code', code),
-            ('document_status_reason_description', text),
-            ('note', text),
-            ('transport_user_remarks', text),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('transport_user_party', asbie),
-            ('transport_service_provider_party', asbie),
-            ('payee_party', asbie),
-            ('signature', asbie),
-            ('transport_execution_plan_document_reference', asbie),
-            ('transport_service_description_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('transport_contract', asbie),
-            ('transport_service_provider_response_deadline_period', asbie),
-            ('main_transportation_service', asbie),
-            ('additional_transportation_service', asbie),
-            ('service_start_time_period', asbie),
-            ('service_end_time_period', asbie),
-            ('from_location', asbie),
-            ('to_location', asbie),
-            ('at_location', asbie),
-            ('transport_execution_terms', asbie),
-            ('consignment', asbie),
-        ])
-        self.TransportProgressStatus = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('status_available_indicator', indicator),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('source_issuer_party', asbie),
-            ('transport_progress_status_request_document_reference', asbie),
-            ('transport_means', asbie),
-            ('transport_schedule', asbie),
-        ])
-        self.TransportProgressStatusRequest = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('transport_means', asbie),
-            ('status_location', asbie),
-        ])
-        self.TransportServiceDescription = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('service_name', name),
-            ('response_code', code),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('transport_service_description_request_document_reference', asbie),
-            ('transport_service_provider_party', asbie),
-            ('service_charge_payment_terms', asbie),
-            ('validity_period', asbie),
-            ('transportation_service', asbie),
-        ])
-        self.TransportServiceDescriptionRequest = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('note', text),
-            ('service_information_preference_code', code),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('transport_service_provider_party', asbie),
-            ('transportation_service', asbie),
-        ])
-        self.UnawardedNotification = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('contract_folder_id', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('contract_name', name),
-            ('note', text),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('minutes_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('tender_result', asbie),
-            ('appeal_terms', asbie),
-        ])
-        self.UtilityStatement = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('copy_indicator', indicator),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('utility_statement_type_code', code),
-            ('note', text),
-            ('document_currency_code', code),
-            ('accounting_cost_code', code),
-            ('accounting_cost', text),
-            ('parent_document_reference', asbie),
-            ('additional_document_reference', asbie),
-            ('signature', asbie),
-            ('sender_party', asbie),
-            ('receiver_party', asbie),
-            ('customer_party', asbie),
-            ('subscriber_party', asbie),
-            ('main_on_account_payment', asbie),
-            ('subscriber_consumption', asbie),
-        ])
-        self.Waybill = iter([
-            ('ubl_version_id', identifier),
-            ('customization_id', identifier),
-            ('profile_id', identifier),
-            ('profile_execution_id', identifier),
-            ('id', identifier),
-            ('carrier_assigned_id', identifier),
-            ('uuid', identifier),
-            ('issue_date', datetime_),
-            ('issue_time', datetime_),
-            ('name', name),
-            ('description', text),
-            ('note', text),
-            ('shipping_order_id', identifier),
-            ('ad_valorem_indicator', indicator),
-            ('declared_carriage_value_amount', amount),
-            ('other_instruction', text),
-            ('consignor_party', asbie),
-            ('carrier_party', asbie),
-            ('freight_forwarder_party', asbie),
-            ('shipment', asbie),
-            ('document_reference', asbie),
-            ('exchange_rate', asbie),
-            ('document_distribution', asbie),
-            ('signature', asbie),
-        ])
+    __registry__ = DocumentDescriptor()
 
     def __iter__(self):
-        for document in self.__slots__:
+        for document in self.__registry__:
             yield document
 
     def __getitem__(self, item):
-        key = key_gen(
-            item,
-            registry=self.__slots__,
-            flags=(ABIERegistry, BIERegistry, BusinessDocumentRegistry,
-                   ProcessRegistry)
-        )
-        if key in self.__slots__:
-            return getattr(self, key)
+        if isinstance(item, BusinessDocumentRegistry):
+            return self.__registry__[item]
         else:
             raise UnknownDocumentError('Document not defined in current '
                                        'library')
 
     def __getattr__(self, item):
-        attr = key_gen(
-            item,
-            registry=self.__slots__,
-            flags=(ABIERegistry, BIERegistry, BusinessDocumentRegistry,
-                   ProcessRegistry)
-        )
-        if attr in self.__slots__:
-            return getattr(self, attr)
+        if isinstance(item, BusinessDocumentRegistry):
+            return self.__registry__[item]
         else:
             raise UnknownDocumentError('Document not defined in current '
                                        'library')
@@ -7396,230 +5578,118 @@ class Documents:
     def __setitem__(self, key, value):
         raise RuntimeError('Document library cannot be modified')
 
-    def __setattr__(self, key, value):
-        raise RuntimeError('Document library cannot be modified')
-
     def __delattr__(self, item):
         raise RuntimeError('Attribute cannot be deleted')
 
     def __contains__(self, item):
-        return key_gen(item) in self.__slots__
+        return item in self.__registry__
 
     @classmethod
     def is_valid(cls, document, definition=None):
         # determine if a given document meets the specified or
         # default definition
         # definition should be an iterable of fields and respective values
-        document_map = dict()
-        if isinstance(document, str) and definition is None:
-            definition = dict(getattr(cls(), document, {}))
-        elif isinstance(document, BusinessDocument) and definition is None:
-            definition = dict(getattr(cls(), document.__class__.__name__, {}))
-            fields = document.__slots__ if document.__slots__ else dir(document)
-            document_map = {x: v for x in fields for v in getattr(document,
-                                                                  x, None)}
+        document_map = cls.__registry__.get(document, None)
         return document_map == definition
 
     @classmethod
     def document_definition(cls, name):
-        if name in cls.__slots__:
-            return dict(getattr(cls(), name))
+        return cls().__registry__.get(name, None)
 
     @classmethod
     def registry(cls):
-        return iter(cls.__slots__)
+        return cls().__registry__
 
 
-class Schemas:
+class Schemas(RegistryMixin):
     # URI schema definition for listed documents
-    __slots__ = 'base_url', 'ApplicationResponse', 'AttachedDocument', \
-                'AwardedNotification', 'UnawardedNotification', \
-                'BillOfLading', 'CallForTenders', 'Catalogue', \
-                'CatalogueDeletion', 'CatalogueItemSpecificationUpdate', \
-                'CataloguePricingUpdate', 'CatalogueRequest', \
-                'CertificateOfOrigin', 'ContractAwardNotice', \
-                'ContractNotice', 'CreditNote', 'DebitNote', \
-                'DespatchAdvice', 'DocumentStatus', 'DocumentStatusRequest', \
-                'ExceptionCriteria', 'ExceptionNotification', 'Forecast', \
-                'ForecastRevision', 'ForwardingInstructions', \
-                'FreightInvoice', 'FulfilmentCancellation', \
-                'GoodsItemItinerary', 'GuaranteeCertificate', \
-                'InstructionForReturns', 'InventoryReport', 'Invoice', \
-                'ItemInformationRequest', 'Order', 'OrderCancellation', \
-                'OrderChange', 'OrderResponse', 'OrderResponseSimple', \
-                'PackingList', 'PriorInformationNotice', 'ProductActivity', \
-                'Quotation', 'ReceiptAdvice', 'Reminder', 'RemittanceAdvice',\
-                'RequestForQuotation', 'RetailEvent', 'SelfBilledCreditNote',\
-                'SelfBilledInvoice', 'Statement', 'StockAvailabilityReport', \
-                'Tender', 'TendererQualification', \
-                'TendererQualificationResponse', 'TenderReceipt', \
-                'TradeItemLocationProfile', 'TransportationStatus', \
-                'TransportationStatusRequest', 'TransportExecutionPlan', \
-                'TransportExecutionPlanRequest', 'TransportProgressStatus', \
-                'TransportProgressStatusRequest', \
-                'TransportServiceDescription', \
-                'TransportServiceDescriptionRequest', 'UtilityStatement', \
-                'Waybill',
 
     def __init__(self):
         base_url = 'http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html'
-        self.ApplicationResponse = \
-            '%s%s' % (base_url, '#T-APPLICATION-RESPONSE')
-        self.AttachedDocument = '%s%s' % (base_url, '#T-ATTACHED-DOCUMENT')
-        self.AwardedNotification = \
-            '%s%s' % (base_url, '#T-AWARDED-NOTIFICATION')
-        self.BillOfLading = \
-            '%s%s' % (base_url, '#T-BILL-OF-LADING')
-        self.CallForTenders = \
-            '%s%s' % (base_url, '#T-CALL-FOR-TENDERS')
-        self.Catalogue = \
-            '%s%s' % (base_url, '#T-CATALOGUE')
-        self.CatalogueDeletion = \
-            '%s%s' % (base_url, '#T-CATALOGUE-DELETION')
-        self.CatalogueItemSpecificationUpdate = \
-            '%s%s' % (base_url, '#T-CATALOGUE-ITEM-SPECIFICATION-UPDATE')
-        self.CataloguePricingUpdate = \
-            '%s%s' % (base_url, '#T-CATALOGUE-PRICING-UPDATE')
-        self.CatalogueRequest = \
-            '%s%s' % (base_url, '#T-CATALOGUE-REQUEST')
-        self.CertificateOfOrigin = \
-            '%s%s' % (base_url, '#T-CERTIFICATE-OF-ORIGIN')
-        self.ContractAwardNotice = \
-            '%s%s' % (base_url, '#T-CONTRACT-AWARD-NOTICE')
-        self.ContractNotice = \
-            '%s%s' % (base_url, '#T-CONTRACT-NOTICE')
-        self.CreditNote = \
-            '%s%s' % (base_url, '#T-CREDIT-NOTE')
-        self.DebitNote = \
-            '%s%s' % (base_url, '#T-DEBIT-NOTE')
-        self.DespatchAdvice = \
-            '%s%s' % (base_url, '#T-DESPATCH-ADVICE')
-        self.DocumentStatus = \
-            '%s%s' % (base_url, '#T-DOCUMENT-STATUS')
-        self.DocumentStatusRequest = \
-            '%s%s' % (base_url, '#T-DOCUMENT-STATUS-REQUEST')
-        self.ExceptionCriteria = \
-            '%s%s' % (base_url, '#T-EXCEPTION-CRITERIA')
-        self.ExceptionNotification = \
-            '%s%s' % (base_url, '#T-EXCEPTION-NOTIFICATION')
-        self.Forecast = \
-            '%s%s' % (base_url, '#T-FORECAST')
-        self.ForecastRevision = \
-            '%s%s' % (base_url, '#T-FORECAST-REVISION')
-        self.ForwardingInstructions = \
-            '%s%s' % (base_url, '#T-FORWARDING-INSTRUCTIONS')
-        self.FreightInvoice = \
-            '%s%s' % (base_url, '#T-FREIGHT-INVOICE')
-        self.FulfilmentCancellation = \
-            '%s%s' % (base_url, '#T-FULFILMENT-CANCELLATION')
-        self.GoodsItemItinerary = \
-            '%s%s' % (base_url, '#T-GOODS-ITEM-ITINERARY')
-        self.GuaranteeCertificate = \
-            '%s%s' % (base_url, '#T-GUARANTEE-CERTIFICATE')
-        self.InstructionForReturns = \
-            '%s%s' % (base_url, '#T-INSTRUCTION-FOR-RETURNS')
-        self.InventoryReport = \
-            '%s%s' % (base_url, '#T-INVENTORY-REPORT')
-        self.Invoice = \
-            '%s%s' % (base_url, '#T-INVOICE')
-        self.ItemInformationRequest = \
-            '%s%s' % (base_url, '#T-ITEM-INFORMATION-REQUEST')
-        self.Order = \
-            '%s%s' % (base_url, '#T-ORDER')
-        self.OrderCancellation = \
-            '%s%s' % (base_url, '#T-ORDER-CANCELLATION')
-        self.OrderChange = \
-            '%s%s' % (base_url, '#T-ORDER-CHANGE')
-        self.OrderResponse = \
-            '%s%s' % (base_url, '#T-ORDER-RESPONSE')
-        self.OrderResponseSimple = \
-            '%s%s' % (base_url, '#T-ORDER-RESPONSE-SIMPLE')
-        self.PackingList = \
-            '%s%s' % (base_url, '#T-PACKING-LIST')
-        self.PriorInformationNotice = \
-            '%s%s' % (base_url, '#T-PRIOR-INFORMATION-NOTICE')
-        self.ProductActivity = \
-            '%s%s' % (base_url, '#T-PRODUCT-ACTIVITY')
-        self.Quotation = \
-            '%s%s' % (base_url, '#T-QUOTATION')
-        self.ReceiptAdvice = \
-            '%s%s' % (base_url, '#T-RECEIPT-ADVICE')
-        self.Reminder = \
-            '%s%s' % (base_url, '#T-REMINDER')
-        self.ReceiptAdvice = \
-            '%s%s' % (base_url, '#T-REMITTANCE-ADVICE')
-        self.RequestForQuotation = \
-            '%s%s' % (base_url, '#T-REQUEST-FOR-QUOTATION')
-        self.RetailEvent = \
-            '%s%s' % (base_url, '#T-RETAIL-EVENT')
-        self.SelfBilledCreditNote = \
-            '%s%s' % (base_url, '#T-SELF-BILLED-CREDIT-NOTE')
-        self.SelfBilledInvoice = \
-            '%s%s' % (base_url, '#T-SELF-BILLED-INVOICE')
-        self.Statement = \
-            '%s%s' % (base_url, '#T-STATEMENT')
-        self.StockAvailabilityReport = \
-            '%s%s' % (base_url, '#T-STOCK-AVAILABILITY-REPORT')
-        self.Tender = \
-            '%s%s' % (base_url, '#T-TENDER')
-        self.TenderReceipt = \
-            '%s%s' % (base_url, '#T-TENDER-RECEIPT')
-        self.TendererQualificationResponse = \
-            '%s%s' % (base_url, '#T-TENDERER-QUALIFICATION-RESPONSE')
-        self.TendererQualification = \
-            '%s%s' % (base_url, '#T-TENDERER-QUALIFICATION')
-        self.TradeItemLocationProfile = \
-            '%s%s' % (base_url, '#T-TRADE-ITEM-LOCATION-PROFILE')
-        self.TransportExecutionPlan = \
-            '%s%s' % (base_url, '#T-TRANSPORT-EXECUTION-PLAN')
-        self.TransportExecutionPlanRequest = \
-            '%s%s' % (base_url, '#T-TRANSPORT-EXECUTION-PLAN-REQUEST')
-        self.TransportProgressStatus = \
-            '%s%s' % (base_url, '#T-TRANSPORT-PROGRESS-STATUS')
-        self.TransportProgressStatusRequest = \
-            '%s%s' % (base_url, '#T-TRANSPORT-PROGRESS-STATUS-REQUEST')
-        self.TransportServiceDescription = \
-            '%s%s' % (base_url, '#T-TRANSPORT-SERVICE-DESCRIPTION')
-        self.TransportServiceDescriptionRequest = \
-            '%s%s' % (base_url, '#T-TRANSPORT-SERVICE-DESCRIPTION-REQUEST')
-        self.TransportationStatus = \
-            '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS')
-        self.TransportationStatusRequest = \
-            '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS-REQUEST')
-        self.UnawardedNotification = \
-            '%s%s' % (base_url, '#T-UNAWARDED-NOTIFICATION')
-        self.UtilityStatement = \
-            '%s%s' % (base_url, '#T-UTILITY-STATEMENT')
-        self.Waybill = \
-            '%s%s' % (base_url, '#T-WAYBILL')
+        values = iter([
+            '%s%s' % (base_url, '#T-APPLICATION-RESPONSE'),
+            '%s%s' % (base_url, '#T-ATTACHED-DOCUMENT'),
+            '%s%s' % (base_url, '#T-AWARDED-NOTIFICATION'),
+            '%s%s' % (base_url, '#T-BILL-OF-LADING'),
+            '%s%s' % (base_url, '#T-CALL-FOR-TENDERS'),
+            '%s%s' % (base_url, '#T-CATALOGUE'),
+            '%s%s' % (base_url, '#T-CATALOGUE-DELETION'),
+            '%s%s' % (base_url, '#T-CATALOGUE-ITEM-SPECIFICATION-UPDATE'),
+            '%s%s' % (base_url, '#T-CATALOGUE-PRICING-UPDATE'),
+            '%s%s' % (base_url, '#T-CATALOGUE-REQUEST'),
+            '%s%s' % (base_url, '#T-CERTIFICATE-OF-ORIGIN'),
+            '%s%s' % (base_url, '#T-CONTRACT-AWARD-NOTICE'),
+            '%s%s' % (base_url, '#T-CONTRACT-NOTICE'),
+            '%s%s' % (base_url, '#T-CREDIT-NOTE'),
+            '%s%s' % (base_url, '#T-DEBIT-NOTE'),
+            '%s%s' % (base_url, '#T-DESPATCH-ADVICE'),
+            '%s%s' % (base_url, '#T-DOCUMENT-STATUS'),
+            '%s%s' % (base_url, '#T-DOCUMENT-STATUS-REQUEST'),
+            '%s%s' % (base_url, '#T-EXCEPTION-CRITERIA'),
+            '%s%s' % (base_url, '#T-EXCEPTION-NOTIFICATION'),
+            '%s%s' % (base_url, '#T-FORECAST'),
+            '%s%s' % (base_url, '#T-FORECAST-REVISION'),
+            '%s%s' % (base_url, '#T-FORWARDING-INSTRUCTIONS'),
+            '%s%s' % (base_url, '#T-FREIGHT-INVOICE'),
+            '%s%s' % (base_url, '#T-FULFILMENT-CANCELLATION'),
+            '%s%s' % (base_url, '#T-GOODS-ITEM-ITINERARY'),
+            '%s%s' % (base_url, '#T-GUARANTEE-CERTIFICATE'),
+            '%s%s' % (base_url, '#T-INSTRUCTION-FOR-RETURNS'),
+            '%s%s' % (base_url, '#T-INVENTORY-REPORT'),
+            '%s%s' % (base_url, '#T-INVOICE'),
+            '%s%s' % (base_url, '#T-ITEM-INFORMATION-REQUEST'),
+            '%s%s' % (base_url, '#T-ORDER'),
+            '%s%s' % (base_url, '#T-ORDER-CANCELLATION'),
+            '%s%s' % (base_url, '#T-ORDER-CHANGE'),
+            '%s%s' % (base_url, '#T-ORDER-RESPONSE'),
+            '%s%s' % (base_url, '#T-ORDER-RESPONSE-SIMPLE'),
+            '%s%s' % (base_url, '#T-PACKING-LIST'),
+            '%s%s' % (base_url, '#T-PRIOR-INFORMATION-NOTICE'),
+            '%s%s' % (base_url, '#T-PRODUCT-ACTIVITY'),
+            '%s%s' % (base_url, '#T-QUOTATION'),
+            '%s%s' % (base_url, '#T-RECEIPT-ADVICE'),
+            '%s%s' % (base_url, '#T-REMINDER'),
+            '%s%s' % (base_url, '#T-REMITTANCE-ADVICE'),
+            '%s%s' % (base_url, '#T-REQUEST-FOR-QUOTATION'),
+            '%s%s' % (base_url, '#T-RETAIL-EVENT'),
+            '%s%s' % (base_url, '#T-SELF-BILLED-CREDIT-NOTE'),
+            '%s%s' % (base_url, '#T-SELF-BILLED-INVOICE'),
+            '%s%s' % (base_url, '#T-STATEMENT'),
+            '%s%s' % (base_url, '#T-STOCK-AVAILABILITY-REPORT'),
+            '%s%s' % (base_url, '#T-TENDER'),
+            '%s%s' % (base_url, '#T-TENDER-RECEIPT'),
+            '%s%s' % (base_url, '#T-TENDERER-QUALIFICATION-RESPONSE'),
+            '%s%s' % (base_url, '#T-TENDERER-QUALIFICATION'),
+            '%s%s' % (base_url, '#T-TRADE-ITEM-LOCATION-PROFILE'),
+            '%s%s' % (base_url, '#T-TRANSPORT-EXECUTION-PLAN'),
+            '%s%s' % (base_url, '#T-TRANSPORT-EXECUTION-PLAN-REQUEST'),
+            '%s%s' % (base_url, '#T-TRANSPORT-PROGRESS-STATUS'),
+            '%s%s' % (base_url, '#T-TRANSPORT-PROGRESS-STATUS-REQUEST'),
+            '%s%s' % (base_url, '#T-TRANSPORT-SERVICE-DESCRIPTION'),
+            '%s%s' % (base_url, '#T-TRANSPORT-SERVICE-DESCRIPTION-REQUEST'),
+            '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS'),
+            '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS-REQUEST'),
+            '%s%s' % (base_url, '#T-UNAWARDED-NOTIFICATION'),
+            '%s%s' % (base_url, '#T-UTILITY-STATEMENT'),
+            '%s%s' % (base_url, '#T-WAYBILL'),
+        ])
+        self.__registry__ = dict(zip(BusinessDocumentRegistry, values))
 
     def __getitem__(self, item):
-        key = key_gen(
-            item,
-            registry=self.__slots__,
-            flags=(ABIERegistry, BIERegistry, BusinessDocumentRegistry,
-                   ProcessRegistry)
-        )
-        if key in self.__slots__:
-            return getattr(self, key)
+        if isinstance(item, BusinessDocumentRegistry):
+            return self.__registry__.get(item)
         else:
             raise IndexError('Schema not defined in library')
 
     def __getattr__(self, item):
-        attr = key_gen(
-            item,
-            registry=self.__slots__,
-            flags=(ABIERegistry, BIERegistry, BusinessDocumentRegistry,
-                   ProcessRegistry)
-        )
-        if attr in self.__slots__:
-            return getattr(self, attr)
+        if isinstance(item, BusinessDocumentRegistry):
+            return self.__registry__.get(item)
         else:
             raise UnknownDocumentError('Schema not defined in library')
 
     def __iter__(self):
         schemas = itertools.filterfalse(lambda x: x == 'base_url',
-                                        self.__slots__)
+                                        self.__registry__)
         for schema in schemas:
             yield schema
 
@@ -7633,22 +5703,23 @@ class Schemas:
         raise RuntimeError('Attribute cannot be deleted')
 
     def __contains__(self, item):
-        return key_gen(item, registry=self.__slots__) is True
+        return item in self.__registry__
 
     @classmethod
     def schemas(cls):
-        return itertools.filterfalse(lambda x: x == 'base_url', cls.__slots__)
+        return itertools.filterfalse(lambda x: x == 'base_url', 
+                                     cls().__registry__)
 
     @classmethod
     def document_schema(cls, name):
-        return getattr(cls(), name, None)
+        return cls().__registry__.get(name)
 
 
-class BusinessProcesses:
-    __slots__ = 'lookup'
+class BusinessProcesses(RegistryMixin, metaclass=Singleton):
 
     def __init__(self):
-        self.lookup = dict(zip(
+        bd = BusinessDocumentRegistry
+        self.__registry__ = dict(zip(
             (
                 ProcessRegistry.BILLING,
                 ProcessRegistry.CATALOGUE,
@@ -7682,69 +5753,70 @@ class BusinessProcesses:
                 ProcessRegistry.VENDOR_INVENTORY,
             ),
             (
-                ('ApplicationResponse', 'AttachedDocument', 'DocumentStatus',
-                 'DocumentStatusRequest'),
-                ('CreditNote', 'DebitNote', 'Invoice', 'Reminder'),
-                ('Catalogue', 'CatalogueDeletion',
-                 'CatalogueItemSpecificationUpdate', 'CataloguePricingUpdate'),
-                ('CertificateOfOrigin', 'Catalogue', 'Catalogue',
-                 'ExceptionCriteria'),
-                ('Catalogue', 'Catalogue', 'ExceptionCriteria',
-                 'ExceptionNotification'),
-                ('Catalogue', 'ExceptionCriteria', 'ExceptionNotification',
-                 'Forecast'),
-                ('ExceptionCriteria', 'ExceptionNotification', 'Forecast',
-                 'ItemInformationRequest'),
-                ('TradeItemLocationProfile', 'Catalogue',
-                 'InstructionForReturns', 'InventoryReport'),
-                ('Catalogue', 'InstructionForReturns', 'InventoryReport',
-                 'RetailEvent'),
-                ('InstructionForReturns', 'InventoryReport', 'RetailEvent',
-                 'StockAvailabilityReport'),
-                ('Catalogue', 'ExceptionCriteria', 'ExceptionNotification',
-                 'Forecast'),
-                ('ExceptionCriteria', 'ExceptionNotification', 'Forecast',
-                 'ForecastRevision'),
-                ('FreightInvoice', 'BillOfLading', 'ForwardingInstructions',
-                 'PackingList'),
-                ('BillOfLading', 'ForwardingInstructions', 'PackingList',
-                 'Waybill'),
-                ('TransportationStatus', 'TransportationStatusRequest',
-                 'DespatchAdvice', 'OrderCancellation'),
-                ('DespatchAdvice', 'OrderCancellation', 'OrderChange',
-                 'ReceiptAdvice'),
-                ('FulfilmentCancellation', 'FulfilmentCancellation',
-                 'Catalogue', 'GoodsItemItinerary'),
-                ('FulfilmentCancellation', 'Catalogue', 'GoodsItemItinerary',
-                 'TransportExecutionPlan'),
-                ('Catalogue', 'GoodsItemItinerary', 'TransportExecutionPlan',
-                 'TransportExecutionPlanRequest'),
-                ('GoodsItemItinerary', 'TransportExecutionPlan',
-                 'TransportExecutionPlanRequest', 'TransportProgressStatus'),
-                ('Order', 'OrderCancellation', 'OrderChange', 'OrderResponse'),
-                ('RemittanceAdvice', 'Catalogue', 'Catalogue', 'Quotation'),
-                ('Catalogue', 'Catalogue', 'Quotation', 'RequestForQuotation'),
-                ('Catalogue', 'Quotation', 'RequestForQuotation',
-                 'ExceptionCriteria'),
-                ('Quotation', 'RequestForQuotation', 'ExceptionCriteria',
-                 'ExceptionNotification'),
-                ('ExceptionCriteria', 'ExceptionNotification', 'Forecast',
-                 'ForecastRevision'),
-                ('AwardedNotification', 'CallForTenders', 'ContractAwardNotice',
-                 'ContractNotice'),
-                ('Catalogue', 'Catalogue', 'Catalogue', 'UtilityStatement'),
-                ('Catalogue', 'Catalogue', 'UtilityStatement',
-                 'ProductActivity'),
-                ('Catalogue', 'UtilityStatement', 'ProductActivity'),
-                ('UtilityStatement', 'ProductActivity'),
-                ('ProductActivity',),
+                (bd.APPLICATION_RESPONSE, bd.ATTACHED_DOCUMENT,
+                 bd.DOCUMENT_STATUS,
+                 bd.DOCUMENT_STATUS_REQUEST),
+                (bd.CREDIT_NOTE, bd.DEBIT_NOTE, bd.INVOICE, bd.REMINDER,
+                 bd.SELF_BILLED_CREDIT_NOTE, bd.SELF_BILLED_INVOICE,
+                 bd.STATEMENT),
+                (bd.CATALOGUE, bd.CATALOGUE_DELETION,
+                 bd.CATALOGUE_ITEM_SPECIFICATION_UPDATE,
+                 bd.CATALOGUE_PRICING_UPDATE, bd.CATALOGUE_REQUEST),
+                (bd.CERTIFICATE_OF_ORIGIN, ),
+                (bd.CATALOGUE, ),
+                (bd.CATALOGUE, ),
+                (bd.EXCEPTION_CRITERIA, bd.EXCEPTION_NOTIFICATION, bd.FORECAST,
+                 bd.ITEM_INFORMATION_REQUEST, bd.PRODUCT_ACTIVITY,
+                 bd.TRADE_ITEM_LOCATION_PROFILE),
+                (bd.CATALOGUE, ),
+                (bd.INSTRUCTION_FOR_RETURNS, bd.INVENTORY_REPORT,
+                 bd.RETAIL_EVENT, bd.STOCK_AVAILABILITY_REPORT),
+                (bd.CATALOGUE, ),
+                (bd.EXCEPTION_CRITERIA, ),
+                (bd.FREIGHT_INVOICE, ),
+                (bd.BILL_OF_LADING, ),
+                (bd.TRANSPORTATION_STATUS, ),
+                (bd.DESPATCH_ADVICE, bd.ORDER_CANCELLATION, bd.ORDER_CHANGE,
+                 bd.RECEIPT_ADVICE, ),
+                (bd.FULFILMENT_CANCELLATION, ),
+                (bd.FULFILMENT_CANCELLATION, ),
+                (bd.CATALOGUE, ),
+                (bd.GOODS_ITEM_ITINERARY, bd.TRANSPORT_EXECUTION_PLAN,
+                 bd.TRANSPORT_EXECUTION_PLAN_REQUEST,
+                 bd.TRANSPORT_PROGRESS_STATUS,
+                 bd.TRANSPORT_PROGRESS_STATUS_REQUEST,
+                 bd.TRANSPORT_SERVICE_DESCRIPTION,
+                 bd.TRANSPORT_SERVICE_DESCRIPTION_REQUEST),
+                (bd.ORDER, bd.ORDER_CANCELLATION, bd.ORDER_CHANGE,
+                 bd.ORDER_RESPONSE, bd.ORDER_RESPONSE_SIMPLE),
+                (bd.REMITTANCE_ADVICE, ),
+                (bd.CATALOGUE, ),
+                (bd.CATALOGUE, ),
+                (bd.QUOTATION, bd.REQUEST_FOR_QUOTATION),
+                (bd.EXCEPTION_CRITERIA, bd.EXCEPTION_NOTIFICATION, bd.FORECAST,
+                 bd.FORECAST_REVISION, bd.FORECAST_REVISION,
+                 bd.ITEM_INFORMATION_REQUEST,
+                 bd.PRODUCT_ACTIVITY, bd.TRADE_ITEM_LOCATION_PROFILE),
+                (bd.AWARDED_NOTIFICATION, bd.CALL_FOR_TENDERS,
+                 bd.CONTRACT_AWARD_NOTICE,
+                 bd.CONTRACT_NOTICE, bd.GUARANTEE_CERTIFICATE,
+                 bd.PRIOR_INFORMATION_NOTICE, bd.TENDER,
+                 bd.TENDERER_QUALIFICATION,
+                 bd.TENDERER_QUALIFICATION_RESPONSE, bd.TENDER_RECEIPT,
+                 bd.UNAWARDED_NOTIFICATION),
+                (bd.CATALOGUE, ),
+                (bd.CATALOGUE, ),
+                (bd.CATALOGUE, ),
+                (bd.UTILITY_STATEMENT, ),
+                (bd.PRODUCT_ACTIVITY, ),
             )
         ))
 
     @staticmethod
     def document_lookup(self, process, documents=None):
-        transaction_docs = self.lookup.get(process, None)
-        docs = Components()
-        if transaction_docs:
+        transaction_docs = self.__registry__.get(process, None)
+        if transaction_docs and isinstance(documents, list):
             return itertools.chain(transaction_docs, (x for x in documents if
-                                                      x in docs))
+                                                      x in ComponentRegistry))
+        else:
+            return iter(transaction_docs)

@@ -26,14 +26,11 @@ from collections import OrderedDict
 from datetime import datetime
 from hashlib import sha512
 from weakref import WeakValueDictionary
-
 from ubl.components.ccts import BusinessDocument
-from ubl.components import Documents, Schemas, \
-    BusinessProcesses as Bp, key_gen
+from ubl.components import Documents, Schemas, BusinessProcesses as Bp
 from ubl.exceptions import DocumentTypeError
 from ubl.utils import Singleton
-from ubl.components import ABIERegistry, BIERegistry, \
-    BusinessDocumentRegistry, ProcessRegistry
+
 
 __all__ = (
     'BusinessDocumentFactory',
@@ -138,17 +135,16 @@ class BusinessDocumentFactory:
         # if the document is not in document lists, exit
         # if the document is in list, then check if it's instance
         # else create instance and return a copy
-        document_alias = document
-        if document_alias not in BusinessDocumentTemplate.document_registry():
+        if document not in BusinessDocumentTemplate.document_registry():
             raise DocumentTypeError('Unrecognised document type specified')
         else:
             bt = BusinessDocumentTemplate()
-            if not DocumentCache.cached_instance(document_alias):
-                cls._name = document_alias
-                cls._definition = bt.get_definition(document_alias)
-                cls._fields = bt.document_fields(document_alias)
+            if not DocumentCache.cached_instance(document):
+                cls._name = document
+                cls._definition = bt.get_definition(document)
+                cls._fields = bt.document_fields(document)
                 definition = {'__slots__': cls._fields, **cls._definition}
-                cls._schema = bt.schema(document_alias)
+                cls._schema = bt.schema(document)
                 instance = type(
                         cls._name,
                         (BusinessDocument, object),
