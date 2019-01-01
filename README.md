@@ -5,17 +5,20 @@ Python implementation of the OASIS Universal Business Language (version 2.1)
 
 This project is aimed at producing collections of business documents based on
  the [OASIS UBL 2.2 specification](http://docs.oasis-open.org/ubl/os-UBL-2
- .1/UBL-2.1.html)
+ .1/UBL-2.1.html).
+
  One of the goals of this project is to reduce development time in business
  applications requiring electronic documents as proof of business. The
  ideology adopted for developing this implementation is built off from the
  concept:
+
  "Every business service consist of activities performed at a cost and
 requiring feedback (proof of transaction)."
-This application is focused on generating proofs of transactions and not
-business services, activities, or other such business component. Developers
+
+This project focuses on generating proofs of transactions and not
+business services, activities, or other such business components. Developers
 can further extend this package to meet such needs or further improve the
-existing proofs of transaction or business document.
+existing business documents to meet their requirements.
 
 ## Getting Started
 
