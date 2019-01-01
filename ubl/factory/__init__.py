@@ -50,25 +50,25 @@ class BusinessDocumentTemplate(metaclass=Singleton):
 
     @classmethod
     def get_definition(cls, document):
-        return Documents.document_definition(name=document)
+        return Documents.document_definition(document)
 
     @classmethod
     def document_fields(cls, document):
-        definition = Documents.document_definition(name=document)
+        definition = Documents.document_definition(document)
         if definition:
             return definition.keys()
 
     @classmethod
     def schema(cls, document):
-        return Schemas.document_schema(name=document)
+        return Schemas.get(document)
 
     @classmethod
     def document_schemas(cls):
-        return Schemas.schemas()
+        return Schemas.__registry__
 
     @classmethod
     def document_registry(cls):
-        return Documents.registry()
+        return Documents.__registry__
 
 
 class DocumentRevisions:
@@ -140,15 +140,14 @@ class BusinessDocumentFactory:
         else:
             bt = BusinessDocumentTemplate()
             if not DocumentCache.cached_instance(document):
-                cls._name = document
+                cls._name = document.name
                 cls._definition = bt.get_definition(document)
                 cls._fields = bt.document_fields(document)
-                definition = {'__slots__': cls._fields, **cls._definition}
                 cls._schema = bt.schema(document)
                 instance = type(
                         cls._name,
                         (BusinessDocument, object),
-                        definition,
+                        cls._definition,
                     )
                 prototype = instance()
                 DocumentCache.save(cls._name, prototype)

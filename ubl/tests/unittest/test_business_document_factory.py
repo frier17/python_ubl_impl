@@ -1,7 +1,7 @@
 import pytest
 from ubl.factory import BusinessDocumentFactory
 from ubl.components.ccts import BusinessDocument
-from ubl.components import ProcessRegistry, BusinessDocumentRegistry
+from ubl.components import ProcessRegistry, DocumentRegistry
 
 """
 Test the following features:
@@ -43,7 +43,8 @@ def test_init():
     with pytest.raises(RuntimeError):
         a = BusinessDocumentFactory()
         business_doc = BusinessDocumentFactory.produce_document(
-            BusinessDocumentRegistry.ATTACHED_DOCUMENT)
+            DocumentRegistry.ATTACHED_DOCUMENT)
+        print(business_doc)
         documents = BusinessDocumentFactory.generate_transaction_document(
             process=ProcessRegistry.TENDERING)
         assert a.instance is not None

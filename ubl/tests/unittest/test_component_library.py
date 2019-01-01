@@ -6,12 +6,13 @@ from ubl.components.ccts import CodeType, AmountType, \
     AssociatedBusinessEntity, DateTimeType, NumericType, TextType, \
     MeasureType, QuantityType, IdentifierType, IndicatorType, NameType
 from ubl.components import ABIERegistry, BIERegistry, \
-    BusinessDocumentRegistry, ProcessRegistry, Components, Documents, Schemas
+    DocumentRegistry, ComponentRegistry, ProcessRegistry, Components, \
+    Documents, Schemas
 
 """
 test_component_library
-    Units: Base class - BIERegistry, ABIERegistry, BusinessDocumentRegistry
-    -- Assert BIERegistry, ABIERegistry, BusinessDocumentRegistry are all types
+    Units: Base class - BIERegistry, ABIERegistry, DocumentRegistry
+    -- Assert BIERegistry, ABIERegistry, DocumentRegistry are all types
     of IntFlag enum
     -- Assert each registry has named UBL components (BIE, ASBIE)
     -- Assert Components obeys the mapping protocol with support for __get__,
@@ -30,7 +31,7 @@ test_component_library
 @pytest.mark.parametrize("registry, expected", [
     (ABIERegistry, True),
     (BIERegistry, True),
-    (BusinessDocumentRegistry, True),
+    (DocumentRegistry, True),
     (ProcessRegistry, True)
 ])
 def abie_registry_test(registry, expected):
@@ -45,9 +46,9 @@ def abie_registry_test(registry, expected):
     ('ACCESSORY_RELATED_ITEM', ABIERegistry, True),
     ('ACTIVITY_PERIOD', ABIERegistry, True),
     ('ALLOWED_SUBCONTRACT_TERMS', ABIERegistry, True),
-    ('APPLICATION_RESPONSE', BusinessDocumentRegistry, True),
-    ('BILL_OF_LADING', BusinessDocumentRegistry, True),
-    ('CATALOGUE', BusinessDocumentRegistry, True),
+    ('APPLICATION_RESPONSE', DocumentRegistry, True),
+    ('BILL_OF_LADING', DocumentRegistry, True),
+    ('CATALOGUE', DocumentRegistry, True),
 ])
 def bie_registry_test(alias, registry, expected):
     assert alias in registry.__members__ is expected
@@ -99,35 +100,49 @@ amount = AmountType.mock(0.0, currency='NAIRA', currency_code='NGN',
     (Components, ABIERegistry.BILLING_REFERENCE, True),
     (Components, ABIERegistry.ACCOUNTING_CONTACT, True),
     (Components, ABIERegistry.ACTIVITY_DATA_LINE, True),
-    (Documents, BusinessDocumentRegistry.ORDER_CANCELLATION, True),
-    (Documents, BusinessDocumentRegistry.CATALOGUE, True),
-    (Documents, BusinessDocumentRegistry.CATALOGUE, True),
-    (Schemas, BusinessDocumentRegistry.CATALOGUE, True),
-    (Schemas, BusinessDocumentRegistry.CREDIT_NOTE, True),
-    (Schemas, BusinessDocumentRegistry.DEBIT_NOTE, True),
-    (Schemas, BusinessDocumentRegistry.ORDER, True),
+    (Documents, DocumentRegistry.ORDER_CANCELLATION, True),
+    (Documents, DocumentRegistry.CATALOGUE, True),
+    (Documents, DocumentRegistry.CATALOGUE, True),
+    (Schemas, DocumentRegistry.CATALOGUE, True),
+    (Schemas, DocumentRegistry.CREDIT_NOTE, True),
+    (Schemas, DocumentRegistry.DEBIT_NOTE, True),
+    (Schemas, DocumentRegistry.ORDER, True),
 ])
 def test_component_maps(component_map, attribute, expected):
-    with pytest.raises(AttributeError):
-        instance = component_map()
-        assert component_map.get(attribute) == expected
-        assert instance[attribute] == expected
+    instance = component_map()
+    assert component_map.get(attribute) and True is expected
+    assert instance[attribute] and True is expected
 
 
 @pytest.mark.parametrize("component_map, attribute, expected", [
-    (Components, ABIERegistry.APPEAL_TERMS, iter([
-            ('description', text),
-            ('presentation_period', asbie),
-            ('appeal_information_party', asbie),
-            ('appeal_receiver_party', asbie),
-            ('mediation_party', asbie),
-        ])),
-    (Components, ABIERegistry.BUDGET_ACCOUNT, iter([
-            ('id', identifier),
-            ('budget_year', numeric),
-            ('required_classification_scheme', asbie),
-        ])),
-    (Documents, BusinessDocumentRegistry.APPLICATION_RESPONSE, iter([
+    (Components, ComponentRegistry.ACTIVITY_DATA_LINE, [
+        ('id', identifier),
+        ('supply_chain_activity_type_code', code),
+        ('buyer_customer_party', asbie),
+        ('seller_supplier_party', asbie),
+        ('activity_period', asbie),
+        ('activity_origin_location', asbie),
+        ('activity_final_location', asbie),
+        ('sales_item', asbie),
+    ]),
+    (Components, ComponentRegistry.ALLOWANCE_CHARGE, [
+        ('id', identifier),
+        ('charge_indicator', indicator),
+        ('allowance_charge_reason_code', code),
+        ('allowance_charge_reason', text),
+        ('multiplier_factor', numeric),
+        ('prepaid_indicator', indicator),
+        ('sequence', numeric),
+        ('amount', amount),
+        ('base_amount', amount),
+        ('accounting_cost_code', code),
+        ('accounting_cost', text),
+        ('per_unit_amount', amount),
+        ('tax_category', asbie),
+        ('tax_total', asbie),
+        ('payment_means', asbie),
+    ]),
+    (Documents, DocumentRegistry.APPLICATION_RESPONSE, [
             ('ubl_version_id', identifier),
             ('customization_id', identifier),
             ('profile_id', identifier),
@@ -144,8 +159,8 @@ def test_component_maps(component_map, attribute, expected):
             ('sender_party', asbie),
             ('receiver_party', asbie),
             ('document_response', asbie),
-        ])),
-    (Documents, BusinessDocumentRegistry.ATTACHED_DOCUMENT, iter([
+        ]),
+    (Documents, DocumentRegistry.ATTACHED_DOCUMENT, [
             ('ubl_version_id', identifier),
             ('customization_id', identifier),
             ('profile_id', identifier),
@@ -165,20 +180,22 @@ def test_component_maps(component_map, attribute, expected):
             ('receiver_party', asbie),
             ('attachment', asbie),
             ('parent_document_line_reference', asbie),
-        ])),
-    (Schemas, BusinessDocumentRegistry.ATTACHED_DOCUMENT,
-     'http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html'
-     '#T-APPLICATION-RESPONSE'),
-    (Schemas, BusinessDocumentRegistry.ATTACHED_DOCUMENT,
-     'http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html'
-     '#T-ATTACHED-DOCUMENT'),
+        ]),
 ])
 def test_business_maps(component_map, attribute, expected):
-    with pytest.raises(IndexError):
-        instance = component_map()
-        assert component_map.get(attribute) == expected
-        assert instance[attribute] == expected
+    # compare set of retrieved values
+    instance = component_map()
+    instance_fields = ((x, y.__class__) for x, y in instance[attribute])
+    expected_fields = ((x, y.__class__) for x, y in expected)
+    assert set(instance_fields) == set(expected_fields)
 
-    with pytest.raises(AttributeError):
-        record = component_map.get(attribute)
-        assert record == expected
+
+@pytest.mark.parametrize("schemas, attribute, expected", [
+    (Schemas, DocumentRegistry.ATTACHED_DOCUMENT,
+     'http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html#T-ATTACHED-DOCUMENT'),
+    (Schemas, DocumentRegistry.AWARDED_NOTIFICATION,
+     'http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html#T-AWARDED-NOTIFICATION'),
+])
+def test_schema_maps(schemas, attribute, expected):
+    component_url = schemas.get(attribute)
+    assert component_url == expected

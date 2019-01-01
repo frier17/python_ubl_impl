@@ -4,9 +4,7 @@ from ubl.components.ccts import CodeType, AmountType, BinaryObjectType, \
 import itertools
 from collections import namedtuple, Iterable
 from enum import unique, IntFlag
-from ubl.exceptions import UnknownDocumentError
 from ubl.components.ccts import BusinessDocument
-from ubl.utils import Singleton
 
 
 @unique
@@ -1798,7 +1796,7 @@ class ComponentRegistry(IntFlag):
 
 
 @unique
-class BusinessDocumentRegistry(IntFlag):
+class DocumentRegistry(IntFlag):
     """
     Defines a list of named constants which identifies all
     Business Documents supported by this Python implementation of UBL 2.1
@@ -2156,19 +2154,6 @@ class CountryRegistry(IntFlag):
     YEMEN = 887
     ZAMBIA = 894
     ZIMBABWE = 716
-
-
-class RegistryMixin:
-    __slots__ = ()
-
-    def __init__(self):
-        pass
-
-    @classmethod
-    def get(cls, item):
-        registry = getattr(cls, 'registry', None)
-        if registry and isinstance(registry, dict):
-            return registry.get(item)
 
 
 class CountryCurrencyRegistry:
@@ -2832,7 +2817,7 @@ class UBLComponentRegistry:
 
     __slots__ = 'registry', 'binary', 'code', 'asbie', 'datetime_', \
                 'measure', 'quantity', 'numeric', 'text', 'identifier', \
-                'indicator', 'name', 'amount', 'values'
+                'indicator', 'name', 'amount', 'values', '__weakref__'
 
     def __init__(self):
         self.binary = BinaryObjectType.mock()
@@ -5441,12 +5426,11 @@ class UBLComponentRegistry:
 
 
 class UBLDocumentRegistry:
-    __slots__ = 'registry', 'binary', 'code', 'asbie', 'datetime_', \
+    __slots__ = 'registry', 'code', 'asbie', 'datetime_', \
                 'measure', 'quantity', 'numeric', 'text', 'identifier', \
-                'indicator', 'name', 'amount', 'values'
+                'indicator', 'name', 'amount', 'values', '__weakref__'
 
     def __init__(self):
-        self.binary = BinaryObjectType.mock()
         self.code = CodeType.mock('SAMPLE', pattern=r'/(\w+)/', max_length=5)
         self.asbie = AssociatedBusinessEntity.mock()
         self.datetime_ = DateTimeType.mock()
@@ -5459,10 +5443,10 @@ class UBLDocumentRegistry:
         self.name = NameType.mock('Sample Name', pattern=r'\w+', max_length=20)
         self.amount = AmountType.mock(0.0, currency='NAIRA',
                                       currency_code='NGN', version_id='2.1')
-        binary = self.binary
+
         code = self.code
-        asbie = self.asbie
         datetime_ = self.datetime_
+        asbie = self.asbie
         measure = self.measure
         quantity = self.quantity
         numeric = self.numeric
@@ -5473,143 +5457,1899 @@ class UBLDocumentRegistry:
         amount = self.amount
 
         self.values = iter([
-
+            [
+                # Application Response
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('response_date', datetime_),
+                ('response_time', datetime_),
+                ('note', text),
+                ('version_id', identifier),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('document_response', asbie),
+            ],
+            [
+                # Attached Document
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('document_type_code', code),
+                ('document_type', text),
+                ('parent_document_id', identifier),
+                ('parent_document_type_code', code),
+                ('parent_document_version_id', identifier),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('attachment', asbie),
+                ('parent_document_line_reference', asbie),
+            ],
+            [
+                # Unawarded Notification
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('contract_name', name),
+                ('note', text),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('minutes_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('tender_result', asbie),
+                ('appeal_terms', asbie),
+            ],
+            [
+                # Bill of Lading
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('carrier_assigned_id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('name', name),
+                ('description', text),
+                ('note', text),
+                ('document_status_code', code),
+                ('shipping_order_id', identifier),
+                ('to_order_indicator', indicator),
+                ('ad_valorem_indicator', indicator),
+                ('declared_carriage_value_amount', numeric),
+                ('other_instruction', text),
+                ('consignor_party', asbie),
+                ('carrier_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('shipment', asbie),
+                ('document_reference', asbie),
+                ('exchange_rate', asbie),
+                ('document_distribution', asbie),
+                ('signature', asbie),
+            ],
+            [
+                # Call For Tenders
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('approval_date', datetime_),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('version_id', identifier),
+                ('previous_version_id', identifier),
+                ('legal_document_reference', asbie),
+                ('technical_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('contracting_party', asbie),
+                ('originator_customer_party', asbie),
+                ('receiver_party', asbie),
+                ('tendering_terms', asbie),
+                ('tendering_process', asbie),
+                ('procurement_project', asbie),
+                ('procurement_project_lot', asbie),
+            ],
+            [
+                # Catalogue
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('action_code', code),
+                ('name', name),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('revision_date', datetime_),
+                ('revision_time', datetime_),
+                ('note', text),
+                ('description', text),
+                ('version_id', identifier),
+                ('previous_version_id', identifier),
+                ('line_count_numeric', quantity),
+                ('validity_period', asbie),
+                ('referenced_contract', asbie),
+                ('source_catalogue_reference', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('provider_party', asbie),
+                ('receiver_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('contractor_customer_party', asbie),
+                ('trading_terms', asbie),
+                ('catalogue_line', asbie),
+            ],
+            [
+                # Catalogue Deletion
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('name', name),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('effective_date', datetime_),
+                ('effective_time', datetime_),
+                ('note', text),
+                ('version_id', identifier),
+                ('description', text),
+                ('validity_period', asbie),
+                ('deleted_catalogue_reference', asbie),
+                ('referenced_contract', asbie),
+                ('signature', asbie),
+                ('receiver_party', asbie),
+                ('provider_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('contractor_customer_party', asbie),
+            ],
+            [
+                # Catalogue Item Specification Update
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('name', name),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('revision_date', datetime_),
+                ('revision_time', datetime_),
+                ('note', text),
+                ('description', text),
+                ('version_id', identifier),
+                ('line_count_numeric', quantity),
+                ('validity_period', asbie),
+                ('related_catalogue_reference', asbie),
+                ('referenced_contract', asbie),
+                ('signature', asbie),
+                ('provider_party', asbie),
+                ('receiver_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('contractor_customer_party', asbie),
+                ('trading_terms', asbie),
+                ('default_language', asbie),
+                ('catalogue_item_specification_update_line', asbie),
+            ],
+            [
+                # Catalogue Pricing Update
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('name', name),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('revision_date', datetime_),
+                ('revision_time', datetime_),
+                ('note', text),
+                ('description', text),
+                ('version_id', identifier),
+                ('line_count_numeric', quantity),
+                ('validity_period', asbie),
+                ('related_catalogue_reference', asbie),
+                ('referenced_contract', asbie),
+                ('signature', asbie),
+                ('provider_party', asbie),
+                ('receiver_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('contractor_customer_party', asbie),
+                ('trading_terms', asbie),
+                ('default_language', asbie),
+                ('catalogue_pricing_update_line', asbie),
+            ],
+            [
+                # Catalogue Request
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('name', name),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('description', text),
+                ('pricing_update_request_indicator', indicator),
+                ('item_update_request_indicator', indicator),
+                ('line_count_numeric', quantity),
+                ('validity_period', asbie),
+                ('signature', asbie),
+                ('receiver_party', asbie),
+                ('provider_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('contractor_customer_party', asbie),
+                ('requested_catalogue_reference', asbie),
+                ('referenced_contract', asbie),
+                ('trading_terms', asbie),
+                ('document_reference', asbie),
+                ('applicable_territory_address', asbie),
+                ('requested_language', asbie),
+                ('requested_classification_scheme', asbie),
+                ('catalogue_request_line', asbie),
+            ],
+            [
+                # Certificate Of Origin
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('description', text),
+                ('note', text),
+                ('version_id', identifier),
+                ('signature', asbie),
+                ('exporter_party', asbie),
+                ('importer_party', asbie),
+                ('endorser_party', asbie),
+                ('certificate_of_origin_application', asbie),
+                ('issuer_endorsement', asbie),
+                ('embassy_endorsement', asbie),
+                ('insurance_endorsement', asbie),
+            ],
+            [
+                # Contract Award Notice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('regulatory_domain', text),
+                ('publish_award_indicator', indicator),
+                ('previous_document_reference', asbie),
+                ('minutes_document_reference', asbie),
+                ('signature', asbie),
+                ('contracting_party', asbie),
+                ('originator_customer_party', asbie),
+                ('receiver_party', asbie),
+                ('tendering_terms', asbie),
+                ('tendering_process', asbie),
+                ('procurement_project', asbie),
+                ('procurement_project_lot', asbie),
+                ('tender_result', asbie),
+            ],
+            [
+                # Contract Notice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('requested_publication_date', datetime_),
+                ('regulatory_domain', text),
+                ('frequency_period', asbie),
+                ('signature', asbie),
+                ('contracting_party', asbie),
+                ('originator_customer_party', asbie),
+                ('receiver_party', asbie),
+                ('tendering_terms', asbie),
+                ('tendering_process', asbie),
+                ('procurement_project', asbie),
+                ('procurement_project_lot', asbie),
+            ],
+            [
+                # Credit Note
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('tax_point_date', datetime_),
+                ('credit_note_type_code', code),
+                ('note', text),
+                ('document_currency_code', code),
+                ('tax_currency_code', code),
+                ('pricing_currency_code', code),
+                ('payment_currency_code', code),
+                ('payment_alternative_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', numeric),
+                ('line_count_numeric', numeric),
+                ('buyer_reference', text),
+                ('invoice_period', asbie),
+                ('discrepancy_response', asbie),
+                ('order_reference', asbie),
+                ('billing_reference', asbie),
+                ('despatch_document_reference', asbie),
+                ('receipt_document_reference', asbie),
+                ('contract_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('statement_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('payee_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('tax_representative_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('payment_alternative_exchange_rate', asbie),
+                ('allowance_charge', asbie),
+                ('tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('credit_note_line', asbie),
+            ],
+            [
+                # Debit Note
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('tax_point_date', datetime_),
+                ('document_currency_code', code),
+                ('tax_currency_code', code),
+                ('pricing_currency_code', code),
+                ('payment_currency_code', code),
+                ('payment_alternative_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', numeric),
+                ('line_count_numeric', numeric),
+                ('invoice_period', asbie),
+                ('discrepancy_response', asbie),
+                ('order_reference', asbie),
+                ('billing_reference', asbie),
+                ('despatch_document_reference', asbie),
+                ('receipt_document_reference', asbie),
+                ('statement_document_reference', asbie),
+                ('contract_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('payee_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('tax_representative_party', asbie),
+                ('prepaid_payment', asbie),
+                ('allowance_charge', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('payment_alternative_exchange_rate', asbie),
+                ('tax_total', asbie),
+                ('requested_monetary_total', asbie),
+                ('debit_note_line', asbie),
+            ],
+            [
+                # Despatch Advice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('document_status_code', code),
+                ('despatch_advice_type_code', code),
+                ('note', text),
+                ('line_count_numeric', numeric),
+                ('order_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('despatch_supplier_party', asbie),
+                ('delivery_customer_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+                ('shipment', asbie),
+                ('despatch_line', asbie),
+            ],
+            [
+                # Document Status
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('document_response', asbie),
+                ('additional_document_response', asbie),
+            ],
+            [
+                # Document Status Request
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('u_u_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('tracking_id', identifier),
+                ('requested_document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+            ],
+            [
+                # Exception Criteria
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('u_u_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('version_id', identifier),
+                ('validity_period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('exception_criteria_line', asbie),
+            ],
+            [
+                # Exception Notification
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('exception_observation_period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('exception_notification_line', asbie),
+            ],
+            [
+                # Forecast
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('version_id', identifier),
+                ('based_on_consensus_indicator', indicator),
+                ('forecast_purpose_code', code),
+                ('forecast_period', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('forecast_line', asbie),
+            ],
+            [
+                # Forecast Revision
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('u_u_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('sequence_number_id', identifier),
+                ('revision_status_code', code),
+                ('purpose_code', code),
+                ('forecast_period', asbie),
+                ('original_document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('forecast_revision_line', asbie),
+            ],
+            [
+                # Forwarding Instructions
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('carrier_assigned_id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('name', name),
+                ('description', text),
+                ('note', text),
+                ('document_status_code', code),
+                ('shipping_order_id', identifier),
+                ('to_order_indicator', indicator),
+                ('ad_valorem_indicator', indicator),
+                ('declared_carriage_value_amount', amount),
+                ('other_instruction', text),
+                ('consignor_party', asbie),
+                ('carrier_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('shipment', asbie),
+                ('document_reference', asbie),
+                ('exchange_rate', asbie),
+                ('signature', asbie),
+            ],
+            [
+                # Freight Invoice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('invoice_type_code', code),
+                ('note', text),
+                ('tax_point_date', datetime_),
+                ('document_currency_code', code),
+                ('tax_currency_code', code),
+                ('pricing_currency_code', code),
+                ('payment_currency_code', code),
+                ('payment_alternative_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('invoice_period', asbie),
+                ('shipment', asbie),
+                ('order_reference', asbie),
+                ('billing_reference', asbie),
+                ('despatch_document_reference', asbie),
+                ('receipt_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('contract_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('payee_party', asbie),
+                ('tax_representative_party', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('prepaid_payment', asbie),
+                ('allowance_charge', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('payment_alternative_exchange_rate', asbie),
+                ('tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('invoice_line', asbie),
+            ],
+            [
+                # Fulfilment Cancellation
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('cancellation_note', text),
+                ('despatch_document_reference', asbie),
+                ('receipt_document_reference', asbie),
+                ('order_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('contract', asbie),
+                ('signature', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('delivery_customer_party', asbie),
+                ('despatch_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+            ],
+            [
+                # Goods Item Itinerary
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('version_id', identifier),
+                ('transport_execution_plan_reference_id', identifier),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('referenced_consignment', asbie),
+                ('referenced_transport_equipment', asbie),
+                ('referenced_package', asbie),
+                ('referenced_goods_item', asbie),
+                ('transportation_segment', asbie),
+            ],
+            [
+                # Guarantee Certificate
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('guarantee_type_code', code),
+                ('purpose', text),
+                ('liability_amount', amount),
+                ('constitution_code', code),
+                ('note', text),
+                ('applicable_period', asbie),
+                ('applicable_regulation', asbie),
+                ('guarantee_document_reference', asbie),
+                ('immobilized_security', asbie),
+                ('signature', asbie),
+                ('guarantor_party', asbie),
+                ('interested_party', asbie),
+                ('beneficiary_party', asbie),
+            ],
+            [
+                # Instructions For Returns
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('u_u_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('seller_supplier_party', asbie),
+                ('retailer_customer_party', asbie),
+                ('manufacturer_party', asbie),
+                ('shipment', asbie),
+                ('instruction_for_returns_line', asbie),
+            ],
+            [
+                # Inventory Report
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('document_currency_code', code),
+                ('inventory_period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('retailer_customer_party', asbie),
+                ('inventory_reporting_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('inventory_report_line', asbie),
+            ],
+            [
+                # Invoice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('due_date', datetime_),
+                ('invoice_type_code', code),
+                ('note', text),
+                ('tax_point_date', datetime_),
+                ('document_currency_code', code),
+                ('tax_currency_code', code),
+                ('pricing_currency_code', code),
+                ('payment_currency_code', code),
+                ('payment_alternative_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('buyer_reference', text),
+                ('invoice_period', asbie),
+                ('order_reference', asbie),
+                ('billing_reference', asbie),
+                ('despatch_document_reference', asbie),
+                ('receipt_document_reference', asbie),
+                ('statement_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('contract_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('project_reference', asbie),
+                ('signature', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('payee_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('tax_representative_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('prepaid_payment', asbie),
+                ('allowance_charge', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('payment_alternative_exchange_rate', asbie),
+                ('tax_total', asbie),
+                ('withholding_tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('invoice_line', asbie),
+            ],
+            [
+                # Item Information Request
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('item_information_request_line', asbie),
+            ],
+            [
+                # Order
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('sales_order_id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('order_type_code', code),
+                ('note', text),
+                ('requested_invoice_currency_code', code),
+                ('document_currency_code', code),
+                ('pricing_currency_code', code),
+                ('tax_currency_code', code),
+                ('customer_reference', text),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('validity_period', asbie),
+                ('quotation_document_reference', asbie),
+                ('order_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('catalogue_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('contract', asbie),
+                ('project_reference', asbie),
+                ('signature', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('transaction_conditions', asbie),
+                ('allowance_charge', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('destination_country', asbie),
+                ('tax_total', asbie),
+                ('anticipated_monetary_total', asbie),
+                ('order_line', asbie),
+            ],
+            [
+                # Order Cancellation
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('cancellation_note', text),
+                ('order_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('contract', asbie),
+                ('signature', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+            ],
+            [
+                # Order Change
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('sales_order_id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('sequence_number_id', identifier),
+                ('note', text),
+                ('requested_invoice_currency_code', code),
+                ('document_currency_code', code),
+                ('pricing_currency_code', code),
+                ('tax_currency_code', code),
+                ('customer_reference', text),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('validity_period', asbie),
+                ('order_reference', asbie),
+                ('quotation_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('contract', asbie),
+                ('signature', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('accounting_supplier_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('transaction_conditions', asbie),
+                ('allowance_charge', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('destination_country', asbie),
+                ('tax_total', asbie),
+                ('anticipated_monetary_total', asbie),
+                ('order_line', asbie),
+            ],
+            [
+                # Order Response
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('sales_order_id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('order_response_code', code),
+                ('note', text),
+                ('document_currency_code', code),
+                ('pricing_currency_code', code),
+                ('tax_currency_code', code),
+                ('total_packages_quantity', quantity),
+                ('gross_weight_measure', measure),
+                ('net_weight_measure', measure),
+                ('net_net_weight_measure', measure),
+                ('gross_volume_measure', measure),
+                ('net_volume_measure', measure),
+                ('customer_reference', text),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('validity_period', asbie),
+                ('order_reference', asbie),
+                ('order_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('contract', asbie),
+                ('signature', asbie),
+                ('seller_supplier_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('originator_customer_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('allowance_charge', asbie),
+                ('transaction_conditions', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('destination_country', asbie),
+                ('tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('order_line', asbie),
+            ],
+            [
+                # Order Response Simple
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('accepted_indicator', indicator),
+                ('rejection_note', text),
+                ('customer_reference', text),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('order_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('seller_supplier_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('originator_customer_party', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+            ],
+            [
+                # Packaging List
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('name', name),
+                ('description', text),
+                ('note', text),
+                ('version_id', identifier),
+                ('other_instruction', text),
+                ('consignor_party', asbie),
+                ('carrier_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('shipment', asbie),
+                ('document_reference', asbie),
+                ('document_distribution', asbie),
+                ('signature', asbie),
+            ],
+            [
+                # Prior Information Notice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('planned_date', datetime_),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('contracting_party', asbie),
+                ('originator_customer_party', asbie),
+                ('receiver_party', asbie),
+                ('tendering_terms', asbie),
+                ('tendering_process', asbie),
+                ('procurement_project', asbie),
+                ('procurement_project_lot', asbie),
+            ],
+            [
+                # Product Activity
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('document_currency_code', code),
+                ('activity_period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('supply_chain_activity_data_line', asbie),
+            ],
+            [
+                # Quotation
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('u_u_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('pricing_currency_code', code),
+                ('line_count_numeric', numeric),
+                ('validity_period', asbie),
+                ('request_for_quotation_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('contract', asbie),
+                ('signature', asbie),
+                ('seller_supplier_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('originator_customer_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('transaction_conditions', asbie),
+                ('allowance_charge', asbie),
+                ('destination_country', asbie),
+                ('tax_total', asbie),
+                ('quoted_monetary_total', asbie),
+                ('quotation_line', asbie),
+            ],
+            [
+                # Receipt Advice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('u_u_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('document_status_code', code),
+                ('receipt_advice_type_code', code),
+                ('note', text),
+                ('line_count_numeric', numeric),
+                ('order_reference', asbie),
+                ('despatch_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('delivery_customer_party', asbie),
+                ('despatch_supplier_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('shipment', asbie),
+                ('receipt_line', asbie),
+            ],
+            [
+                # Reminder
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('reminder_type_code', code),
+                ('reminder_sequence_numeric', numeric),
+                ('note', text),
+                ('tax_point_date', datetime_),
+                ('document_currency_code', code),
+                ('tax_currency_code', code),
+                ('pricing_currency_code', code),
+                ('payment_currency_code', code),
+                ('payment_alternative_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('reminder_period', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('payee_party', asbie),
+                ('tax_representative_party', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('prepaid_payment', asbie),
+                ('allowance_charge', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('payment_alternative_exchange_rate', asbie),
+                ('tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('reminder_line', asbie),
+            ],
+            [
+                # Remittance Advice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('document_currency_code', code),
+                ('total_debit_amount', amount),
+                ('total_credit_amount', amount),
+                ('total_payment_amount', amount),
+                ('payment_order_reference', text),
+                ('payer_reference', text),
+                ('invoicing_party_reference', text),
+                ('line_count_numeric', numeric),
+                ('invoice_period', asbie),
+                ('billing_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_customer_party', asbie),
+                ('accounting_supplier_party', asbie),
+                ('payee_party', asbie),
+                ('payment_means', asbie),
+                ('tax_total', asbie),
+                ('remittance_advice_line', asbie),
+            ],
+            [
+                # Request for Quotation
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('submission_due_date', datetime_),
+                ('note', text),
+                ('pricing_currency_code', code),
+                ('line_count_numeric', numeric),
+                ('requested_validity_period', asbie),
+                ('catalogue_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('originator_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('destination_country', asbie),
+                ('contract', asbie),
+                ('request_for_quotation_line', asbie),
+            ],
+            [
+                # Retail Event
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('retail_event_name', name),
+                ('retail_event_status_code', code),
+                ('seller_event_id', identifier),
+                ('buyer_event_id', identifier),
+                ('description', text),
+                ('period', asbie),
+                ('original_document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('event_comment', asbie),
+                ('promotional_event', asbie),
+                ('miscellaneous_event', asbie),
+            ],
+            [
+                # Self Billed Credit Note
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('tax_point_date', datetime_),
+                ('note', text),
+                ('document_currency_code', code),
+                ('tax_currency_code', code),
+                ('pricing_currency_code', code),
+                ('payment_currency_code', code),
+                ('payment_alternative_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('invoice_period', asbie),
+                ('discrepancy_response', asbie),
+                ('order_reference', asbie),
+                ('billing_reference', asbie),
+                ('despatch_document_reference', asbie),
+                ('receipt_document_reference', asbie),
+                ('contract_document_reference', asbie),
+                ('statement_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_customer_party', asbie),
+                ('accounting_supplier_party', asbie),
+                ('payee_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('tax_representative_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('allowance_charge', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('payment_alternative_exchange_rate', asbie),
+                ('tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('credit_note_line', asbie),
+            ],
+            [
+                # Self Billed Invoice
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('tax_point_date', datetime_),
+                ('invoice_type_code', code),
+                ('note', text),
+                ('document_currency_code', code),
+                ('tax_currency_code', code),
+                ('pricing_currency_code', code),
+                ('payment_currency_code', code),
+                ('payment_alternative_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('line_count_numeric', numeric),
+                ('invoice_period', asbie),
+                ('order_reference', asbie),
+                ('billing_reference', asbie),
+                ('contract_document_reference', asbie),
+                ('despatch_document_reference', asbie),
+                ('receipt_document_reference', asbie),
+                ('statement_document_reference', asbie),
+                ('originator_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_customer_party', asbie),
+                ('accounting_supplier_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('payee_party', asbie),
+                ('tax_representative_party', asbie),
+                ('delivery', asbie),
+                ('delivery_terms', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('prepaid_payment', asbie),
+                ('allowance_charge', asbie),
+                ('tax_exchange_rate', asbie),
+                ('pricing_exchange_rate', asbie),
+                ('payment_exchange_rate', asbie),
+                ('payment_alternative_exchange_rate', asbie),
+                ('tax_total', asbie),
+                ('legal_monetary_total', asbie),
+                ('invoice_line', asbie),
+            ],
+            [
+                # Statement
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('document_currency_code', code),
+                ('total_debit_amount', amount),
+                ('total_credit_amount', amount),
+                ('total_balance_amount', amount),
+                ('line_count_numeric', numeric),
+                ('statement_type_code', code),
+                ('statement_period', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('accounting_supplier_party', asbie),
+                ('accounting_customer_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('originator_customer_party', asbie),
+                ('payee_party', asbie),
+                ('payment_means', asbie),
+                ('payment_terms', asbie),
+                ('allowance_charge', asbie),
+                ('tax_total', asbie),
+                ('statement_line', asbie),
+            ],
+            [
+                # Stock Availability Report
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('document_currency_code', code),
+                ('inventory_period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('seller_supplier_party', asbie),
+                ('retailer_customer_party', asbie),
+                ('inventory_reporting_party', asbie),
+                ('stock_availability_report_line', asbie),
+            ],
+            [
+                # Tender
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('tender_type_code', code),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('contract_name', name),
+                ('note', text),
+                ('validity_period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('tenderer_party', asbie),
+                ('tenderer_qualification_document_reference', asbie),
+                ('subcontractor_party', asbie),
+                ('contracting_party', asbie),
+                ('originator_customer_party', asbie),
+                ('tendered_project', asbie),
+            ],
+            [
+                # Tender Qualification
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('version_id', identifier),
+                ('previous_version_id', identifier),
+                ('signature', asbie),
+                ('tenderer_party_qualification', asbie),
+                ('contracting_party', asbie),
+                ('evidence', asbie),
+                ('additional_document_reference', asbie),
+            ],
+            [
+                # Tenderer Qualification Response
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('contract_name', name),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('resolution_document_reference', asbie),
+                ('qualification_resolution', asbie),
+                ('appeal_terms', asbie),
+                ('signature', asbie),
+            ],
+            [
+                # Tender Receipt
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('contract_name', name),
+                ('note', text),
+                ('registered_date', datetime_),
+                ('registered_time', datetime_),
+                ('tender_document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+            ],
+            [
+                # Tender Item Location Profile
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('profile_status_code', code),
+                ('period', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('buyer_customer_party', asbie),
+                ('seller_supplier_party', asbie),
+                ('item_management_profile', asbie),
+            ],
+            [
+                # Transportation Status
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('carrier_assigned_id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('name', name),
+                ('description', text),
+                ('note', text),
+                ('shipping_order_id', identifier),
+                ('other_instruction', text),
+                ('transportation_status_type_code', code),
+                ('transport_execution_status_code', code),
+                ('consignment', asbie),
+                ('transport_event', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('transportation_status_request_document_reference', asbie),
+                ('transport_execution_plan_document_reference', asbie),
+                ('updated_pickup_transport_event', asbie),
+                ('updated_delivery_transport_event', asbie),
+                ('status_location', asbie),
+                ('status_period', asbie),
+            ],
+            [
+                # Transportation Status Request
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('carrier_assigned_id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('name', name),
+                ('description', text),
+                ('note', text),
+                ('shipping_order_id', identifier),
+                ('other_instruction', text),
+                ('transportation_status_type_code', code),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('transport_execution_plan_document_reference', asbie),
+                ('consignment', asbie),
+                ('document_reference', asbie),
+                ('signature', asbie),
+                ('requested_status_location', asbie),
+                ('requested_status_period', asbie),
+            ],
+            [
+                # Transport Execution Plan
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('version_id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('document_status_code', code),
+                ('document_status_reason_code', code),
+                ('document_status_reason_description', text),
+                ('note', text),
+                ('transport_user_remarks', text),
+                ('transport_service_provider_remarks', text),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('transport_user_party', asbie),
+                ('transport_service_provider_party', asbie),
+                ('bill_to_party', asbie),
+                ('signature', asbie),
+                ('transport_execution_plan_request_document_reference', asbie),
+                ('transport_execution_plan_document_reference', asbie),
+                ('transport_service_description_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('transport_contract', asbie),
+                ('transport_service_provider_response_required_period', asbie),
+                ('transport_user_response_required_period', asbie),
+                ('validity_period', asbie),
+                ('main_transportation_service', asbie),
+                ('additional_transportation_service', asbie),
+                ('service_start_time_period', asbie),
+                ('service_end_time_period', asbie),
+                ('from_location', asbie),
+                ('to_location', asbie),
+                ('at_location', asbie),
+                ('transport_execution_terms', asbie),
+                ('consignment', asbie),
+            ],
+            [
+                # Transport Execution Plan Request
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('version_id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('document_status_code', code),
+                ('document_status_reason_code', code),
+                ('document_status_reason_description', text),
+                ('note', text),
+                ('transport_user_remarks', text),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('transport_user_party', asbie),
+                ('transport_service_provider_party', asbie),
+                ('payee_party', asbie),
+                ('signature', asbie),
+                ('transport_execution_plan_document_reference', asbie),
+                ('transport_service_description_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('transport_contract', asbie),
+                ('transport_service_provider_response_deadline_period', asbie),
+                ('main_transportation_service', asbie),
+                ('additional_transportation_service', asbie),
+                ('service_start_time_period', asbie),
+                ('service_end_time_period', asbie),
+                ('from_location', asbie),
+                ('to_location', asbie),
+                ('at_location', asbie),
+                ('transport_execution_terms', asbie),
+                ('consignment', asbie),
+            ],
+            [
+                # Transport Progress Status
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('status_available_indicator', indicator),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('source_issuer_party', asbie),
+                ('transport_progress_status_request_document_reference', asbie),
+                ('transport_means', asbie),
+                ('transport_schedule', asbie),
+            ],
+            [
+                # Transport Progress Status Request
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('transport_means', asbie),
+                ('status_location', asbie),
+            ],
+            [
+                # Transport Service Description
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('service_name', name),
+                ('response_code', code),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('transport_service_description_request_document_reference',
+                 asbie),
+                ('transport_service_provider_party', asbie),
+                ('service_charge_payment_terms', asbie),
+                ('validity_period', asbie),
+                ('transportation_service', asbie),
+            ],
+            [
+                # Transport Service Description Request
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('note', text),
+                ('service_information_preference_code', code),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('transport_service_provider_party', asbie),
+                ('transportation_service', asbie),
+            ],
+            [
+                # Utility Statement
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('utility_statement_type_code', code),
+                ('note', text),
+                ('document_currency_code', code),
+                ('accounting_cost_code', code),
+                ('accounting_cost', text),
+                ('parent_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('signature', asbie),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('customer_party', asbie),
+                ('subscriber_party', asbie),
+                ('main_on_account_payment', asbie),
+                ('subscriber_consumption', asbie),
+            ],
+            [
+                # Waybill
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('carrier_assigned_id', identifier),
+                ('uuid', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('name', name),
+                ('description', text),
+                ('note', text),
+                ('shipping_order_id', identifier),
+                ('ad_valorem_indicator', indicator),
+                ('declared_carriage_value_amount', amount),
+                ('other_instruction', text),
+                ('consignor_party', asbie),
+                ('carrier_party', asbie),
+                ('freight_forwarder_party', asbie),
+                ('shipment', asbie),
+                ('document_reference', asbie),
+                ('exchange_rate', asbie),
+                ('document_distribution', asbie),
+                ('signature', asbie),
+            ],
+            [
+                # Awarded Notification
+                ('ubl_version_id', identifier),
+                ('customization_id', identifier),
+                ('profile_id', identifier),
+                ('profile_execution_id', identifier),
+                ('id', identifier),
+                ('copy_indicator', indicator),
+                ('uuid', identifier),
+                ('contract_folder_id', identifier),
+                ('issue_date', datetime_),
+                ('issue_time', datetime_),
+                ('contract_name', name),
+                ('note', text),
+                ('sender_party', asbie),
+                ('receiver_party', asbie),
+                ('minutes_document_reference', asbie),
+                ('additional_document_reference', asbie),
+                ('tender_result', asbie),
+                ('final_financial_guarantee', asbie),
+                ('signature', asbie),
+            ]
         ])
-        self.registry = dict(zip(BusinessDocumentRegistry, self.values))
+
+        self.registry = dict(zip(DocumentRegistry, self.values))
 
 
-class ComponentIterator(Iterable):
-
-    def __init__(self):
-        self.registry = UBLComponentRegistry().registry
-
-    def __getitem__(self, item):
-        return self.registry.get(item)
-
-    def __contains__(self, item):
-        return item in self.registry
-
-    def __setitem__(self, key, value):
-        alias = self.__class__.__name__
-        raise RuntimeError('%s definitions, key: %s and value: %s cannot be '
-                           'modified' % alias, key, value)
-
-    def __delattr__(self, item):
-        alias = self.__class__.__name__
-        raise RuntimeError('%s attribute, %s cannot be deleted' % alias, item)
-
-    def __iter__(self):
-        for component in self.registry:
-            yield component
-
-
-class Descriptor:
-
-    def __get__(self, instance, owner):
-        if instance or owner:
-            return self.registry
-
-    def __set__(self, instance, value):
-        alias = instance.__class__.__name__
-        raise RuntimeError('%s definitions cannot be modified' % alias)
-
-    def __delete__(self, instance):
-        alias = instance.__class__.__name__
-        raise RuntimeError('%s definitions cannot be modified' % alias)
-
-
-class ComponentDescriptor(Descriptor):
-
-    def __init__(self):
-        self.registry = UBLComponentRegistry().registry
-        super(ComponentDescriptor, self).__init__()
-
-
-class DocumentDescriptor:
-    def __init__(self):
-        self.registry = UBLDocumentRegistry().registry
-        super(DocumentDescriptor, self).__init__()
-
-
-
-class SchemaDescriptor:
-    pass
-
-
-class Components(ComponentIterator, RegistryMixin):
-    __registry__ = Descriptor()
-
-    def __init__(self):
-        super(Components, self).__init__()
-
-    @classmethod
-    def field_definition(cls, component, field):
-        data = None
-        entries = cls()[component]
-        if entries:
-            check = itertools.filterfalse(lambda x, y: x != field, entries)
-            if check:
-                _, data = check.pop()
-        return type(data)
-
-
-class Documents(RegistryMixin):
-
-    __registry__ = DocumentDescriptor()
-
-    def __iter__(self):
-        for document in self.__registry__:
-            yield document
-
-    def __getitem__(self, item):
-        if isinstance(item, BusinessDocumentRegistry):
-            return self.__registry__[item]
-        else:
-            raise UnknownDocumentError('Document not defined in current '
-                                       'library')
-
-    def __getattr__(self, item):
-        if isinstance(item, BusinessDocumentRegistry):
-            return self.__registry__[item]
-        else:
-            raise UnknownDocumentError('Document not defined in current '
-                                       'library')
-
-    def __setitem__(self, key, value):
-        raise RuntimeError('Document library cannot be modified')
-
-    def __delattr__(self, item):
-        raise RuntimeError('Attribute cannot be deleted')
-
-    def __contains__(self, item):
-        return item in self.__registry__
-
-    @classmethod
-    def is_valid(cls, document, definition=None):
-        # determine if a given document meets the specified or
-        # default definition
-        # definition should be an iterable of fields and respective values
-        document_map = cls.__registry__.get(document, None)
-        return document_map == definition
-
-    @classmethod
-    def document_definition(cls, name):
-        return cls().__registry__.get(name, None)
-
-    @classmethod
-    def registry(cls):
-        return cls().__registry__
-
-
-class Schemas(RegistryMixin):
-    # URI schema definition for listed documents
-
+class UBLSchemaRegistry:
+    
     def __init__(self):
         base_url = 'http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html'
         values = iter([
             '%s%s' % (base_url, '#T-APPLICATION-RESPONSE'),
             '%s%s' % (base_url, '#T-ATTACHED-DOCUMENT'),
-            '%s%s' % (base_url, '#T-AWARDED-NOTIFICATION'),
+            '%s%s' % (base_url, '#T-UNAWARDED-NOTIFICATION'),
             '%s%s' % (base_url, '#T-BILL-OF-LADING'),
             '%s%s' % (base_url, '#T-CALL-FOR-TENDERS'),
             '%s%s' % (base_url, '#T-CATALOGUE'),
@@ -5669,57 +7409,161 @@ class Schemas(RegistryMixin):
             '%s%s' % (base_url, '#T-TRANSPORT-SERVICE-DESCRIPTION-REQUEST'),
             '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS'),
             '%s%s' % (base_url, '#T-TRANSPORTATION-STATUS-REQUEST'),
-            '%s%s' % (base_url, '#T-UNAWARDED-NOTIFICATION'),
             '%s%s' % (base_url, '#T-UTILITY-STATEMENT'),
             '%s%s' % (base_url, '#T-WAYBILL'),
+            '%s%s' % (base_url, '#T-AWARDED-NOTIFICATION'),
         ])
-        self.__registry__ = dict(zip(BusinessDocumentRegistry, values))
+        self.registry = dict(zip(DocumentRegistry, values))
+
+
+class BaseIterator(Iterable):
+    
+    def __init__(self):
+        self.registry = dict()
 
     def __getitem__(self, item):
-        if isinstance(item, BusinessDocumentRegistry):
-            return self.__registry__.get(item)
-        else:
-            raise IndexError('Schema not defined in library')
+        return self.registry.get(item)
 
-    def __getattr__(self, item):
-        if isinstance(item, BusinessDocumentRegistry):
-            return self.__registry__.get(item)
-        else:
-            raise UnknownDocumentError('Schema not defined in library')
+    def __contains__(self, item):
+        return item in self.registry
+
+    def __setitem__(self, key, value):
+        alias = self.__class__.__name__
+        raise RuntimeError('%s definitions, key: %s and value: %s cannot be '
+                           'modified' % alias, key, value)
+
+    def __delattr__(self, item):
+        alias = self.__class__.__name__
+        raise RuntimeError('%s attribute, %s cannot be deleted' % alias, item)
+
+    def __iter__(self):
+        for entry in self.registry:
+            yield entry
+
+    @classmethod
+    def get(cls, item):
+        return cls().registry.get(item)
+
+
+class ComponentIterator(BaseIterator):
+
+    def __init__(self):
+        super(ComponentIterator, self).__init__()
+        self.registry = UBLComponentRegistry().registry
+
+
+class DocumentIterator(BaseIterator):
+    
+    def __init__(self):
+        super(DocumentIterator, self).__init__()
+        self.registry = UBLDocumentRegistry().registry
+
+
+class SchemaIterator(BaseIterator):
+    
+    def __init__(self):
+        super(SchemaIterator, self).__init__()
+        self.registry = UBLSchemaRegistry().registry
+
+
+class Descriptor:
+    _registry = None
+
+    def __get__(self, instance, owner):
+        if instance or owner:
+            return self._registry
+
+    def __set__(self, instance, value):
+        alias = instance.__class__.__name__
+        raise RuntimeError('%s definitions cannot be modified' % alias)
+
+    def __delete__(self, instance):
+        alias = instance.__class__.__name__
+        raise RuntimeError('%s definitions cannot be modified' % alias)
+
+
+class ComponentDescriptor(Descriptor):
+
+    def __init__(self):
+        self._registry = UBLComponentRegistry().registry
+
+
+class DocumentDescriptor(Descriptor):
+    def __init__(self):
+        self._registry = UBLDocumentRegistry().registry
+
+
+class SchemaDescriptor(Descriptor):
+    def __init__(self):
+        self._registry = UBLSchemaRegistry().registry
+
+
+class Components(ComponentIterator):
+    __registry__ = Descriptor()
+
+    def __init__(self):
+        super(Components, self).__init__()
+
+    @classmethod
+    def field_definition(cls, component, field):
+        data = None
+        entries = cls.get(component)
+        if entries:
+            check = itertools.filterfalse(lambda x, y: x != field,
+                                          entries.keys())
+            if check:
+                _, data = check.pop()
+        return type(data)
+
+
+class Documents(DocumentIterator):
+
+    __registry__ = DocumentDescriptor()
+
+    @classmethod
+    def is_valid(cls, document, definition=None):
+        # determine if a given document meets the specified or
+        # default definition
+        # definition should be an iterable of fields and respective values
+        document_map = cls.get(document)
+        return document_map == definition
+
+    @classmethod
+    def document_definition(cls, document):
+        document_map = cls.get(document)
+        if document_map:
+            return dict(document_map)
+
+
+class Schemas(SchemaIterator):
+    # URI schema definition for listed documents
+    __registry__ = SchemaDescriptor()
+
+    def __init__(self):
+        super(Schemas, self).__init__()
 
     def __iter__(self):
         schemas = itertools.filterfalse(lambda x: x == 'base_url',
-                                        self.__registry__)
+                                        self.registry)
         for schema in schemas:
             yield schema
-
-    def __setitem__(self, key, value):
-        raise RuntimeError('Schema definitions cannot be modified')
-
-    def __setattr__(self, key, value):
-        raise RuntimeError('Schema definitions cannot be modified')
-
-    def __delattr__(self, item):
-        raise RuntimeError('Attribute cannot be deleted')
-
-    def __contains__(self, item):
-        return item in self.__registry__
 
     @classmethod
     def schemas(cls):
         return itertools.filterfalse(lambda x: x == 'base_url', 
-                                     cls().__registry__)
+                                     cls().registry)
 
     @classmethod
     def document_schema(cls, name):
-        return cls().__registry__.get(name)
+        return cls().registry.get(name)
 
 
-class BusinessProcesses(RegistryMixin, metaclass=Singleton):
+class BusinessProcesses(DocumentIterator):
 
     def __init__(self):
-        bd = BusinessDocumentRegistry
-        self.__registry__ = dict(zip(
+        super(BusinessProcesses, self).__init__()
+        bd = DocumentRegistry
+        self.registry = dict(zip(
             (
                 ProcessRegistry.BILLING,
                 ProcessRegistry.CATALOGUE,
@@ -5814,7 +7658,7 @@ class BusinessProcesses(RegistryMixin, metaclass=Singleton):
 
     @staticmethod
     def document_lookup(self, process, documents=None):
-        transaction_docs = self.__registry__.get(process, None)
+        transaction_docs = self.registry.get(process, None)
         if transaction_docs and isinstance(documents, list):
             return itertools.chain(transaction_docs, (x for x in documents if
                                                       x in ComponentRegistry))
