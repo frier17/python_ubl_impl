@@ -1,4 +1,7 @@
-# UNIVERSAL BUSINESS LANGUAGE (UBL) PYTHON IMPLEMENTATION
+# python_ubl_impl
+Python implementation of the OASIS Universal Business Language (version 2.1)
+
+## UNIVERSAL BUSINESS LANGUAGE (UBL) PYTHON IMPLEMENTATION
 
 This project is aimed at producing collections of business documents based on
  the [OASIS UBL 2.2 specification](http://docs.oasis-open.org/ubl/os-UBL-2
@@ -49,10 +52,7 @@ Simply run the various tests from command line using appropriate commands and
 Add additional notes about how to deploy this on a live system
 
 ## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+This package was built using Python 3.6
 
 ## Contributing
 Individuals interested in contributing to this project can do. Kindly adhere
@@ -61,13 +61,13 @@ joining the project contact [frier17](https://github.com/frier17)
 
 ## Versioning
 Version control was done using git version control
-For document history, see the [repository](https://github.com/your/project/tags).
+For document history, see the [repository](https://github.com/frier17/python_ubl_impl).
 
 ## Authors
+Initial design work and code base created by:
+* **A. Friday** - *Initial work* - [frier17](https://github.com/frier17)
 
-* **Aniefiok Friday** - *Initial work* - [frier17](https://github.com/frier17)
-
-See also the list of [contributors](https://github.com/your/project/) who
+See also the list of [contributors](https://github.com/frier17/python_ubl_impl) who
 participated in this project.
 
 ## License
