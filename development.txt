@@ -1,7 +1,7 @@
 [UNIVERSAL BUSINESS LANGUAGE]
 This application is python implementation of the UBL 2.0 specification for
 business documents and processes. The core ideas of the this project are
-geared towards building faster business application for web, mobile, and others.
+geared towards building faster business application for web, mobile etc.
 
 [DESIGN AND IMPLEMENTATION CONSIDERATIONS]
 The abstract base types of the UBL will be implemented using the abc.ABC
@@ -45,20 +45,6 @@ This will enable various businesses simply specify their parameters,
 attributes to ignore or hide, compulsory fields etc. and have the application
 create corresponding datatypes using the type('BSOType', (), {}) to make
 instances or classes.
-
-[FIELD LIST]
-Each Component type may have a field list which defines all possible tags or
-attributes of the component. Permissions or restrictions of these fields can
-be hardcoded into properties or defined by expressions.
-Example:
- # in python script
- # define the allowed fields as list or named tuple
- _fields = (field_1, field_2, field_3)
-
-@property
-def field_1(self):
- # do processing applying rules
- return self._field.named_field
 
 [STANDARD BUSINESS SERVICES]
 "Every business services consist of activities performed at a cost and
@@ -214,8 +200,60 @@ fixed values and keys. The keys can serve as a lookup to trace source of
 error during debugging. This system will enable centralized location of all
 messages
 
-[DOCUMENT GENERATOR]
-The BusinessDocumentPrototype.produce_document(document) can be called in a
+[DOCUMENT GENERATOR] - IMPLEMENTED
+The BusinessDocumentFactory.produce_document(document) can be called in a
 for loop or similar iterator to generate multiple documents. By keeping a
 reference of document generated as instance, future request for that document
  can simply be copied instead of created.
+
+[PARSING XML]
+The application can be used to parse xml document into python dictionary or
+equivalent data structure. Existing parsers convert xml to dict enabling
+developers access information in a dictionary-like manner. BSO was designed
+to enable application developer access fields as attributes or items of a
+collection abstracting the xml parent-child nested structure. Future edition
+can incorporate a more elaborate scheme as described below:
+Example
+order = Order(definitions)
+order.get('field', None)
+order.set('field', value)
+order.field
+order.field.__meta__ # returns tha xml metadata for this field
+order.field.__parent__ # return the parent node of this field or None if root
+order.field.__children__ # return children nodes of this field as a list
+
+[CACHING DOCUMENT] - IMPLEMENTED
+Using metaclasses or a cache manager that relies on the weakref value
+dictionary, business documents can be created and cached by the prototyping
+class or factory. This will enable objects to be removed only during garbage
+collection and created only if non existent in memory/cache.
+
+[EXTENDING DOCUMENT FIELDS] - IMPLEMENTED
+The UBL document library specifies the fields of each electronic document.
+The implementation of this specification may not meet requirement of various
+businesses. The need to extend a document field thus arises. One approach
+will entail simply patching extra fields to the base document definition.
+Another approach, the one adopted herein, uses an __ext class variable as an
+expansion slot to which extra fields and their corresponding values or
+definitions can be appended to a document. Having this attribute will enable
+the various classes to expand functionality to meet specific business needs
+
+[ASSOCIATING DOCUMENT COMPONENT]
+The various document may have relationship fields that references other
+components or documents. These fields are generally depicted by the asbie
+type which is lazily evaluated. In essence, the actual component that is
+reference may not be known ahead or can be set after creating document. This
+lazy evaluation allows for flexible and easier control of the document life
+cycle also enabling document designers swap components dynamically by
+changing the target of the association. asbie types simply serve as 'blank'
+association objects or as dynamic reference pointers.
+
+[DOCUMENT WRITER]
+This feature will convert the various document templates into designated
+electronic formats such as DOCX, PDF etc.
+
+[DOCUMENT CONFIGURATION]
+The UBL document fields and default values may be specified in a config file
+which the application can load dynamically in future versions. Base or common
+ attributes such as uuid, profile_id etc can be defined as attributes of the
+ BusinessDocument base class
