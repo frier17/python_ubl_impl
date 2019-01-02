@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from business_systems.bso import business_service
+from ubl.business_systems import business_service
 
 
 class Catalogue(business_service, OrderedDict):

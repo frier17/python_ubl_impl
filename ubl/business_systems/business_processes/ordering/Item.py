@@ -1,4 +1,4 @@
-from business_systems.bso import business_service
+from ubl.business_systems import business_service
 
 
 class Item(business_service):
