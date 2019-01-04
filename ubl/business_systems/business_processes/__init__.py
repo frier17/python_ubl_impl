@@ -3,9 +3,9 @@ Business process package defines routine services provided by a business.
 The listed processes are used to manage the activities associated with a
 given business service.
 The design implemented of all processes are derived from the definition of
-business service by Aniefiok Friday.
-Every business service consists of activities performed at a cost and
-requires a feedback (proof of transaction) to participants or parties involved
+business service by Aniefiok Friday:
+"Every business service consists of activities performed at a cost and
+requires a feedback (proof of transaction) to participants or parties involved"
 
 Implement the business processes such as procurement, call to tender etc.
 defined in the UBL 2.1
@@ -25,10 +25,29 @@ Section 2.18, “Intermodal Freight Management”
 Section 2.16, “Freight Status Reporting”
 Section 2.17, “Certification of Origin of Goods”
 adopted from http://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.html
+The named business operations are provided as corresponding service module
+mixins. These mixins would define the features available in defined services.
+
+Mixins to include:
+1	TenderingMixin
+2	CatalogueMixin
+3	QuotationMixin
+4	OrderingMixin
+5	FulfilmentMixin
+6	BillingMixin
+7	FreightBillingMixin
+8	UtilityBillingMixin
+9	PaymentNotificationMixin
+10	CollaborativePlanningForecastingandReplenishmentMixin
+11	VendorManagedInventoryMixin
+12	InternationalFreightManagementMixin
+13	IntermodalFreightManagementMixin
+14	FreightStatusReportingMixin
+15	CertificationofOriginofGoodsMixin
+
 """
 
 from abc import ABC, abstractmethod
-from functools import partial
 
 
 class Service(ABC):
@@ -46,7 +65,7 @@ class Service(ABC):
     def perform_task(self, *, document, callbacks, flags, conditions):
         """
         The base operation of a business activity
-        :param document: A business document provided to commerce an
+        :param document: A business document provided to commence an
         activity
         :param callbacks:
         :param conditions:
@@ -101,8 +120,14 @@ class Service(ABC):
 
 
 class BusinessService(Service):
-    # @todo: define methods common to all processes/services
+
+    def perform_task(self, *, document, callbacks, flags, conditions):
+        super().perform_task(document=document, callbacks=callbacks,
+                             flags=flags, conditions=conditions)
+
     def __new__(cls, *args, **kwargs):
+        # creating new object of the Business service should be through
+        # factory methods
         pass
 
     def __init__(self):
@@ -113,47 +138,51 @@ class BusinessService(Service):
         # be created only through factories
         pass
 
-    def perform_task(
-            self,
-            source_document=None,
-            parent_task=None,
-            conditions=None,
-            flags=None
-    ):
-        pass
 
 
-class BillingServiceMixin:
-    # @todo: define methods only accessible in Billing service
+class BillingMixin:
+    """
+    Define the common behaviours of all billing services: self billling,
+    billing with credit note, billing with debit note etc. as defined in the
+    UBL 2.1 specification
+
+    receive invoice
+    send account response
+    receive credit note
+    receive account response
+    raise credit note
+    raise invoice
+
+    """
     __slots__ = ()
 
 
-class CatalogueServiceMixin:
+class CatalogueMixin:
     __slots__ = ()
 
 
-class CertificateOfGoodsServiceMixin:
+class CertificateOfGoodsMixin:
     __slots__ = ()
 
 
-class ForecastingServiceMixin:
+class ForecastingMixin:
     __slots__ = ()
 
 
-class InternationalFreightServiceMixin:
+class InternationalFreightMixin:
     def __init__(self):
         super().__init__()
 
 
-class IntermodalFreightServiceMixin:
+class IntermodalFreightMixin:
     __slots__ = ()
 
 
-class FreightBillingServiceMixin:
+class FreightBillingMixin:
     __slots__ = ()
 
 
-class FulfilmentServiceMixin:
+class FulfilmentMixin:
     __slots__ = ()
 
 
@@ -161,27 +190,27 @@ class InventoryMixin:
     __slots__ = ()
 
 
-class OrderingServiceMixin:
+class OrderingMixin:
     __slots__ = ()
 
 
-class PaymentNotificationServiceMixin:
+class PaymentNotificationMixin:
     __slots__ = ()
 
 
-class PaymentServiceMixin:
+class PaymentMixin:
     __slots__ = ()
 
 
-class InventoryPlanningServiceMixin:
+class InventoryPlanningMixin:
     __slots__ = ()
 
 
-class InventoryReplenishmentServiceMixin:
+class InventoryReplenishmentMixin:
     __slots__ = ()
 
 
-class TenderingServiceMixin:
+class TenderingMixin:
     __slots__ = ()
 
     def prepare_prior_notice(self, *, document, callbacks, flags, conditions):
@@ -234,9 +263,9 @@ class TenderingServiceMixin:
         pass
 
 
-class UtilityBillingServiceMixin:
+class UtilityBillingMixin:
     __slots__ = ()
 
 
-class QuotationServiceMixin:
+class QuotationMixin:
     __slots__ = ()

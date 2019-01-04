@@ -33,15 +33,49 @@ Python 3.6 or later
 Pytest test runner
 Behave test runner
 
+### Usage
+
+This project was designed to provide the following services for application
+developers:
+
++ Enable developers design and develop business application which are
+compliant with the UBL specification
++ Provide a python package or implementation of the UBL specification that
+will enable fast and easy integration of the UBL specification
++ Serve as a foundational work in building business application that uses
+clearly defined schemas or business objects in communicating between several
+processes
++ Provide an efficient means of communicating business, assets, processes and
+ services in a widely accepted specification
++ Provide a guideline for database schemas and objects which are derived from
+ UBL specification
+
+This project may be used in various python framework or extended to suit
+desired python framework. Current implementation provide most of the UBL
+specifications as simple Python objects with attributes set to the same name
+(using a naming convention) to ease mapping of existing document types to
+implemented Python business document object. Implemented business document
+objects may be extended using the provided hooks (**\_\_extension\_\_,
+\_\_meta\_\_, \_\_registry\_\_, \_\_annotations\_\_, and  \_\_desc\_\_**)
+
+The UBL defined documents and business components (BEIE, ASBIE etc.) have  a
+large list of attributes matching to data.
+These fields can be configured dynamically or statically from a configuration
+ file. This will enable various businesses simply specify their parameters,
+ attributes to ignore or hide, compulsory fields etc. and have the
+ application create corresponding datatypes using the Python type function (e
+ .g:  **type('BSOType', bases, members)** ) to make dynamic classes.
+
 ### Installing
 
 Developers will be able to download the package using pip command:
 pip install python_ubl_impl
 
 
-## Running the tests
+## Tests
 
-All tests are in the tests directory. Behave tests are saved in the features
+All project tests are saved in the tests directory. Behave tests are saved in
+ the features
 directory while functional tests are in the unittest directory.
 
 Behave tests were written with the python behave framework as the target test

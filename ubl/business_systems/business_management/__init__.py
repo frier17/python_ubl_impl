@@ -7,7 +7,7 @@ business process
 class TenderManagement:
     """
     Manage the life cycle of a tender or call for tender.
-    By adopting a management class, various operations by the tendering process will not need to call different tender
+    By adopting a business_management class, various operations by the tendering process will not need to call different tender
     objects directly
     """
 

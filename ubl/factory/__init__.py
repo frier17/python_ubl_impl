@@ -29,7 +29,6 @@ from weakref import WeakValueDictionary
 from ubl.components.ccts import BusinessDocument
 from ubl.components import Documents, Schemas, BusinessProcesses as Bp
 from ubl.exceptions import DocumentTypeError
-from ubl.utils import Singleton
 
 
 __all__ = (
@@ -128,7 +127,7 @@ class BusinessDocumentFactory:
         self._schema = None
 
     def __init_subclass__(self, *args, **kwargs):
-        raise Exception('Document Factory not to be extended')
+        raise RuntimeError('Document Factory not to be extended')
 
     @classmethod
     def produce_document(cls, document):
