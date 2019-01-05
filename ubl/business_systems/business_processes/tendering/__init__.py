@@ -1,14 +1,4 @@
 from abc import abstractmethod
-"""
-ContractAuthority
-ContractNoticeManagement
-FinancialGurantyCertificate
-Tender
-TendererQualification
-TendererQualificationResponse
-TenderManagement
-TenderReceipt
-"""
 
 
 class ContractingInformationMixin:
@@ -141,4 +131,21 @@ class TenderAwardPublicationMixin:
 
     @abstractmethod
     def publish_contract_award_notice(self, *args, **kwargs):
+        pass
+
+
+class FinancialGuaranteeCertificate:
+    # GUARANTEE DEPOSIT
+    __slots__ = ()
+
+    @abstractmethod
+    def get_guarantee_from_financial_institution(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def submit_certificate(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def receive_guarantee_certificate(self, *args, **kwargs):
         pass
