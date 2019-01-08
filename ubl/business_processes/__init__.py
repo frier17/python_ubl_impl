@@ -47,7 +47,7 @@ Mixins to include:
 
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 class Payable(ABC):
@@ -68,9 +68,6 @@ class BusinessService(Service, Payable):
     def __new__(cls, *args, **kwargs):
         # creating new object of the Business service should be through
         # factory methods
-        pass
-
-    def __init__(self):
         pass
 
     def __init_subclass__(self, *args, **kwargs):

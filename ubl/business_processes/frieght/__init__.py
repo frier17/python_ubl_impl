@@ -1,5 +1,7 @@
 from abc import abstractmethod
-from ubl.business_systems.business_processes import BusinessService
+
+from ubl.business_processes import BusinessService
+
 
 class FreightProcessMixin:
     # FREIGHT MANAGEMENT:INITIATE FREIGHT PROCESS

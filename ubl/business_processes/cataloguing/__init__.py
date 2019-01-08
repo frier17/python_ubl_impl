@@ -1,6 +1,7 @@
-from collections import OrderedDict
 from abc import abstractmethod
-from ubl.business_systems.business_processes import BusinessService
+from collections import OrderedDict
+
+from ubl.business_processes import BusinessService
 
 
 class Catalogue(OrderedDict):
