@@ -50,80 +50,20 @@ Mixins to include:
 from abc import ABC, abstractmethod
 
 
+class Payable(ABC):
+    pass
+
+
 class Service(ABC):
 
     # define the various user parties
     buyer_parties = None
     seller_parties = None
     publishers = None
-
-    @abstractmethod
-    def create_document(self, *, document_type, flags, conditions):
-        pass
-
-    @abstractmethod
-    def perform_task(self, *, document, callbacks, flags, conditions):
-        """
-        The base operation of a business activity
-        :param document: A business document provided to commence an
-        activity
-        :param callbacks:
-        :param conditions:
-        :param flags: phase or process can be captured in flags
-        """
-        target_document = None
-        next_task = None
-        # yield or return. If function is a coroutine use @prime_coroutine
-        # the return value could be used to set state.
-        # next task can be set in the TaskSequenceQueue or returned
-
-    @abstractmethod
-    def publish(self, *, document, flags, conditions):
-        # the flags can be used to determine how the tender will be published
-        # E.g publish tender in buyer's profile
-        # publish can be composed function taking other callbacks to run
-        pass
-
-    @abstractmethod
-    def evaluate_document(self, *, document, flags, conditions):
-        pass
-
-    @abstractmethod
-    def request_document(self, *, document, flags, conditions):
-        pass
-
-    @abstractmethod
-    def receive_document(self, *, document, callbacks, flags, conditions):
-        # callbacks can be document validators
-        pass
-
-    @abstractmethod
-    def request_action(self, *, task, flags, conditions):
-        pass
-
-    @abstractmethod
-    def respond_action(self, *, task, flags, conditions):
-        pass
-
-    @abstractmethod
-    def terminate_task(self, *, document, callbacks, flags, conditions):
-        # document parameter can be initial state before terminating
-        pass
-
-    @abstractmethod
-    def validate_document(self, *, document, callbacks, flags, conditions):
-        pass
-
-    @abstractmethod
-    def submit_document(self, *, document, callbacks, flags, conditions):
-        pass
+    activity = None
 
 
-class BusinessService(Service):
-
-    def perform_task(self, *, document, callbacks, flags, conditions):
-        super().perform_task(document=document, callbacks=callbacks,
-                             flags=flags, conditions=conditions)
+class BusinessService(Service, Payable):
 
     def __new__(cls, *args, **kwargs):
         # creating new object of the Business service should be through
@@ -138,6 +78,13 @@ class BusinessService(Service):
         # be created only through factories
         pass
 
+    @classmethod
+    def initialize(cls, *args, **kwargs):
+        raise NotImplementedError
+
+
+class Transaction:
+    pass
 
 
 class BillingMixin:
