@@ -1,7 +1,8 @@
 import pytest
-from ubl.factory import BusinessDocumentFactory
-from ubl.components.ccts import BusinessDocument
-from ubl.components import ProcessRegistry, DocumentRegistry
+from ubl.business_document.components import ProcessRegistry, DocumentRegistry
+from ubl.business_document.factory import BusinessDocumentFactory
+
+from ubl.business_document.components.ccts import BusinessDocument
 
 """
 Test the following features:

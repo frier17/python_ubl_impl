@@ -80,136 +80,28 @@ class BusinessService(Service, Payable):
         raise NotImplementedError
 
 
-class Transaction:
+class BusinessParty(ABC):
     pass
 
 
-class BillingMixin:
+class Buyer(BusinessParty):
+    pass
+
+
+class Seller(BusinessParty):
+    pass
+
+
+class Supplier(BusinessParty):
     """
-    Define the common behaviours of all billing services: self billling,
-    billing with credit note, billing with debit note etc. as defined in the
-    UBL 2.1 specification
-
-    receive invoice
-    send account response
-    receive credit note
-    receive account response
-    raise credit note
-    raise invoice
-
+    A supplier may not necessarily be the manufacturer or final seller of
+    goods and items. Supplier may be middleman, however, for simplicity,
+    this implementation defines a supplier as the source or manufacturer who
+    may also be a seller. Seller may not be Supplier but Supplier can both
+    sell and supply goods and services.
     """
-    __slots__ = ()
+    pass
 
 
-class CatalogueMixin:
-    __slots__ = ()
-
-
-class CertificateOfGoodsMixin:
-    __slots__ = ()
-
-
-class ForecastingMixin:
-    __slots__ = ()
-
-
-class InternationalFreightMixin:
-    def __init__(self):
-        super().__init__()
-
-
-class IntermodalFreightMixin:
-    __slots__ = ()
-
-
-class FreightBillingMixin:
-    __slots__ = ()
-
-
-class FulfilmentMixin:
-    __slots__ = ()
-
-
-class InventoryMixin:
-    __slots__ = ()
-
-
-class OrderingMixin:
-    __slots__ = ()
-
-
-class PaymentNotificationMixin:
-    __slots__ = ()
-
-
-class PaymentMixin:
-    __slots__ = ()
-
-
-class InventoryPlanningMixin:
-    __slots__ = ()
-
-
-class InventoryReplenishmentMixin:
-    __slots__ = ()
-
-
-class TenderingMixin:
-    __slots__ = ()
-
-    def prepare_prior_notice(self, *, document, callbacks, flags, conditions):
-        # fallback on Service.prepare_documents(**kwargs)
-        pass
-
-    def publish_documents(self, *, buyers, flags, conditions):
-        # fallback on the Service.publish(**kwargs) to execute
-        # called for publish tender and publish prior information
-        # publish in buyer, publish contract etc. base on flags & conditions
-        pass
-
-    def prepare_notices(self, *, document, callbacks, flags, conditions):
-        pass
-
-    def validate_documents(self, *, document, callbacks, flags, conditions):
-        # validate contract notice doc.
-        # fallback on Service.validate_document(**kwargs)
-        pass
-
-    def receive_tenders(self, *, document, callbacks, flags, conditions):
-        # fallback on Service.receive_document(**kwargs)
-        pass
-
-    def call_for_tender(self, *, document, callbacks, flags, conditions):
-        # fallback on Service.request_document(**kwargs)
-        pass
-
-    def prepare_tender(self, *, document, callbacks, flags, conditions):
-        # fallback on Service.prepare_document(**kwargs)
-        pass
-
-    def receive_tender_invitation(self, *, document, callbacks, flags,
-                                  conditions):
-        # fallback on Service.receive_document(**kwargs)
-        pass
-
-    def request_invitation_response(self, *, document, callbacks, flags,
-                                    conditions):
-        # fallback on Service.request_action and Service.request_document
-        pass
-
-    def prepare_qualification_document(self, *, document, callbacks, flags,
-                                       conditions):
-        # fallback on Service.prepare_document(**kwargs)
-        pass
-
-    def submit_document(self, *, document, callbacks, flags, conditions):
-        # fallback on Service.submit_document
-        pass
-
-
-class UtilityBillingMixin:
-    __slots__ = ()
-
-
-class QuotationMixin:
-    __slots__ = ()
+class Transaction:
+    pass

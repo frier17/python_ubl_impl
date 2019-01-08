@@ -1,5 +1,6 @@
+# @todo: review and update
 """
-# Provide functions for managing the various types of notices for
+Provide functions for managing the various types of notices for
 business processes such as tender, awards, billing etc.
 """
 
