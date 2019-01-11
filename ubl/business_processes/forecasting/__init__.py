@@ -1,10 +1,48 @@
 from abc import abstractmethod
-
 from ubl.business_processes import BusinessService
 
 
+class ForecastingMixin:
+    __slots__ = ()
+
+    @abstractmethod
+    def send_revision(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def receive_exception(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def send_retail_event(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def receive_retail_event(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def send_product_activity(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def receive_sales_forecast(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def send_exception(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def resolve_exception(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def await_exception_notification(self, *args, **kwargs):
+        pass
+
+
 class EstablishForecastMixin:
-    # COLLABORATIVE PLANNING: FORECASTING & REPLENISHMENT: ESTABLISH RELATIONSHIP
     __slots__ = ()
 
     @abstractmethod
@@ -16,15 +54,7 @@ class EstablishForecastMixin:
         pass
 
     @abstractmethod
-    def send_revision(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
     def send_exception_criteria(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def receive_exception(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -35,6 +65,7 @@ class EstablishForecastMixin:
     def receive_revision(self, *args, **kwargs):
         pass
 
+
 class JointBusinessPlanningMixin:
     # COLLABORATIVE: CREATE JOINT BUSINESS PLAN
     __slots__ = ()
@@ -44,59 +75,48 @@ class JointBusinessPlanningMixin:
         pass
 
     @abstractmethod
-    def send_retail_event(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
     def receive_retail_event_revision(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def receive_trade_location_profile(self, *args, **kwargs):
+    def receive_tilp(self, *args, ** kwargs):
         pass
 
     @abstractmethod
-    def revise_trade_location_profile(self, *args, **kwargs):
+    def revise_tilp(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def send_TILP_revision(self, *args, **kwargs):
+    def send_tilp_revision(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def receive_TILP(self, *args, **kwargs):
+    def receive_tilp(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def send_TILP(self, *args, **kwargs):
+    def send_tilp(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def create_TILP(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def receive_retail_event(self, *args, **kwargs):
+    def create_tilp(self, *args, **kwargs):
         pass
 
     @abstractmethod
     def revise_retail_event(self, *args, **kwargs):
         pass
 
+
 class SalesForecastMixin:
     # COLLABORATIVE: CREATE SALES FORECAST
     __slots__ = ()
 
     @abstractmethod
-    def create_product_activity(self, *args, **kwargs):
+    def create_product_activity(self, *args, ** kwargs):
         pass
 
     @abstractmethod
-    def create_product_activity(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def send_product_activity(self, *args, **kwargs):
+    def create_product_activity(self, *args, ** kwargs):
         pass
 
     @abstractmethod
@@ -113,10 +133,6 @@ class SalesForecastMixin:
 
     @abstractmethod
     def send_sales_forecast(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def receive_sales_forecast(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -137,15 +153,7 @@ class ExceptionHandlingMixin:
     __slots__ = ()
 
     @abstractmethod
-    def wait_for_sales_forecast_exception_notification(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def send_exception(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def resolve_exception(self, *args, **kwargs):
+    def await_sales_forecast_exception_notification(self, *args, **kwargs):
         pass
 
 
@@ -154,7 +162,7 @@ class OrderForecastMixin:
     __slots__ = ()
 
     @abstractmethod
-    def receive_retail_product_activity(self, *args, **kwargs):
+    def receive_retail_and_product_activity(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -179,11 +187,7 @@ class ExceptionMonitorMixin:
     __slots__ = ()
 
     @abstractmethod
-    def ordering(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def wait_for_exception_notification(self, *args, **kwargs):
+    def process_order(self, *args, **kwargs):
         pass
 
 
@@ -218,26 +222,14 @@ class ForecastService(BusinessService, EstablishForecastMixin,
     def initialize(cls, *args, **kwargs):
         pass
 
-    def send_exception(self, *args, **kwargs):
-        super().send_exception(*args, **kwargs)
+    def await_sales_forecast_exception_notification(self, *args, **kwargs):
+        super().await_sales_forecast_exception_notification(*args, **kwargs)
 
-    def wait_for_sales_forecast_exception_notification(self, *args, **kwargs):
-        super().wait_for_sales_forecast_exception_notification(*args, **kwargs)
-
-    def resolve_exception(self, *args, **kwargs):
-        super().resolve_exception(*args, **kwargs)
-
-    def ordering(self, *args, **kwargs):
-        super().ordering(*args, **kwargs)
-
-    def wait_for_exception_notification(self, *args, **kwargs):
-        super().wait_for_exception_notification(*args, **kwargs)
+    def process_order(self, *args, **kwargs):
+        super().process_order(*args, **kwargs)
 
     def send_order_forecast_revision(self, *args, **kwargs):
         super().send_order_forecast_revision(*args, **kwargs)
-
-    def receive_order_forecast(self, *args, **kwargs):
-        super().receive_order_forecast(*args, **kwargs)
 
     def revise_order_forecast(self, *args, **kwargs):
         super().revise_order_forecast(*args, **kwargs)
@@ -245,89 +237,71 @@ class ForecastService(BusinessService, EstablishForecastMixin,
     def send_order_forecast(self, *args, **kwargs):
         super().send_order_forecast(*args, **kwargs)
 
-    def receive_retail_product_activity(self, *args, **kwargs):
-        super().receive_retail_product_activity(*args, **kwargs)
+    def receive_retail_and_product_activity(self, *args, **kwargs):
+        super().receive_retail_and_product_activity(*args, **kwargs)
 
-    def receive_revision(self, *args, **kwargs):
-        super().receive_revision(*args, **kwargs)
-
-    def review_and_resend_revision(self, *args, **kwargs):
-        super().review_and_resend_revision(*args, **kwargs)
-
-    def receive_exception(self, *args, **kwargs):
-        super().receive_exception(*args, **kwargs)
-
-    def send_exception_criteria(self, *args, **kwargs):
-        super().send_exception_criteria(*args, **kwargs)
-
-    def revise_exception(self, *args, **kwargs):
-        super().revise_exception(*args, **kwargs)
-
-    def send_revision(self, *args, **kwargs):
-        super().send_revision(*args, **kwargs)
-
-    def receive_exception_criteria(self, *args, **kwargs):
-        super().receive_exception_criteria(*args, **kwargs)
-
-    def create_sales_forecast(self, *args, **kwargs):
-        super().create_sales_forecast(*args, **kwargs)
-
-    def receive_sales_forecast_revision(self, *args, **kwargs):
-        super().receive_sales_forecast_revision(*args, **kwargs)
+    def receive_order_forecast(self, *args, **kwargs):
+        super().receive_order_forecast(*args, **kwargs)
 
     def send_sales_forecast(self, *args, **kwargs):
         super().send_sales_forecast(*args, **kwargs)
 
-    def receive_product_activity(self, *args, **kwargs):
-        super().receive_product_activity(*args, **kwargs)
-
     def create_product_activity(self, *args, **kwargs):
         super().create_product_activity(*args, **kwargs)
 
-    def send_product_activity(self, *args, **kwargs):
-        super().send_product_activity(*args, **kwargs)
+    def create_sales_forecast(self, *args, **kwargs):
+        super().create_sales_forecast(*args, **kwargs)
 
     def create_item_information_request(self, *args, **kwargs):
         super().create_item_information_request(*args, **kwargs)
 
+    def receive_sales_forecast_revision(self, *args, **kwargs):
+        super().receive_sales_forecast_revision(*args, **kwargs)
+
     def reuse_sales_forecast(self, *args, **kwargs):
         super().reuse_sales_forecast(*args, **kwargs)
-
-    def receive_sales_forecast(self, *args, **kwargs):
-        super().receive_sales_forecast(*args, **kwargs)
 
     def revise_sales_forecast(self, *args, **kwargs):
         super().revise_sales_forecast(*args, **kwargs)
 
-    def receive_retail_event(self, *args, **kwargs):
-        super().receive_retail_event(*args, **kwargs)
+    def receive_product_activity(self, *args, **kwargs):
+        super().receive_product_activity(*args, **kwargs)
 
-    def send_TILP_revision(self, *args, **kwargs):
-        super().send_TILP_revision(*args, **kwargs)
+    def receive_revision(self, *args, **kwargs):
+        super().receive_revision(*args, **kwargs)
 
-    def receive_TILP(self, *args, **kwargs):
-        super().receive_TILP(*args, **kwargs)
+    def revise_exception(self, *args, **kwargs):
+        super().revise_exception(*args, **kwargs)
 
-    def revise_trade_location_profile(self, *args, **kwargs):
-        super().revise_trade_location_profile(*args, **kwargs)
+    def send_exception_criteria(self, *args, **kwargs):
+        super().send_exception_criteria(*args, **kwargs)
 
-    def send_retail_event(self, *args, **kwargs):
-        super().send_retail_event(*args, **kwargs)
+    def review_and_resend_revision(self, *args, **kwargs):
+        super().review_and_resend_revision(*args, **kwargs)
+
+    def receive_exception_criteria(self, *args, **kwargs):
+        super().receive_exception_criteria(*args, **kwargs)
 
     def receive_retail_event_revision(self, *args, **kwargs):
         super().receive_retail_event_revision(*args, **kwargs)
 
-    def send_TILP(self, *args, **kwargs):
-        super().send_TILP(*args, **kwargs)
+    def receive_tilp(self, *args, **kwargs):
+        super().receive_tilp(*args, **kwargs)
 
-    def receive_trade_location_profile(self, *args, **kwargs):
-        super().receive_trade_location_profile(*args, **kwargs)
+    def revise_tilp(self, *args, **kwargs):
+        super().revise_tilp(*args, **kwargs)
+
+    def send_tilp(self, *args, **kwargs):
+        super().send_tilp(*args, **kwargs)
+
+    def send_tilp_revision(self, *args, **kwargs):
+        super().send_tilp_revision(*args, **kwargs)
+
+    def create_retail_event(self, *args, **kwargs):
+        super().create_retail_event(*args, **kwargs)
 
     def revise_retail_event(self, *args, **kwargs):
         super().revise_retail_event(*args, **kwargs)
 
-    def create_TILP(self, *args, **kwargs):
-        super().create_TILP(*args, **kwargs)
-
-    def create_retail_event(self, *args, **kwargs):
-        super().create_retail_event(*args, **kwargs)
+    def create_tilp(self, *args, **kwargs):
+        super().create_tilp(*args, **kwargs)

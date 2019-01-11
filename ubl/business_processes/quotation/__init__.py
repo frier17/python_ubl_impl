@@ -1,5 +1,4 @@
 from abc import abstractmethod
-
 from ubl.business_processes import BusinessService
 
 

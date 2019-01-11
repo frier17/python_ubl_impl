@@ -1,5 +1,4 @@
 from abc import abstractmethod
-
 from ubl.business_processes import BusinessService
 
 
@@ -70,8 +69,7 @@ class IntermediaryFulfilment(Fulfilment):
     pass
 
 
-class DispatchAdviceMixin:
-    # FULFILLMENT WITH DESPATCH ADVICE PROCESS
+class FulfilmentMixin:
     __slots__ = ()
 
     @abstractmethod
@@ -91,10 +89,6 @@ class DispatchAdviceMixin:
         pass
 
     @abstractmethod
-    def cancel_dispatch(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
     def receive_fulfillment_cancellation(self, *args, **kwargs):
         pass
 
@@ -106,17 +100,28 @@ class DispatchAdviceMixin:
     def receive_order_items(self, *args, **kwargs):
         pass
 
+
+class DespatchAdviceMixin:
+    __slots__ = ()
+
     @abstractmethod
-    def send_dispatch_advice(self, *args, **kwargs):
+    def accept_order(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def receive_dispatch_advice(self, *args, **kwargs):
+    def cancel_despatch(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def send_despatch_advice(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def receive_despatch_advice(self, *args, **kwargs):
         pass
 
 
 class ReceiptAdviceMixin:
-    # FULFILLMENT WITH RECEIPT ADVICE PROCESS
     __slots__ = ()
 
     @abstractmethod
@@ -135,52 +140,49 @@ class ReceiptAdviceMixin:
     def cancel_receipt_notification(self, *args, **kwargs):
         pass
 
+    @abstractmethod
+    def cancel_order(self, *args, **kwargs):
+        pass
 
-class FulfilmentService(BusinessService, DispatchAdviceMixin,
+    @abstractmethod
+    def change_order(self, *args, **kwargs):
+        pass
+
+
+class FulfilmentService(BusinessService, DespatchAdviceMixin,
                         ReceiptAdviceMixin):
     __slots__ = 'despatch_advice', 'fulfillment_cancellation', 'receipt_advice'
+
     @classmethod
     def initialize(cls, *args, **kwargs):
         pass
 
-    def receive_order_items(self, *args, **kwargs):
-        super().receive_order_items(*args, **kwargs)
-
-    def receive_dispatch_advice(self, *args, **kwargs):
-        super().receive_dispatch_advice(*args, **kwargs)
-
-    def receive_receipt_advice(self, *args, **kwargs):
-        super().receive_receipt_advice(*args, **kwargs)
-
-    def accept_items(self, *args, **kwargs):
-        super().accept_items(*args, **kwargs)
-
-    def check_status_of_items(self, *args, **kwargs):
-        super().check_status_of_items(*args, **kwargs)
-
-    def adjust_supply_status(self, *args, **kwargs):
-        super().adjust_supply_status(*args, **kwargs)
-
-    def send_receipt_advice(self, *args, **kwargs):
-        super().send_receipt_advice(*args, **kwargs)
-
-    def cancel_dispatch(self, *args, **kwargs):
-        super().cancel_dispatch(*args, **kwargs)
-
-    def send_dispatch_advice(self, *args, **kwargs):
-        super().send_dispatch_advice(*args, **kwargs)
-
-    def receive_fulfillment_cancellation(self, *args, **kwargs):
-        super().receive_fulfillment_cancellation(*args, **kwargs)
-
-    def adjust_order(self, *args, **kwargs):
-        super().adjust_order(*args, **kwargs)
+    def send_order_cancellation(self, *args, **kwargs):
+        super().send_order_cancellation(*args, **kwargs)
 
     def cancel_receipt_notification(self, *args, **kwargs):
         super().cancel_receipt_notification(*args, **kwargs)
 
-    def send_order_cancellation(self, *args, **kwargs):
-        super().send_order_cancellation(*args, **kwargs)
+    def change_order(self, *args, **kwargs):
+        super().change_order(*args, **kwargs)
+
+    def adjust_order(self, *args, **kwargs):
+        super().adjust_order(*args, **kwargs)
 
     def advise_buyer_of_status(self, *args, **kwargs):
         super().advise_buyer_of_status(*args, **kwargs)
+
+    def cancel_order(self, *args, **kwargs):
+        super().cancel_order(*args, **kwargs)
+
+    def cancel_despatch(self, *args, **kwargs):
+        super().cancel_despatch(*args, **kwargs)
+
+    def send_despatch_advice(self, *args, **kwargs):
+        super().send_despatch_advice(*args, **kwargs)
+
+    def accept_order(self, *args, **kwargs):
+        super().accept_order(*args, **kwargs)
+
+    def receive_despatch_advice(self, *args, **kwargs):
+        super().receive_despatch_advice(*args, **kwargs)
