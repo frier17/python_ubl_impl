@@ -30,7 +30,7 @@ class FreightMixin:
         pass
 
 
-class FreightProcessMixing:
+class InitiateFreightMixing:
     __slots__ = ()
 
     @abstractmethod
@@ -38,7 +38,7 @@ class FreightProcessMixing:
         pass
 
     @abstractmethod
-    def receive_bill_of_landing(self, *args, **kwargs):
+    def receive_bill_of_lading(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -46,7 +46,7 @@ class FreightProcessMixing:
         pass
 
     @abstractmethod
-    def send_bill_of_landing(self, *args, **kwargs):
+    def send_bill_of_lading(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -54,7 +54,7 @@ class FreightProcessMixing:
         pass
 
     @abstractmethod
-    def transport_goods_items_to_delivery_party(self, *args, **kwargs):
+    def transport_goods_to_delivery_party(self, *args, **kwargs):
         pass
 
 
@@ -64,7 +64,6 @@ class FreightStatusReportMixin:
     @abstractmethod
     def receive_status_request(self, *args, **kwargs):
         pass
-
 
 
 class CertificateOfOriginProcessMixin:
@@ -211,7 +210,7 @@ class TransportExecutionPlanMixin:
         pass
 
 
-class GoodsItemItinery:
+class GoodsItemItinerary:
     __slots__ = ()
 
     @abstractmethod
@@ -243,11 +242,12 @@ class TransportProgressStatusMixin:
         pass
 
 
-class FreightService(BusinessService, CertificateOfOriginProcessMixin,
-                     TransportProgressStatusMixin, FreightMixin,
-                     FreightProcessMixing, FreightStatusReportMixin,
-                     GoodsItemItinery, IntermodalFreightMixin,
-                     TransportExecutionPlanMixin, TransportServiceMixin ):
+class InitiateFreightService(BusinessService, CertificateOfOriginProcessMixin,
+                             TransportProgressStatusMixin, FreightMixin,
+                             InitiateFreightMixing, FreightStatusReportMixin,
+                             GoodsItemItinerary, IntermodalFreightMixin,
+                             TransportExecutionPlanMixin,
+                             TransportServiceMixin):
 
     __slots__ = 'freight_invoice', 'forwarding_instruction', \
                 'bill_of_lading', 'waybill', 'transportation_status', \
@@ -314,14 +314,14 @@ class FreightService(BusinessService, CertificateOfOriginProcessMixin,
     def request_logistic_service(self, *args, **kwargs):
         super().request_logistic_service(*args, **kwargs)
 
-    def receive_bill_of_landing(self, *args, **kwargs):
-        super().receive_bill_of_landing(*args, **kwargs)
+    def receive_bill_of_lading(self, *args, **kwargs):
+        super().receive_bill_of_lading(*args, **kwargs)
 
-    def send_bill_of_landing(self, *args, **kwargs):
-        super().send_bill_of_landing(*args, **kwargs)
+    def send_bill_of_lading(self, *args, **kwargs):
+        super().send_bill_of_lading(*args, **kwargs)
 
-    def transport_goods_items_to_delivery_party(self, *args, **kwargs):
-        super().transport_goods_items_to_delivery_party(*args, **kwargs)
+    def transport_goods_to_delivery_party(self, *args, **kwargs):
+        super().transport_goods_to_delivery_party(*args, **kwargs)
 
     def receive_waybill(self, *args, **kwargs):
         super().receive_waybill(*args, **kwargs)

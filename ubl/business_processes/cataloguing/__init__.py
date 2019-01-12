@@ -125,7 +125,6 @@ class CatalogueDeleteMixin:
 
 
 class PunchoutSourcingMixin:
-    # PUNCHOUT SOURCING PROCESS
     __slots__ = ()
 
     @abstractmethod

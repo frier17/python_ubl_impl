@@ -2,7 +2,6 @@ from abc import abstractmethod
 from ubl.business_processes import BusinessService
 
 
-@abstractmethod
 class BillingMixin:
     __slots__ = ()
 
@@ -160,7 +159,7 @@ class PaymentStatementMixin:
         pass
 
 
-class BillingService(BusinessService, BillingMixin,BillingWithDebitNoteMixin,
+class BillingService(BusinessService, BillingMixin, BillingWithDebitNoteMixin,
                      FreightBillingMixin, PaymentNotificationMixin,
                      PaymentReminderMixin, PaymentStatementMixin,
                      SelfCreditNoteBillingMixin, UtilityBillingMixin):
@@ -257,4 +256,3 @@ class BillingService(BusinessService, BillingMixin,BillingWithDebitNoteMixin,
 
     def notify_payee(self, *args, **kwargs):
         super().notify_payee(*args, **kwargs)
-
