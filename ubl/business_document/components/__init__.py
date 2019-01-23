@@ -1,11 +1,11 @@
 import itertools
 from collections import namedtuple, Iterable
 from enum import unique, IntFlag
-
 from ubl.business_document.components.ccts import BusinessDocument
 from ubl.business_document.components.ccts import CodeType, AmountType, \
     BinaryObjectType, AssociatedBusinessEntity, DateTimeType, NumericType, \
     TextType, MeasureType, QuantityType, IdentifierType, IndicatorType, NameType
+from ubl.business_processes import ProcessRegistry
 
 
 @unique
@@ -1867,41 +1867,6 @@ class DocumentRegistry(IntFlag):
     UTILITY_STATEMENT = 307
     WAYBILL = 311
     AWARDED_NOTIFICATION = 313
-
-
-@unique
-class ProcessRegistry(IntFlag):
-    ANY_COLLABORATION = 2
-    BILLING = 3
-    CATALOGUE = 5
-    CERTIFICATE_OF_ORIGIN_OF_GOODS = 7
-    CHANGES_TO_THE_ARTICLE_CATALOGUE = 11
-    CHANGES_TO_THE_ITEM_CATALOGUE = 13
-    COLLABORATIVE_PLANNING = 17
-    CREATE_CATALOGUE = 19
-    CYCLIC_REPLENISHMENT_PROGRAM = 23
-    DELETE_CATALOGUE = 29
-    FORECASTING = 31
-    FREIGHT_BILLING = 37
-    FREIGHT_MANAGEMENT = 41
-    FREIGHT_STATUS_REPORTING = 43
-    FULFILLMENT = 47
-    FULFILMENT_WITH_DESPATCH_ADVICE = 53
-    FULFILMENT_WITH_RECEIPT_ADVICE = 59
-    INITIAL_STOCKING_OF_THE_AREA_BY_PRODUCER = 61
-    INTERMODAL_FREIGHT_MANAGEMENT = 67
-    ORDERING = 71
-    PAYMENT_NOTIFICATION = 73
-    PERMANENT_REPLENISHMENT = 79
-    PRICE_ADJUSTMENTS = 83
-    QUOTATION = 89
-    REPLENISHMENT = 97
-    TENDERING = 101
-    TRANSFER_OF_BASE_ITEM_CATALOGUE = 103
-    UPDATE_CATALOGUE_ITEM_SPECIFICATION = 107
-    UPDATE_CATALOGUE_PRICING = 109
-    UTILITY_BILLING = 113
-    VENDOR_INVENTORY = 127
 
 
 @unique

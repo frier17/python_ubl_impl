@@ -2,9 +2,9 @@ from enum import IntFlag
 
 import pytest
 from ubl.business_document.components import ABIERegistry, BIERegistry, \
-    DocumentRegistry, ComponentRegistry, ProcessRegistry, Components, \
+    DocumentRegistry, ComponentRegistry, Components, \
     Documents, Schemas
-
+from ubl.business_processes import ProcessRegistry
 from ubl.business_document.components.ccts import CodeType, AmountType, \
     AssociatedBusinessEntity, DateTimeType, NumericType, TextType, \
     MeasureType, QuantityType, IdentifierType, IndicatorType, NameType

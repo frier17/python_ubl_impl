@@ -26,13 +26,12 @@ from collections import OrderedDict
 from datetime import datetime
 from hashlib import sha512
 from weakref import WeakValueDictionary
-
 from ubl.business_document.components import Documents, Schemas,  \
     BusinessProcesses as Bp
-
 from ubl.business_document.components.ccts import BusinessDocument
 from ubl.exceptions import DocumentTypeError
 from ubl.utils import Singleton
+
 
 __all__ = (
     'BusinessDocumentFactory',

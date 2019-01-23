@@ -1,5 +1,6 @@
 import pytest
-from ubl.business_document.components import ProcessRegistry, DocumentRegistry
+from ubl.business_document.components import DocumentRegistry
+from ubl.business_processes import ProcessRegistry
 from ubl.business_document.factory import BusinessDocumentFactory
 
 from ubl.business_document.components.ccts import BusinessDocument
