@@ -89,7 +89,8 @@ class DocumentRevisions:
 
     @classmethod
     def set_revision(cls, key, value):
-        stamped_key = sha512(datetime.utcnow() + key).hexdigest()
+        stamped_key = sha512(str(datetime.utcnow()).encode() +
+                             str(key).encode()).hexdigest()
         cls._cache[stamped_key] = value
 
 
