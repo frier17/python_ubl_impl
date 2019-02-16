@@ -222,10 +222,10 @@ class PunchoutSourcing(Enum):
 
 
 class QuotationProcess(Enum):
-    SEND_REQUEST_FOR_QUOTATION = bp(ProcessRegistry.QUATATION, 347, 1041)
-    RECEIVE_REQUEST_FOR_QUOTATION = bp(ProcessRegistry.QUATATION, 349, 1047)
-    SEND_QUOTATION = bp(ProcessRegistry.QUATATION, 353, 1059)
-    RECEIVE_QUOTATION = bp(ProcessRegistry.QUATATION, 359, 1077)
+    SEND_REQUEST_FOR_QUOTATION = bp(ProcessRegistry.QUOTATION, 347, 1041)
+    RECEIVE_REQUEST_FOR_QUOTATION = bp(ProcessRegistry.QUOTATION, 349, 1047)
+    SEND_QUOTATION = bp(ProcessRegistry.QUOTATION, 353, 1059)
+    RECEIVE_QUOTATION = bp(ProcessRegistry.QUOTATION, 359, 1077)
 
 
 class OrderingProcess(Enum):
