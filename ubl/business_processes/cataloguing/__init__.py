@@ -153,17 +153,18 @@ class CatalogueService(BusinessService, CatalogueDeleteMixin,
                 'catalogue_pricing_update', 'catalogue_deletion', 'quotation'
 
     def __init__(self):
-        self.catalogue = None
-        self.catalogue_deletion = None
-        self.application_response = None
-        self.catalogue_request = None
-        self.catalogue_item_specification_update = None
-        self.quotation = None
-        self.catalogue_pricing_update = None
+        raise RuntimeError('Class %s should not be initialize' %
+                           self.__class__.__name__)
 
     @classmethod
     def initialize(cls, *args, **kwargs):
-        pass
+        cls.catalogue = None
+        cls.catalogue_deletion = None
+        cls.application_response = None
+        cls.catalogue_request = None
+        cls.catalogue_item_specification_update = None
+        cls.quotation = None
+        cls.catalogue_pricing_update = None
 
     def initiate_a_punchout_session(self, *args, **kwargs):
         super().initiate_a_punchout_session(*args, **kwargs)
