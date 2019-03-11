@@ -548,7 +548,6 @@ class BusinessParty(ABC):
 class BusinessAction:
     # record the effect of a given action. Action effect are set by
     # dedicated signal handlers
-    action = None
     provisional_effect = None
     final_effect = None
     counter_effect = None
@@ -561,21 +560,34 @@ class BusinessAction:
         pass
 
     @classmethod
-    def rollback(cls, action=None, process=None, previous_state=None):
+    def rollback(cls, action=None, process=None, previous=None):
         """
         This reverses the current state of the business service to specified
-        previous state or most recent state (if previous_state is not
+        previous state or most recent state (if previous is not
         provided). The service type is identified by the enum process
         The function executed is identified by the action parameter which is
         a function hash of the bespoke function to execute.
-        The previous_state references a state key which can be used to
+        The previous references a state key which can be used to
         retrieve all database records e.g key maps to SQL query or function
         that executes a query.
+        :param action: the service function that performs the rollback procedure
+        :param process: the named process which is being rolled back or which
+        contains the activity that is reversed
+        :param previous: the previous state of the business relationship
+        :return: True if the operation was successful
         """
         pass
 
     @classmethod
-    def push_forward(cls, action=None, process=None, previous_state=None):
+    def push_forward(cls, action=None, process=None, state=None):
+        """
+        Attempts to execute a business action with corresponding change of state
+        :param action: the action to be executed to have new business state
+        :param process: the named process which is being executed or which
+        contains the activity that is being executed
+        :param state: the current state before or at execution
+        :return: None
+        """
         pass
 
 
