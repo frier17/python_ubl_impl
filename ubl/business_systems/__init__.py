@@ -7,6 +7,7 @@ from hashlib import sha512
 from datetime import datetime
 from ubl.utils import Singleton
 from collections import namedtuple, Sequence, Iterable
+from enum import IntFlag
 
 
 class Payable(ABC):
@@ -272,14 +273,7 @@ class BusinessOperations:
         pass
 
 
-class BusinessService(ABC):
-
-    @classmethod
-    def initialize(cls, *args, **kwargs):
-        # initialize class or instance variables in sub classes
-        # initialize the associated _tasks and specify the business _process
-        raise NotImplementedError
-
+class Service(ABC):
     @classmethod
     @abstractmethod
     def request_action(cls, action=None, requester=None, performer=None,
@@ -352,46 +346,202 @@ class BusinessService(ABC):
         pass
 
 
+class BusinessService(Service):
+
+    @classmethod
+    def perform_action(cls, action=None):
+        super().perform_action(action)
+
+    @classmethod
+    def action_outcome(cls, action=None, response=None, outcome=None):
+        super().action_outcome(action, response, outcome)
+
+    @classmethod
+    def request_action(cls, action=None, requester=None, performer=None,
+                       action_params=None):
+        super().request_action(action, requester, performer, action_params)
+
+    @classmethod
+    def reply_action(cls, action=None, reply=None):
+        super().reply_action(action, reply)
+
+    @classmethod
+    def initialize(cls, *args, **kwargs):
+        # initialize class or instance variables in sub classes
+        # initialize the associated _tasks and specify the business _process
+        raise NotImplementedError
+
+
+class BusinessActor(IntFlag):
+    """
+    Specify the various user role types for the business transaction protocol
+    which deals with business relations between disparate entities that may
+    implement their processes independently. See BTP protocol example for
+    more information (https://www.oasis-open.org/committees/business
+    -transaction/documents/primer/Primerhtml/BTP%20Primer%20D1%2020020602
+    .html#_Toc10820998).
+    Target systems or implementation can map desired user types to the named
+    roles or actors.
+    """
+    COORDINATOR = 2
+    SUB_COORDINATOR = 3
+    COMPOSER = 5
+    SUB_COMPOSER = 7
+    INFERIOR = 11
+    SUPERIOR = 13
+    DECIDER = 17
+    TERMINATOR = 19
+    INITIATOR = 23
+
+
 class BusinessParty(ABC):
-    # may be a buyer or seller and identified by BusinessPartyEnum
     """
     BusinessParty represents the various business system actors
     """
     _actor = None
-    _user = None
+
+    class User:
+        __slots__ = 'username', 'user_id', 'email', 'role', 'actor'
+
+        @classmethod
+        def get(cls, attribute):
+            attribute = str(attribute)  # force attribute to string type
+            if attribute in cls.__slots__:
+                return getattr(cls, attribute)
+            else:
+                return getattr(cls.actor, attribute, None)
 
     @property
-    def party(self):
-        return NotImplemented
+    def role(self):
+        return self.User.get('role')
 
-    def cancel(self, *args, **kwargs):
+    @abstractmethod
+    def cancel(self, operation, action=None, callback=None):
+        """
+        Performs a cancellation of a business activity between the actors.
+        This method will raise the request to cancel and perform necessary
+        routine to cancel set operation
+        :param operation: business operation to cancel
+        :param action: callable object. if provided, the action
+        attempts to perform the cancellation routine for the specified
+        operation. The action function may take varied parameter by using the
+        functools.partial function
+        :param callback: function to call if operation was cancelled. The
+        callback function takes only the name of operation. Extra parameters
+        can be passed using the functools.partial function
+        :return: True if successful
+        """
         pass
 
-    def confirm(self, *args, **kwargs):
+    @abstractmethod
+    def confirm(self, operation, action=None, callback=None):
+        """
+        Confirms the actor's or entity's acceptance to provide a business
+        service. This function should be called to indicate to other
+        participants the specified actor will comply to business activity
+        requirements or provide the requested service.
+        The instance of BusinessParty is assumed to be explicitly responsible
+        for the action being confirmed.
+        :param operation: the business operation being confirmed
+        responsible for the operation
+        :param action: function to perform the confirmation routine
+        :param callback: function to call if operation is confirmed
+        :return: True if successful
+        """
         pass
 
-    def initiate(self, *args, **kwargs):
+    @abstractmethod
+    def initiate(self, operation, action=None, parties=None):
+        """
+        Initiate a business operation with the given parameters
+        :param operation:
+        :param action:
+        :param parties: business entities invited or participating
+        operation
+        :return: None
+        """
         pass
 
-    def enroll(self, *args, **kwargs):
+    @abstractmethod
+    def enroll(self, operation, action=None):
+        """
+        This method enables the business party to enroll into an operation it
+        has been invited to
+        :param operation: The business operation being enrolled into
+        :param action: The method performing the enrollment routine.
+        :return: True if successful
+        """
         pass
 
-    def resign(self, *args, **kwargs):
+    @abstractmethod
+    def resign(self, operation, action=None):
+        """
+        Attempts to terminate a business party's role in a given operation.
+        :param operation: the business operation being resigned from
+        :param action: the function or method to perform the resignation routine
+        :return: True if successful
+        """
         pass
 
-    def prepare(self, *args, **kwargs):
+    @abstractmethod
+    def prepare(self, operation, action=None):
+        """
+        Prepare all necessary information for a business operation without
+        necessarily executing the operation. Information produced and stored
+        may be used later in executing the operation.
+        :param operation: the business operation being prepared for
+        :param action: the function that performs the preparation routine.
+        :return: list of prepared business documents
+        """
         pass
 
-    def confirm_contradiction(self, *args, **kwargs):
+    @abstractmethod
+    def confirm_contradiction(self, operation, action=None, callback=None):
+        """
+        Mark a business operation has having contradictions or violating
+        agreements.
+        :param operation: the business operation
+        :param action: the function performing the contradiction routine
+        :param callback: the function to call if the contradiction was valid
+        :return: contradiction object if successful
+        """
         pass
 
-    def terminate(self, *args, **kwargs):
+    @abstractmethod
+    def terminate(self, operation, reason=None, action=None, finalize=None):
+        """
+        Ends participation in a business operation or terminate the operation
+        if the operation is owned by entity.
+        :param operation: business operation
+        :param reason: reason for termination
+        :param action: function to perform the termination
+        :param finalize: function to call if the termination was successful.
+        This function can also be used as a cleanup of resource after
+        termination
+        :return:
+        """
         pass
 
-    def interrupt(self, *args, **kwargs):
+    @abstractmethod
+    def interrupt(self, operation, reason=None, action=None):
+        """
+        Attempts to interrupt a running business operation
+        :param operation: business operation
+        :param reason: reason for interrupting operation
+        :param action: function to perform interruption
+        :return: True if successful
+        """
         pass
 
-    def timeout(self, *args, **kwargs):
+    @abstractmethod
+    def timeout(self, operation, duration=None, action=None):
+        """
+        Terminates a business operation that has been running beyond set time
+        :param operation: business operation
+        :param duration: the time duration provided as microseconds
+        :param action: function to perform timeout routine
+        :return: True if successful
+        """
         pass
 
 
@@ -466,10 +616,11 @@ class BusinessTransaction(Payable):
 
         @classmethod
         def get(cls, item=None):
+            item = str(item)  # force item to string type
             if item in cls.__slots__:
                 return getattr(cls, item)
-            elif item in cls.transaction:
-                return getattr(cls.transaction, item)
+            else:
+                return getattr(cls.transaction, item, None)
 
 
 class ServiceRegistry(metaclass=Singleton):
@@ -562,6 +713,7 @@ class ServiceRegistry(metaclass=Singleton):
 
 class ServiceRunner(metaclass=Singleton):
     _action_requests = WeakValueDictionary()
+    _performance = WeakValueDictionary()
 
     @classmethod
     def register(cls, action, params, requester, performer, conditions=None,
@@ -575,7 +727,10 @@ class ServiceRunner(metaclass=Singleton):
         :param requester: requesting entity or source address
         :param performer: performing entity or target address
         :param conditions: specified boolean conditions or flags for
-        deciding if action will be performed or not
+        deciding if action will be performed or not. The evaluation uses a
+        boolean AND operation for all conditions.
+        Ensure target condition for executing function is written to be TRUE
+        when duly compared
         :param target: target outcome if action was specified.
         The target may be provided as a means of asserting the action behaved
         as expected. An equality comparison is carried to assert the target
@@ -589,25 +744,35 @@ class ServiceRunner(metaclass=Singleton):
                                         'performer',
                                         'conditions',
                                         'target',
+                                        'timestamp',
+                                        'status',
+                                        'outcome'
                                     ))
         if isinstance(action, types.FunctionType) or isinstance(
                 action, types.MethodType):
             action_hash = sha512(str.encode(action.__name__)).hexdigest()
             cls._action_requests[action_hash] = \
                 action_request(action, params, requester, performer,
-                               conditions, target)
+                               conditions, target, datetime.timestamp(),
+                               None, None)
 
     @classmethod
     def execute(cls, action):
         outcome = None
         execution = None
         target = None
+        action_performed = namedtuple('ActionPerformed', ('status', 'outcome'))
         if isinstance(action, str):
             if action in cls._action_requests.keys():
                 execution = cls._action_requests[action]
                 if all(execution.conditions):
                     outcome = execution.action(*execution.params)
                     target = execution.target
+                    # assign new action_request object to the key
+                    cls._performance[action] = action_performed(
+                        status=None,
+                        outcome=outcome
+                    )
         elif isinstance(action, types.FunctionType) or \
                 isinstance(action, types.MethodType):
             action_hash = sha512(str.encode(action.__name__)).hexdigest()
@@ -616,6 +781,10 @@ class ServiceRunner(metaclass=Singleton):
                 if all(execution.conditions):
                     outcome = execution.action(*execution.params)
                     target = execution.target
+                    cls._performance[action_hash] = action_performed(
+                        status=None,
+                        outcome=outcome
+                    )
         if execution and (outcome == target):
             return outcome
         else:
